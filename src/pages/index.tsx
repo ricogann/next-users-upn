@@ -1,118 +1,321 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { Navbar } from "@/components/navbar";
+import { BsFillPinMapFill } from "react-icons/bs";
+import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
+import { useRouter } from "next/router";
 
-const inter = Inter({ subsets: ['latin'] })
+interface Fasilitas {
+    id_fasilitas: number;
+    nama: string;
+    deskripsi: string;
+    alamat: string;
+    foto: string;
+    jam_buka: string;
+    jam_tutup: string;
+    bukaHari: string;
+    durasi: number;
+}
+
+interface Cookies {
+    CERT?: string;
+}
 
 export default function Home() {
-  return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    const router = useRouter();
+
+    const [isLogin, setIsLogin] = useState(true);
+    const [cookies, setCookies] = useState<Cookies>({});
+
+    useEffect(() => {
+        const cookies: Cookies = document.cookie.split(";").reduce((res, c) => {
+            const [key, val] = c.trim().split("=");
+            try {
+                return Object.assign(res, { [key]: JSON.parse(val) });
+            } catch (e) {
+                return Object.assign(res, { [key]: val });
+            }
+        }, {});
+
+        setCookies(cookies);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const [dataFasilitas, setDataFasilitas] = useState<Fasilitas[][]>([]);
+    const [dataFotoFasilitas, setDataFotoFasilitas] = useState<string[][]>([]);
+    const [dataInfo, setInfo] = useState<string[]>([]);
+
+    async function getDataFasilitas() {
+        try {
+            const res = await fetch("http://localhost:5000/api/fasilitas");
+            const data = await res.json();
+
+            return data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const data = await getDataFasilitas();
+
+                const dataFoto: string[][] = [];
+                let group: Array<string> = [];
+
+                for (let i = 0; i < data.data.length; i++) {
+                    group.push(data.data[i]);
+
+                    if (group.length === 4 || i === data.data.length - 1) {
+                        dataFoto.push(group);
+                        group = [];
+                    }
+                }
+
+                const dataFasilitas: Fasilitas[][] = [];
+                let groupFasilitas: Array<Fasilitas> = [];
+
+                for (let i = 0; i < data.data.length; i++) {
+                    groupFasilitas.push(data.data[i]);
+
+                    if (
+                        groupFasilitas.length === 4 ||
+                        i === data.data.length - 1
+                    ) {
+                        dataFasilitas.push(groupFasilitas);
+                        groupFasilitas = [];
+                    }
+                }
+
+                setDataFotoFasilitas(dataFoto);
+                setDataFasilitas(dataFasilitas);
+            } catch (error) {
+                console.error("error fetching data fasilitas ", error);
+            }
+        }
+
+        fetchData();
+    }, []);
+
+    const handleFoto = (data: Fasilitas) => {
+        const dataFoto = JSON.parse(data.foto);
+
+        const dataInfo = [
+            String(data.id_fasilitas),
+            data.nama,
+            data.deskripsi,
+            data.alamat,
+            data.jam_buka,
+            data.jam_tutup,
+            data.bukaHari,
+        ];
+
+        setDataFotoFasilitas(dataFoto);
+        setInfo(dataInfo);
+    };
+
+    const handleBook = () => {
+        if (dataInfo.length === 0) {
+            router.push(`/booking/${dataFasilitas[0][0].id_fasilitas}`);
+        } else {
+            router.push(`/booking/${dataInfo[0]}`);
+        }
+    };
+    return (
+        <div className="bg-[#F7F8FA] h-screen md:h-full">
+            <Navbar isLogin={isLogin} />
+            <div className="p-10 xl:mx-24">
+                <div className="carousel carousel-center md:hidden">
+                    {dataFasilitas.map((data, index) => {
+                        return (
+                            <div
+                                className="carousel-item grid grid-cols-2 gap-3 mx-5"
+                                key={index}
+                            >
+                                {data.map((data, index) => {
+                                    return (
+                                        <div
+                                            className=""
+                                            key={index}
+                                            onClick={() => handleFoto(data)}
+                                        >
+                                            <Image
+                                                src={`http://localhost:5000/assets/${
+                                                    JSON.parse(data.foto)[0]
+                                                }`}
+                                                width={150}
+                                                height={150}
+                                                alt="asrama"
+                                                className="rounded-[13px] w-[150px] h-[150px]"
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Tab & Desktop */}
+                <div className="hidden md:flex carousel w-full">
+                    {dataFasilitas.map((data, index) => {
+                        return (
+                            <div
+                                id={`slide${index}`}
+                                className="carousel-item relative w-full grid grid-cols-3 grid-row-2 gap-4"
+                                key={index}
+                            >
+                                {data.map((data, index) => {
+                                    return index === 0 ? (
+                                        <div
+                                            className="row-span-2 cursor-pointer"
+                                            onClick={() => handleFoto(data)}
+                                        >
+                                            <Image
+                                                src={`http://localhost:5000/assets/${
+                                                    JSON.parse(data.foto)[0]
+                                                }`}
+                                                alt="asrama"
+                                                className="h-full"
+                                                width={500}
+                                                height={500}
+                                            />
+                                        </div>
+                                    ) : index === 2 ? (
+                                        <div
+                                            className="row-span-2 cursor-pointer"
+                                            onClick={() => handleFoto(data)}
+                                        >
+                                            <Image
+                                                src={`http://localhost:5000/assets/${
+                                                    JSON.parse(data.foto)[0]
+                                                }`}
+                                                alt="asrama"
+                                                className="h-full"
+                                                width={500}
+                                                height={500}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="cursor-pointer"
+                                            onClick={() => handleFoto(data)}
+                                        >
+                                            <Image
+                                                src={`http://localhost:5000/assets/${
+                                                    JSON.parse(data.foto)[0]
+                                                }`}
+                                                alt="asrama"
+                                                width={500}
+                                                height={500}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                                <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+                                    <a
+                                        href={`#slide${index - 1}`}
+                                        className={`btn btn-circle ${
+                                            index === 0 ? "invisible" : ""
+                                        } cursor-pointer`}
+                                    >
+                                        ❮
+                                    </a>
+                                    <a
+                                        href={`#slide${index + 1}`}
+                                        className={`btn btn-circle ${
+                                            index === dataFasilitas.length - 1
+                                                ? "invisible"
+                                                : ""
+                                        } cursor-pointer`}
+                                    >
+                                        ❯
+                                    </a>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                <div className={`mt-5 bg-[#FFFFFF] rounded-[13px] border`}>
+                    <div className="px-5 py-5 lg:px-14 lg:py-14 lg:flex-row">
+                        {/* Content here */}
+                        <div className="p-2 md:p-3 xl:p-0">
+                            <h1 className="font-bold md:text-[25px] xl:text-[35px] text-black">
+                                {dataInfo[1] === undefined
+                                    ? dataFasilitas.length > 0
+                                        ? dataFasilitas[0][0].nama
+                                        : ""
+                                    : dataInfo[1]}
+                            </h1>
+
+                            <div className="mt-6">
+                                <div className="flex gap-5 mt-3">
+                                    <BsFillPinMapFill className="text-black font-bold text-2xl" />
+                                    <div className="flex flex-col">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                            {dataInfo[3] === undefined
+                                                ? dataFasilitas.length > 0
+                                                    ? dataFasilitas[0][0].alamat
+                                                    : ""
+                                                : dataInfo[3]}
+                                            <a href="">Get directions</a>
+                                        </h2>
+                                    </div>
+                                </div>
+                                <div className="flex gap-5 mt-3">
+                                    <MdOutlineWatchLater className="text-black font-bold text-2xl" />
+                                    <div className="flex flex-col">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                            Senin - Kamis
+                                        </h2>
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                            {dataInfo[4] === undefined
+                                                ? dataFasilitas.length > 0
+                                                    ? dataFasilitas[0][0]
+                                                          .jam_buka
+                                                    : ""
+                                                : dataInfo[4]}{" "}
+                                            -{" "}
+                                            {dataInfo[5] === undefined
+                                                ? dataFasilitas.length > 0
+                                                    ? dataFasilitas[0][0]
+                                                          .jam_tutup
+                                                    : ""
+                                                : dataInfo[5]}
+                                        </h2>
+                                    </div>
+                                </div>
+                                <div className="flex gap-5 mt-3">
+                                    <MdPayment className="text-black font-bold text-2xl" />
+                                    <div className="flex flex-col">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                            Mode Of Payment
+                                        </h2>
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                            Virtual Account
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="flex justify-end mt-5">
+                                <button className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold py-2 px-2 text-black border-black border-[2px] text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2 ">
+                                    More Info
+                                </button>
+                                <button
+                                    className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2"
+                                    onClick={handleBook}
+                                >
+                                    Book Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {/* End Of content */}
+            </div>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    );
 }
