@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useState } from "react";
 import picture_asrama from "../../../public/images/fasilitas_asrama.jpg";
 import picture_kantin from "../../../public/images/fasilitas_kantin.jpg";
 import picture_tennis from "../../../public/images/fasilitas_tennis.jpg";
@@ -10,9 +11,10 @@ import { BiCalendar, BiBookmark } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
 
 export default function DetailFasilitas() {
+    const [isLogin, setIsLogin] = useState(true);
     return (
         <div className="bg-[#F7F8FA]">
-            <Navbar />
+            <Navbar isLogin={isLogin} />
             <div className="p-10 xl:mx-24">
                 <div className="carousel carousel-center md:hidden">
                     <div className="carousel-item grid grid-cols-2 gap-3 mx-5">
