@@ -165,6 +165,10 @@ export default function Pembayaran() {
                 }
             );
             const result = await res.json();
+
+            if (result.status === true) {
+                router.push("/account/profile");
+            }
         } catch (error) {
             console.log(error);
         }

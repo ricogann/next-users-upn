@@ -12,6 +12,18 @@ interface Props {
 const Navbar: React.FC<Props> = ({ isLogin }) => {
     const router = useRouter();
 
+    const getCookie = (name: string) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop()?.split(";").shift();
+    };
+
+    if (getCookie("CERT") === undefined) {
+        isLogin = false;
+    } else {
+        isLogin = true;
+    }
+
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const toggleMobileMenu = () => {
@@ -26,6 +38,20 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
         } else {
             router.push("/auth/registrasi");
         }
+    };
+
+    const handleProfile = () => {
+        router.push("/account/profile");
+    };
+
+    const handleLogout = () => {
+        deleteCookie("CERT");
+        router.push("/auth/login");
+    };
+
+    const deleteCookie = (name: string) => {
+        document.cookie =
+            name + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     };
 
     return (
@@ -48,24 +74,50 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
                         <div
                             className={`md:hidden ${
                                 mobileMenuOpen ? "block" : "hidden"
-                            } absolute right-1 w-[100px]`}
+                            } absolute right-1 w-[150px]`}
                         >
                             <div className="bg-[#cdcdcd] flex flex-col gap-2 p-3 rounded-md">
-                                <button className=" text-black font-semibold">
+                                <button
+                                    className=" text-black font-semibold"
+                                    onClick={() => router.push("/")}
+                                >
                                     Home
                                 </button>
                                 <button
                                     name="login"
-                                    className="text-black font-semibold"
+                                    className={`text-black font-semibold ${
+                                        isLogin ? "hidden" : "block"
+                                    }`}
                                     onClick={handleAuth}
                                 >
                                     Sign Up
                                 </button>
                                 <button
-                                    name="register"
-                                    className=" text-black font-semibold"
+                                    name="login"
+                                    className={`text-black font-semibold ${
+                                        isLogin ? "hidden" : "block"
+                                    }`}
+                                    onClick={() => router.push("/auth/login")}
                                 >
                                     Login
+                                </button>
+                                <button
+                                    name="register"
+                                    className={`text-black font-semibold ${
+                                        isLogin ? "block" : "hidden"
+                                    }`}
+                                    onClick={handleProfile}
+                                >
+                                    Profile
+                                </button>
+                                <button
+                                    name="register"
+                                    className={`text-black font-semibold ${
+                                        isLogin ? "block" : "hidden"
+                                    }`}
+                                    onClick={handleLogout}
+                                >
+                                    Logout
                                 </button>
                             </div>
                         </div>

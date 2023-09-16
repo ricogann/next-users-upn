@@ -35,6 +35,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     const [allError, setAllError] = useState(false);
     const [errorMessages, setErrorMessages] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isConfirm, setIsConfirm] = useState(false);
 
     const [npm, setNpm] = useState("");
     const [email, setEmail] = useState("");
@@ -78,10 +79,12 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
                     setErrorMessages("NPM atau password salah");
                     setAllError(true);
                 }
-                console.log(token);
-
-                setCookie("CERT", token, 1);
-                router.back();
+                if (parseJwt(token).status === true) {
+                    setCookie("CERT", token, 1);
+                    router.push(`/`);
+                } else {
+                    alert("Akun anda belum di verifikasi");
+                }
             }
         } else if (email === "" && password === "") {
             setErrorMessages("Email dan password tidak boleh kosong");
@@ -100,8 +103,21 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
                 setErrorMessages("Email atau password salah");
                 setAllError(true);
             }
-            setCookie("CERT", token, 1);
-            router.back();
+            if (parseJwt(token).status === true) {
+                setCookie("CERT", token, 1);
+                router.push(`/`);
+            } else {
+                alert("Akun anda belum di verifikasi");
+            }
+        }
+    };
+
+    const parseJwt = (token: string) => {
+        console.log(token);
+        try {
+            return JSON.parse(atob(token.split(".")[1]));
+        } catch (e) {
+            return null;
         }
     };
 
@@ -385,7 +401,8 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
                 data.append("status_account", "0");
 
                 const send = await sendRegisterUmum(data);
-                console.log(send);
+
+                router.push("/auth/login");
             }
         } else if (regisRole === "umum") {
             if (
@@ -409,6 +426,8 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
                 data.append("status", "0");
 
                 const send = await sendRegisterUmum(data);
+
+                router.push("/auth/login");
             }
         }
     };

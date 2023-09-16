@@ -84,7 +84,6 @@ export default function Booking() {
         } else {
             setAccount(cookiesGet as Cookies);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,6 +204,8 @@ export default function Booking() {
             router.push(`/booking/pembayaran/${result.data.id_pemesanan}`);
         }
     };
+
+    console.log(dataHarga);
 
     return (
         <div className="">

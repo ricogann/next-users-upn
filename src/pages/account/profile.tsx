@@ -29,6 +29,11 @@ interface Pemesanan {
     remainingTime: string;
 }
 
+interface RemainingTime {
+    tanggal_pemesanan: string;
+    remainingTime: string;
+}
+
 export default function Profile() {
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
@@ -83,8 +88,11 @@ export default function Profile() {
     const [dataBookingOnProcess, setDataBookingOnProcess] = useState<
         Pemesanan[]
     >([]);
-    const [dataBookingOnGoing, setDataBookingOnGoing] = useState([]);
+    const [dataBookingOnGoing, setDataBookingOnGoing] = useState<Pemesanan[]>(
+        []
+    );
     const [dataBookingFinished, setDataBookingFinished] = useState([]);
+    const [remainingTime, setRemainingTime] = useState<RemainingTime[]>([]);
     async function getDataBookingByIdUser(idAccount: number) {
         try {
             const res = await fetch(
@@ -103,10 +111,30 @@ export default function Profile() {
 
             if (data.data.length > 0) {
                 const dataOnProcess = data.data.filter(
-                    (item: any) => item.status === "Menunggu Pembayaran"
+                    (item: Pemesanan) => item.status === "Menunggu Pembayaran"
                 );
 
+                const dataOnGoing = data.data.filter(
+                    (item: Pemesanan) => item.status === "Menunggu Konfirmasi"
+                );
+
+                const dataFinished = data.data.filter(
+                    (item: Pemesanan) => item.status === "Dikonfirmasi"
+                );
+
+                const dataDate: RemainingTime[] = dataOnProcess.map(
+                    (item: Pemesanan) => {
+                        return {
+                            tanggal_pemesanan: item.createdAt,
+                            remainingTime: "",
+                        };
+                    }
+                );
+
+                setRemainingTime(dataDate);
                 setDataBookingOnProcess(dataOnProcess);
+                setDataBookingOnGoing(dataOnGoing);
+                setDataBookingFinished(dataFinished);
             }
         }
 
@@ -114,7 +142,54 @@ export default function Profile() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [idAccount]);
 
-    console.log(dataBookingOnProcess);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (remainingTime.length > 0) {
+                const updatedRemaining = countdown(remainingTime);
+                setRemainingTime(updatedRemaining);
+            }
+        }, 1000);
+
+        return () => {
+            clearInterval(interval); // Clear the interval on unmount
+        };
+    }, [remainingTime]);
+
+    function countdown(tanggalPemesanan: RemainingTime[]) {
+        const updatedRemainingTime = tanggalPemesanan.map((item) => {
+            const targetDateTime =
+                new Date(item.tanggal_pemesanan).getTime() +
+                24 * 60 * 60 * 1000;
+
+            const currentTime = new Date().getTime();
+
+            const difference = targetDateTime - currentTime;
+
+            if (difference <= 0) {
+                return {
+                    tanggal_pemesanan: item.tanggal_pemesanan,
+                    remainingTime: "Waktu Habis",
+                };
+            } else if (difference > 0) {
+                const hours = Math.floor(
+                    (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+                );
+                const minutes = Math.floor(
+                    (difference % (1000 * 60 * 60)) / (1000 * 60)
+                );
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                return {
+                    tanggal_pemesanan: item.tanggal_pemesanan,
+                    remainingTime: `${hours}:${minutes}:${
+                        seconds < 10 ? `0${seconds}` : seconds
+                    }`,
+                };
+            }
+        });
+
+        return updatedRemainingTime as RemainingTime[];
+    }
 
     return (
         <div className="flex flex-col bg-[#F7F8FA] ">
@@ -234,7 +309,7 @@ export default function Profile() {
                                             Selesaikan Pembayaran Dalam
                                         </h2>
                                         <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#FFA101]">
-                                            23:59:59
+                                            {remainingTime[index].remainingTime}
                                         </h2>
                                         <h2 className="text-[16px] lg:text-[12px] font-semibold mt-5">
                                             Batas akhir pembayaran <br />
@@ -334,37 +409,61 @@ export default function Profile() {
                 {activeTab === "On Going" && (
                     <div className="flex flex-col xl:flex-row gap-3 p-3">
                         <div className="flex flex-col gap-5 rounded-[15px] xl:m-4">
-                            <div className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#FFA101]  xl:w-[300px]">
-                                <div className="flex flex-col">
-                                    <Image
-                                        src={picture_giriloka}
-                                        alt="foto"
-                                        className="rounded-xl"
-                                    />
-                                    <h2 className="text-[16px] lg:text-[12px] font-bold my-3 ">
-                                        GiriLoka
-                                    </h2>
-                                    <h2 className="text-[12px] lg:text-[12px] font-regulat ">
-                                        Booking ref # : 65742695
-                                    </h2>
-                                    <h2 className="text-[12px] lg:text-[12px] font-regulat ">
-                                        Sun 16 July 2023 at 5:00pm
-                                    </h2>
-                                    <h2 className="text-[12px] lg:text-[12px] font-regulat ">
-                                        Rp100.000
-                                    </h2>
-                                </div>
+                            {
+                                dataBookingOnGoing.map(
+                                    (item: Pemesanan, index) => (
+                                        <div
+                                            className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#FFA101]  xl:w-[300px]"
+                                            key={index}
+                                        >
+                                            <div className="flex flex-col">
+                                                <Image
+                                                    src={picture_giriloka}
+                                                    alt="foto"
+                                                    className="rounded-xl"
+                                                />
+                                                <h2 className="text-[16px] lg:text-[12px] font-bold my-3 ">
+                                                    {item.Fasilitas.nama}
+                                                </h2>
+                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                    {`Booking ref # : ${item.id_pemesanan}`}
+                                                </h2>
+                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                    {new Date(
+                                                        item.tanggal_pemesanan
+                                                    ).toLocaleDateString(
+                                                        "id-ID",
+                                                        {
+                                                            weekday: "long",
+                                                            year: "numeric",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                        }
+                                                    )}{" "}
+                                                </h2>
+                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                    {`Rp${item.total_harga
+                                                        .toString()
+                                                        .replace(
+                                                            /\B(?=(\d{3})+(?!\d))/g,
+                                                            "."
+                                                        )}`}
+                                                </h2>
+                                            </div>
 
-                                <div className="border-t border-gray-500 xl:hidden"></div>
-                                <div className="text-black">
-                                    <h2 className="text-[16px] lg:text-[12px] font-semibold ">
-                                        Status
-                                    </h2>
-                                    <h1 className="text-[#FFA101]">
-                                        Menunggu Persetujuan
-                                    </h1>
-                                </div>
-                            </div>
+                                            <div className="border-t border-gray-500 xl:hidden"></div>
+                                            <div className="text-black">
+                                                <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                                                    Status
+                                                </h2>
+                                                <h1 className="text-[#FFA101]">
+                                                    Menunggu Persetujuan
+                                                </h1>
+                                            </div>
+                                        </div>
+                                    )
+                                ) /* Start The Card */
+                            }
                         </div>
                         <div className="hidden xl:flex flex-col gap-5 bg-[#FFFFFF] w-full p-10 rounded-[15px] mt-4 mb-4">
                             <h1 className="font-semibold text-[36px]">
@@ -407,30 +506,55 @@ export default function Profile() {
                 {activeTab === "Finished" && (
                     <div className="flex flex-col xl:flex-row gap-3 p-3">
                         <div className="flex flex-col gap-5 rounded-[15px]">
-                            {/* Start The Card */}
-                            <div className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#2EC114]  xl:w-[300px]">
-                                <div className="flex flex-col  w-full gap-4">
-                                    <Image src={picture_giriloka} alt="foto" />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-[16px] lg:text-[12px] font-bold ">
-                                            GiriLoka
-                                        </h2>
-                                        <h2 className="text-[12px] lg:text-[12px] font-regulat ">
-                                            Booking ref # : 65742695
-                                        </h2>
-                                        <h2 className="text-[12px] lg:text-[12px] font-regulat ">
-                                            Sun 16 July 2023 at 5:00pm
-                                        </h2>
-                                        <h2 className="text-[12px] lg:text-[12px] font-regulat ">
-                                            Rp100.000
-                                        </h2>
+                            {dataBookingFinished.map(
+                                (item: Pemesanan, index) => (
+                                    <div
+                                        className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#2EC114]  xl:w-[300px]"
+                                        key={index}
+                                    >
+                                        <div className="flex flex-col  w-full gap-4">
+                                            <Image
+                                                src={picture_giriloka}
+                                                alt="foto"
+                                            />
+                                            <div className="flex flex-col">
+                                                <h2 className="text-[16px] lg:text-[12px] font-bold ">
+                                                    {item.Fasilitas.nama}
+                                                </h2>
+                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                    Booking ref # :{" "}
+                                                    {item.id_pemesanan}
+                                                </h2>
+                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                    {new Date(
+                                                        item.tanggal_pemesanan
+                                                    ).toLocaleDateString(
+                                                        "id-ID",
+                                                        {
+                                                            weekday: "long",
+                                                            year: "numeric",
+                                                            month: "long",
+                                                            day: "numeric",
+                                                        }
+                                                    )}{" "}
+                                                </h2>
+                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                    {`Rp${item.total_harga
+                                                        .toString()
+                                                        .replace(
+                                                            /\B(?=(\d{3})+(?!\d))/g,
+                                                            "."
+                                                        )}`}
+                                                </h2>
+                                            </div>
+                                        </div>
+                                        <div className="border-t border-gray-500 xl:hidden"></div>
+                                        <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg xl:hidden">
+                                            Print Invoice
+                                        </button>
                                     </div>
-                                </div>
-                                <div className="border-t border-gray-500 xl:hidden"></div>
-                                <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg xl:hidden">
-                                    Print Invoice
-                                </button>
-                            </div>
+                                )
+                            )}
                         </div>
 
                         <div className="hidden xl:flex flex-col gap-5 bg-[#FFFFFF] w-full p-10 rounded-[15px] mt-4 mb-4">

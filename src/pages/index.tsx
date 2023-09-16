@@ -123,6 +123,7 @@ export default function Home() {
             router.push(`/booking/${dataInfo[0]}`);
         }
     };
+
     return (
         <div className="bg-[#F7F8FA] h-screen md:h-full">
             <Navbar isLogin={isLogin} />
@@ -172,6 +173,7 @@ export default function Home() {
                                         <div
                                             className="row-span-2 cursor-pointer"
                                             onClick={() => handleFoto(data)}
+                                            key={index}
                                         >
                                             <Image
                                                 src={`http://localhost:5000/assets/${
@@ -187,6 +189,7 @@ export default function Home() {
                                         <div
                                             className="row-span-2 cursor-pointer"
                                             onClick={() => handleFoto(data)}
+                                            key={index}
                                         >
                                             <Image
                                                 src={`http://localhost:5000/assets/${
@@ -202,6 +205,7 @@ export default function Home() {
                                         <div
                                             className="cursor-pointer"
                                             onClick={() => handleFoto(data)}
+                                            key={index}
                                         >
                                             <Image
                                                 src={`http://localhost:5000/assets/${
