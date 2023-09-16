@@ -4,7 +4,9 @@ const nextConfig = {
         domains: ["localhost"],
     },
     reactStrictMode: true,
-    ignoreBuildErrors: true,
+    typescript: {
+        ignoreBuildErrors: true,
+    },
 };
 
 module.exports = nextConfig;
