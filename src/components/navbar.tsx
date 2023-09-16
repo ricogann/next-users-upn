@@ -1,6 +1,6 @@
 import Image from "next/image";
 import logo_upn from "../../public/images/logo-upn.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 import { RxHamburgerMenu } from "react-icons/rx";
@@ -12,17 +12,19 @@ interface Props {
 const Navbar: React.FC<Props> = ({ isLogin }) => {
     const router = useRouter();
 
-    const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(";").shift();
-    };
+    useEffect(() => {
+        const getCookie = (name: string) => {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop()?.split(";").shift();
+        };
 
-    if (getCookie("CERT") === undefined) {
-        isLogin = false;
-    } else {
-        isLogin = true;
-    }
+        if (getCookie("CERT") === undefined) {
+            isLogin = false;
+        } else {
+            isLogin = true;
+        }
+    }, []);
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
