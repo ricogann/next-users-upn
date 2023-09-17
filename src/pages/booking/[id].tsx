@@ -116,13 +116,13 @@ export default function Booking() {
     };
 
     const { data, error, isLoading } = useSwr(
-        id ? `https://ricogann.com:5000/api/fasilitas/${id}` : null,
+        id ? `https://api.ricogann.com/api/fasilitas/${id}` : null,
         fetcher
     );
 
     async function getHarga() {
         const response = await fetch(
-            `https://ricogann.com:5000/api/harga/${id}`
+            `https://api.ricogann.com/api/harga/${id}`
         );
         const result = await response.json();
         return result.data;
@@ -132,7 +132,7 @@ export default function Booking() {
         async function getHarga(id: string) {
             if (id !== undefined) {
                 const response = await fetch(
-                    `https://ricogann.com:5000/api/harga/${id}`
+                    `https://api.ricogann.com/api/harga/${id}`
                 );
                 const result = await response.json();
 
@@ -194,7 +194,7 @@ export default function Booking() {
         }
 
         const response = await fetch(
-            `https://ricogann.com:5000/api/booking/add`,
+            `https://api.ricogann.com/api/booking/add`,
             {
                 method: "POST",
                 headers: {
@@ -232,7 +232,7 @@ export default function Booking() {
                                 <div className="p-7 flex flex-row lg:flex-col lg:items-center gap-3">
                                     {data && (
                                         <Image
-                                            src={`https://ricogann.com:5000/assets/${
+                                            src={`https://api.ricogann.com/assets/${
                                                 JSON.parse(data.data.foto)[0]
                                             }`}
                                             alt="foto"
