@@ -65,7 +65,9 @@ export default function Pembayaran() {
 
     async function getBooking(id: string) {
         try {
-            const res = await fetch(`http://localhost:5000/api/booking/${id}`);
+            const res = await fetch(
+                `http://ricogann.com:5000/api/booking/${id}`
+            );
             const result = await res.json();
 
             setData(result.data);
@@ -158,7 +160,7 @@ export default function Pembayaran() {
     async function uploadBuktiPembayaran(id: string, body: FormData) {
         try {
             const res = await fetch(
-                `http://localhost:5000/api/booking/upload-bukti/${id}`,
+                `http://ricogann.com:5000/api/booking/upload-bukti/${id}`,
                 {
                     method: "PUT",
                     body: body,

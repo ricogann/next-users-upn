@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import picture_asrama from "../../../public/images/fasilitas_asrama.jpg";
 import picture_kantin from "../../../public/images/fasilitas_kantin.jpg";
 import picture_tennis from "../../../public/images/fasilitas_tennis.jpg";
@@ -9,9 +9,145 @@ import { BsFillPinMapFill } from "react-icons/bs";
 import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { BiCalendar, BiBookmark } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
+import useSwr from "swr";
+import { useRouter } from "next/router";
+
+interface Harga {
+    id: number;
+    id_fasilitas: number;
+    nama: string;
+    harga: number;
+}
+
+interface Mahasiswa {
+    nama: string;
+}
+
+interface Dosen {
+    nama: string;
+}
+
+interface Umum {
+    nama: string;
+}
+
+interface Fasilitas {
+    nama: string;
+}
+
+interface Harga {
+    harga: number;
+}
+
+interface Account {
+    Dosen: Dosen[];
+    Mahasiswa: Mahasiswa[];
+    Umum: Umum[];
+}
+
+interface Pemesanan {
+    Account: Account;
+    Fasilitas: Fasilitas;
+    Harga: Harga;
+    id_pemesanan: number;
+    jam_checkin: string;
+    jam_checkout: string;
+    total_harga: number;
+    tanggal_pemesanan: string;
+    status: string;
+    createdAt: string;
+}
 
 export default function DetailFasilitas() {
+    const router = useRouter();
+    const { id } = router.query;
     const [isLogin, setIsLogin] = useState(true);
+    const [harga, setHarga] = useState<Harga[]>([]);
+    const [date, setDate] = useState("");
+    const [pemesanan, setPemesanan] = useState<Pemesanan[]>([]);
+    const [isAvailable, setIsAvailable] = useState(true);
+
+    const fetcher = async (url: string): Promise<any> => {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return await response.json();
+    };
+
+    const { data, error, isLoading } = useSwr(
+        id ? `http://ricogann.com:5000/api/fasilitas/${id}` : null,
+        fetcher
+    );
+
+    useEffect(() => {
+        async function getHarga(id: string) {
+            if (id !== undefined) {
+                const response = await fetch(
+                    `http://ricogann.com:5000/api/harga/${id}`
+                );
+                const result = await response.json();
+
+                if (result.data.length > 0) {
+                    setHarga(result.data);
+                }
+            }
+        }
+
+        async function getPemesanan(id: string) {
+            if (id !== undefined) {
+                const response = await fetch(
+                    `http://ricogann.com:5000/api/booking/fasilitas/${id}`
+                );
+                const result = await response.json();
+
+                if (result.data.length > 0) {
+                    setPemesanan(result.data);
+                }
+            }
+        }
+
+        if (id) {
+            getHarga(id as string);
+            getPemesanan(id as string);
+        }
+    }, [id]);
+
+    const handleDate = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const date = e.target.value;
+        setDate(date);
+    };
+
+    useEffect(() => {
+        setIsAvailable(true);
+
+        const datePemesanan = pemesanan.map((item) => {
+            console.log("11", item.tanggal_pemesanan.split("T")[0]);
+            console.log("12", date);
+            if (
+                item.tanggal_pemesanan
+                    .split("T")[0]
+                    .split("-")
+                    .reverse()
+                    .join("-") === date.split("-").reverse().join("-")
+            ) {
+                setIsAvailable(false);
+            }
+        });
+
+        const dataBooking = pemesanan.filter((item) => {
+            return (
+                item.tanggal_pemesanan
+                    .split("T")[0]
+                    .split("-")
+                    .reverse()
+                    .join("-") === date
+            );
+        });
+
+        setPemesanan(dataBooking);
+    }, [date]);
+
     return (
         <div className="bg-[#F7F8FA]">
             <Navbar isLogin={isLogin} />
@@ -164,17 +300,17 @@ export default function DetailFasilitas() {
                         {/* Content here */}
                         <div className="p-2 md:p-3 xl:p-0">
                             <h1 className="font-bold md:text-[25px] xl:text-[35px] text-black">
-                                Giri Loka
+                                {data?.data.nama}
                             </h1>
 
                             <div className="flex flex-col gap-2 mt-6">
                                 <div className="flex gap-5 mt-3">
                                     <BsFillPinMapFill className="text-black font-bold text-2xl" />
                                     <div className="flex flex-col">
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            Jl. Rungkut Madya No.1, Gn. Anyar,
-                                            Kec. Gn. Anyar, Surabaya,
-                                            <br /> Jawa Timur 60294{" "}
+                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black flex flex-col">
+                                            <div className="w-[200px]">
+                                                {data?.data.alamat}
+                                            </div>
                                             <a href="">Get directions</a>
                                         </h2>
                                     </div>
@@ -183,10 +319,10 @@ export default function DetailFasilitas() {
                                     <MdOutlineWatchLater className="text-black font-bold text-2xl" />
                                     <div className="flex flex-col">
                                         <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            Senin - Kamis
+                                            {data?.data.buka_hari}
                                         </h2>
                                         <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            10:00 am - 07:30 pm
+                                            {`${data?.data.jam_buka} am - ${data?.data.jam_tutup} pm`}
                                         </h2>
                                     </div>
                                 </div>
@@ -194,21 +330,27 @@ export default function DetailFasilitas() {
                                     <BiBookmark className="text-black font-bold text-2xl" />
 
                                     <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black w-[180px] md:w-1/2">
-                                        Lorem Ipsum is simply dummy text of the
-                                        printing and typesetting industry. Lorem
-                                        Ipsum has been the industry standard
-                                        dummy text ever since the 1500s, when an
-                                        unknown printer took a galley of type
-                                        and scrambled it to make a type specimen
-                                        book.
+                                        {data?.data.deskripsi}
                                     </h2>
                                 </div>
                                 <div className="flex items-center gap-5 mt-3">
                                     <FaDollarSign className="text-black font-bold text-2xl" />
 
-                                    <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                        Rp3.000.000
-                                    </h2>
+                                    <div className="flex flex-col">
+                                        {harga.map((item, index) => (
+                                            <h2
+                                                className="text-[10px] md:text-[12px] xl:text-[17px] text-black"
+                                                key={index}
+                                            >
+                                                {`Rp${item.harga
+                                                    .toString()
+                                                    .replace(
+                                                        /\B(?=(\d{3})+(?!\d))/g,
+                                                        "."
+                                                    )} - ${item.nama}`}
+                                            </h2>
+                                        ))}
+                                    </div>
                                 </div>
                                 <div className="flex gap-5 mt-3">
                                     <MdPayment className="text-black font-bold text-2xl" />
@@ -227,48 +369,77 @@ export default function DetailFasilitas() {
                                         <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
                                             Cek Ketersediaan Fasilitas
                                         </h2>
-                                        <input
-                                            type="date"
-                                            className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
-                                        />
+                                        <div className="flex items-center gap-3">
+                                            <input
+                                                type="date"
+                                                className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
+                                                onChange={handleDate}
+                                            />
+                                            {/* <button
+                                                className="text-[8px] p-[5px] bg-gray-500 text-white rounded-md"
+                                                onClick={checkAvailability}
+                                            >
+                                                Check Availability
+                                            </button> */}
+                                        </div>
                                         <div className=" gap-2 mt-2">
-                                            <div className="hidden text-black items-center gap-3">
+                                            {isAvailable ? (
+                                                <div className=" flex text-black items-center gap-3">
+                                                    <div className="">
+                                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                                    </div>
+                                                    <h1>Available</h1>
+                                                </div>
+                                            ) : (
                                                 <div className="">
-                                                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                                </div>
-                                                <h1>Available</h1>
-                                            </div>
-                                            <div className="">
-                                                <div className="text-black flex items-center gap-3">
-                                                    <div className="w-2 h-2 xl:w-3 xl:h-3 bg-red-500 rounded-full"></div>
-                                                    <h1 className="text-[15px] xl:text-[17px]">
-                                                        Booked
-                                                    </h1>
-                                                </div>
-                                                <div className="text-black flex gap-3">
-                                                    <h1 className="text-[15px] xl:text-[17px]">
-                                                        1.
-                                                    </h1>
-                                                    <div className="text-[15px] xl:text-[17px]">
-                                                        09.00
+                                                    <div className="text-black flex items-center gap-3">
+                                                        <div className="w-2 h-2 xl:w-3 xl:h-3 bg-red-500 rounded-full"></div>
+                                                        <h1 className="text-[15px] xl:text-[17px]">
+                                                            Booked
+                                                        </h1>
                                                     </div>
-                                                    <div className="text-[15px] xl:text-[17px]">
-                                                        to
-                                                    </div>
-                                                    <div className="text-[15px] xl:text-[17px]">
-                                                        13.00
+                                                    <div className="">
+                                                        {pemesanan.map(
+                                                            (item, index) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className="text-black flex gap-3"
+                                                                >
+                                                                    <h1 className="text-[15px] xl:text-[17px]">
+                                                                        {index +
+                                                                            1}
+                                                                        .
+                                                                    </h1>
+                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                        {
+                                                                            item.jam_checkin
+                                                                        }
+                                                                    </div>
+                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                        to
+                                                                    </div>
+                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                        {
+                                                                            item.jam_checkout
+                                                                        }
+                                                                    </div>
+                                                                </div>
+                                                            )
+                                                        )}
                                                     </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="flex justify-end mt-5">
-                                <button className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold py-2 px-2 text-black border-black border-[2px] text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2 ">
-                                    More Info
-                                </button>
-                                <button className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2">
+                                <button
+                                    className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2"
+                                    onClick={() =>
+                                        router.push(`/booking/${id}`)
+                                    }
+                                >
                                     Book Now
                                 </button>
                             </div>

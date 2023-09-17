@@ -48,7 +48,7 @@ export default function Home() {
 
     async function getDataFasilitas() {
         try {
-            const res = await fetch("http://localhost:5000/api/fasilitas");
+            const res = await fetch("http://ricogann.com:5000/api/fasilitas");
             const data = await res.json();
 
             return data;
@@ -89,6 +89,7 @@ export default function Home() {
                     }
                 }
 
+                setInfo(dataFasilitas[0][0] as any);
                 setDataFotoFasilitas(dataFoto);
                 setDataFasilitas(dataFasilitas);
             } catch (error) {
@@ -143,7 +144,7 @@ export default function Home() {
                                             onClick={() => handleFoto(data)}
                                         >
                                             <Image
-                                                src={`http://localhost:5000/assets/${
+                                                src={`http://ricogann.com:5000/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 width={150}
@@ -176,7 +177,7 @@ export default function Home() {
                                             key={index}
                                         >
                                             <Image
-                                                src={`http://localhost:5000/assets/${
+                                                src={`http://ricogann.com:5000/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
@@ -192,7 +193,7 @@ export default function Home() {
                                             key={index}
                                         >
                                             <Image
-                                                src={`http://localhost:5000/assets/${
+                                                src={`http://ricogann.com:5000/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
@@ -208,7 +209,7 @@ export default function Home() {
                                             key={index}
                                         >
                                             <Image
-                                                src={`http://localhost:5000/assets/${
+                                                src={`http://ricogann.com:5000/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
@@ -305,7 +306,21 @@ export default function Home() {
                                 </div>
                             </div>
                             <div className="flex justify-end mt-5">
-                                <button className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold py-2 px-2 text-black border-black border-[2px] text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2 ">
+                                <button
+                                    className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold py-2 px-2 text-black border-black border-[2px] text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2 "
+                                    onClick={() =>
+                                        router.push(
+                                            `/detail/${
+                                                dataInfo[0] === undefined
+                                                    ? dataFasilitas.length > 0
+                                                        ? dataFasilitas[0][0]
+                                                              .id_fasilitas
+                                                        : ""
+                                                    : dataInfo[0]
+                                            }`
+                                        )
+                                    }
+                                >
                                     More Info
                                 </button>
                                 <button

@@ -116,12 +116,14 @@ export default function Booking() {
     };
 
     const { data, error, isLoading } = useSwr(
-        id ? `http://localhost:5000/api/fasilitas/${id}` : null,
+        id ? `http://ricogann.com:5000/api/fasilitas/${id}` : null,
         fetcher
     );
 
     async function getHarga() {
-        const response = await fetch(`http://localhost:5000/api/harga/${id}`);
+        const response = await fetch(
+            `http://ricogann.com:5000/api/harga/${id}`
+        );
         const result = await response.json();
         return result.data;
     }
@@ -130,7 +132,7 @@ export default function Booking() {
         async function getHarga(id: string) {
             if (id !== undefined) {
                 const response = await fetch(
-                    `http://localhost:5000/api/harga/${id}`
+                    `http://ricogann.com:5000/api/harga/${id}`
                 );
                 const result = await response.json();
 
@@ -191,13 +193,16 @@ export default function Booking() {
             return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/booking/add`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-        });
+        const response = await fetch(
+            `http://ricogann.com:5000/api/booking/add`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            }
+        );
         const result = await response.json();
 
         if (result.status === true) {
@@ -226,26 +231,24 @@ export default function Booking() {
                             <div className="  bg-[#FFFFFF] flex flex-wrap rounded-[15px] lg:bg-[#FFFFFF] xl:flex-col ">
                                 <div className="p-7 flex flex-row lg:flex-col lg:items-center gap-3">
                                     {data && (
-                                        <div className=""></div>
-                                        // <div className="">test</div>
-                                        // <Image
-                                        //     src={`http://localhost:5000/assets/${
-                                        //         JSON.parse(data.data.foto)[0]
-                                        //     }`}
-                                        //     alt="foto"
-                                        //     width={100}
-                                        //     height={100}
-                                        //     className="xl:w-full xl:h-[300px] rounded-[15px]"
-                                        // />
+                                        <Image
+                                            src={`http://ricogann.com:5000/assets/${
+                                                JSON.parse(data.data.foto)[0]
+                                            }`}
+                                            alt="foto"
+                                            width={100}
+                                            height={100}
+                                            className="xl:w-full xl:h-[300px] rounded-[15px]"
+                                        />
                                     )}
                                     <div className="flex flex-col lg:items-center">
                                         <h2 className="text-[16px] md:text-[20px] font-semibold text-black xl:text-[35px]">
-                                            {/* {data && data.data.nama} */}
+                                            {data && data.data.nama}
                                         </h2>
                                         <div className="flex items-center gap-2">
                                             <HiLocationMarker className="hidden md:block text-black xl:text-2xl" />
                                             <h2 className="text-[10px] md:text-[14px] mt-2 text-black xl:w-[380px]">
-                                                {/* {data && data.data.alamat} */}
+                                                {data && data.data.alamat}
                                             </h2>
                                         </div>
                                     </div>

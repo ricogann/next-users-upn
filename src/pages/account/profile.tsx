@@ -93,10 +93,12 @@ export default function Profile() {
     );
     const [dataBookingFinished, setDataBookingFinished] = useState([]);
     const [remainingTime, setRemainingTime] = useState<RemainingTime[]>([]);
+
+    const [buktiPembayaran, setBuktiPembayaran] = useState<File | null>(null);
     async function getDataBookingByIdUser(idAccount: number) {
         try {
             const res = await fetch(
-                `http://localhost:5000/api/booking/user/${idAccount}`
+                `http://ricogann.com:5000/api/booking/user/${idAccount}`
             );
             const data = await res.json();
             return data;
@@ -190,6 +192,41 @@ export default function Profile() {
 
         return updatedRemainingTime as RemainingTime[];
     }
+
+    async function uploadBuktiPembayaran(id: string, body: FormData) {
+        try {
+            const res = await fetch(
+                `http://ricogann.com:5000/api/booking/upload-bukti/${id}`,
+                {
+                    method: "PUT",
+                    body: body,
+                }
+            );
+            const result = await res.json();
+
+            if (result.status === true) {
+                router.reload();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleInputFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            setBuktiPembayaran(e.target.files[0]);
+        }
+    };
+
+    const handleUpload = async (id: string) => {
+        if (!buktiPembayaran) {
+            alert("Harap upload bukti pembayaran terlebih dahulu");
+        } else {
+            const data = new FormData();
+            data.append("bukti_pembayaran", buktiPembayaran);
+            uploadBuktiPembayaran(id as string, data);
+        }
+    };
 
     return (
         <div className="flex flex-col bg-[#F7F8FA] ">
@@ -328,81 +365,24 @@ export default function Profile() {
                                     </h2>
 
                                     <input
+                                        name="bukti_pembayaran"
                                         type="file"
                                         className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                                        onChange={handleInputFoto}
                                     />
 
-                                    <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg xl:hidden">
+                                    <button
+                                        className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg xl:hidden"
+                                        onClick={() =>
+                                            handleUpload(item.id_pemesanan)
+                                        }
+                                    >
                                         Submit
                                     </button>
                                 </div>
                             ))}
                             {/* Start The Card */}
                         </div>
-                        {/* <div className="hidden xl:flex flex-col gap-5 bg-[#FFFFFF] w-full p-10 rounded-[15px] mt-4 mb-4">
-                            <h1 className="font-semibold text-[36px] text-black">
-                                Sun 16 July 2023 at 5:00pm
-                            </h1>
-                            <div className="rounded-[12px] bg-[#FFA101] w-[108px] text-center text-[#FFFFFF]">
-                                On Process
-                            </div>
-                            <div className="flex flex-row gap-4">
-                                <Image
-                                    src={picture_giriloka}
-                                    alt="foto"
-                                    className="rounded-xl w-[250px] h-[250px]"
-                                />
-                                <div className="flex flex-col mt-3">
-                                    <h1 className="font-medium text-[35px] text-black">
-                                        Giri Loka
-                                    </h1>
-                                    <h1 className="font-regular text-[20px] text-black">
-                                        Booking ref # : 65742695
-                                    </h1>
-                                    <h1 className="font-regular text-[20px] text-black">
-                                        Rp1.000.000
-                                    </h1>
-                                </div>
-                                <div className="flex flex-col justify-center items-center gap-3">
-                                    <div className="bg-[#F7F8FA] p-5 rounded-[12px]">
-                                        <FaLocationDot className="w-[60px] h-[50px]" />
-                                    </div>
-                                    <h1>Location</h1>
-                                </div>
-                                <div className="flex flex-col justify-center items-center gap-3">
-                                    <div className="bg-[#F7F8FA] p-5 rounded-[12px]">
-                                        <GiCancel className="w-[60px] h-[50px]" />
-                                    </div>
-                                    <h1>Cancel</h1>
-                                </div>
-                            </div>
-                            <div className="border-b w-full border-gray-500"></div>
-                            <h2 className="text-[16px] lg:text-[12px] font-bold ">
-                                Upload Bukti Pembayaran
-                            </h2>
-                            <form className="flex">
-                                <div className="shrink-0"></div>
-                                <label className="block">
-                                    <span className="sr-only">
-                                        Choose profile photo
-                                    </span>
-                                    <input
-                                        type="file"
-                                        className="block w-full text-sm text-slate-500
-      file:mr-4 file:py-2 file:px-4
-      file:rounded-full file:border-0
-      file:text-sm file:font-semibold
-      file:bg-violet-50 file:text-violet-700
-      hover:file:bg-violet-100
-    "
-                                    />
-                                </label>
-                            </form>
-
-                            <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg ">
-                                Submit
-                            </button>
-                        </div> */}
                     </div>
                 )}
 
