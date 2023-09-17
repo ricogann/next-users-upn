@@ -48,7 +48,7 @@ export default function Home() {
 
     async function getDataFasilitas() {
         try {
-            const res = await fetch("http://ricogann.com:5000/api/fasilitas");
+            const res = await fetch("https://api.ricogann.com/api/fasilitas");
             const data = await res.json();
 
             return data;
@@ -144,7 +144,7 @@ export default function Home() {
                                             onClick={() => handleFoto(data)}
                                         >
                                             <Image
-                                                src={`http://ricogann.com:5000/assets/${
+                                                src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 width={150}
@@ -177,7 +177,7 @@ export default function Home() {
                                             key={index}
                                         >
                                             <Image
-                                                src={`http://ricogann.com:5000/assets/${
+                                                src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
@@ -193,7 +193,7 @@ export default function Home() {
                                             key={index}
                                         >
                                             <Image
-                                                src={`http://ricogann.com:5000/assets/${
+                                                src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
@@ -209,7 +209,7 @@ export default function Home() {
                                             key={index}
                                         >
                                             <Image
-                                                src={`http://ricogann.com:5000/assets/${
+                                                src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"

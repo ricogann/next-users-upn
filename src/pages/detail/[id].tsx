@@ -76,7 +76,7 @@ export default function DetailFasilitas() {
     };
 
     const { data, error, isLoading } = useSwr(
-        id ? `http://ricogann.com:5000/api/fasilitas/${id}` : null,
+        id ? `https://api.ricogann.com/api/fasilitas/${id}` : null,
         fetcher
     );
 
@@ -84,7 +84,7 @@ export default function DetailFasilitas() {
         async function getHarga(id: string) {
             if (id !== undefined) {
                 const response = await fetch(
-                    `http://ricogann.com:5000/api/harga/${id}`
+                    `https://api.ricogann.com/api/harga/${id}`
                 );
                 const result = await response.json();
 
@@ -97,7 +97,7 @@ export default function DetailFasilitas() {
         async function getPemesanan(id: string) {
             if (id !== undefined) {
                 const response = await fetch(
-                    `http://ricogann.com:5000/api/booking/fasilitas/${id}`
+                    `https://api.ricogann.com/api/booking/fasilitas/${id}`
                 );
                 const result = await response.json();
 

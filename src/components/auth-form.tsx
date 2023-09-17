@@ -133,7 +133,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function sendLogin(data: Object) {
         try {
             const res = await fetch(
-                `http://ricogann.com:5000/api/auth/login${
+                `https://api.ricogann.com/api/auth/login${
                     props.role === "dosen" ? `/dosen` : `/umum`
                 }`,
                 {
@@ -155,7 +155,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function sendLoginMahasiswa(data: Object) {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/auth/login/mahasiswa",
+                "https://api.ricogann.com/api/auth/login/mahasiswa",
                 {
                     method: "POST",
                     headers: {
@@ -178,7 +178,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function sendRegisterMahasiswa(data: FormData) {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/auth/register/mahasiswa",
+                "https://api.ricogann.com/api/auth/register/mahasiswa",
                 {
                     method: "POST",
                     body: data,
@@ -195,7 +195,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function sendRegisterUmum(data: FormData) {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/auth/register/umum",
+                "https://api.ricogann.com/api/auth/register/umum",
                 {
                     method: "POST",
                     body: data,
@@ -212,7 +212,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function sendRegisterDosen(data: FormData) {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/auth/register/dosen",
+                "https://api.ricogann.com/api/auth/register/dosen",
                 {
                     method: "POST",
                     body: data,
@@ -229,7 +229,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function getFakultas() {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/campus/fakultas"
+                "https://api.ricogann.com/api/campus/fakultas"
             );
 
             const resData = await res.json();
@@ -242,7 +242,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function getProdi() {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/campus/prodi"
+                "https://api.ricogann.com/api/campus/prodi"
             );
 
             const resData = await res.json();
@@ -255,7 +255,7 @@ const AuthForm: React.FC<AuthFormProps> = (props) => {
     async function getTahunAjaran() {
         try {
             const res = await fetch(
-                "http://ricogann.com:5000/api/campus/tahun-ajaran"
+                "https://api.ricogann.com/api/campus/tahun-ajaran"
             );
 
             const resData = await res.json();

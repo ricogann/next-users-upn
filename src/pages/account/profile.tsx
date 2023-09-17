@@ -98,7 +98,7 @@ export default function Profile() {
     async function getDataBookingByIdUser(idAccount: number) {
         try {
             const res = await fetch(
-                `http://ricogann.com:5000/api/booking/user/${idAccount}`
+                `https://api.ricogann.com/api/booking/user/${idAccount}`
             );
             const data = await res.json();
             return data;
@@ -196,7 +196,7 @@ export default function Profile() {
     async function uploadBuktiPembayaran(id: string, body: FormData) {
         try {
             const res = await fetch(
-                `http://ricogann.com:5000/api/booking/upload-bukti/${id}`,
+                `https://api.ricogann.com/api/booking/upload-bukti/${id}`,
                 {
                     method: "PUT",
                     body: body,
