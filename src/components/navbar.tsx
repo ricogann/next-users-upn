@@ -57,8 +57,8 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
     };
 
     return (
-        <nav className="p-5">
-            <div className="container mx-auto flex justify-between items-center">
+        <nav className="p-5 bg-[#ffffff]">
+            <div className=" container mx-auto flex justify-between items-center">
                 <div className="flex items-center justify-between w-full px-6 py-3 md:px-8">
                     <a className="text-white font-semibold text-lg ">
                         <Image
