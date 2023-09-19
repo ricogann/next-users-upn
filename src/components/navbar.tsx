@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logo_upn from "../../public/images/logo-upn.png";
+import logo_bpu from "../../public/images/logo-bpu.png";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
@@ -62,9 +62,9 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
                 <div className="flex items-center justify-between w-full px-6 py-3 md:px-8">
                     <a className="text-white font-semibold text-lg ">
                         <Image
-                            src={logo_upn}
+                            src={logo_bpu}
                             alt="logo"
-                            className="w-[60px] h-[60px]"
+                            className="w-[150px] h-[100px]"
                         />
                     </a>
 

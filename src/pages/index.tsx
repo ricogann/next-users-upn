@@ -13,29 +13,30 @@ interface Fasilitas {
     foto: string;
     jam_buka: string;
     jam_tutup: string;
-    bukaHari: string;
+    buka_hari: string;
     durasi: number;
+    no_va: string;
 }
 
 interface Cookies {
-    CERT?: string;
+    CERT: string;
 }
 
 export default function Home() {
     const router = useRouter();
 
     const [isLogin, setIsLogin] = useState(true);
-    const [cookies, setCookies] = useState<Cookies>({});
+    const [cookies, setCookies] = useState<Cookies>();
 
     useEffect(() => {
-        const cookies: Cookies = document.cookie.split(";").reduce((res, c) => {
+        const getCookies = document.cookie.split(";").reduce((res, c) => {
             const [key, val] = c.trim().split("=");
             try {
                 return Object.assign(res, { [key]: JSON.parse(val) });
             } catch (e) {
                 return Object.assign(res, { [key]: val });
             }
-        }, {});
+        }, {} as Cookies);
 
         setCookies(cookies);
 
@@ -110,7 +111,8 @@ export default function Home() {
             data.alamat,
             data.jam_buka,
             data.jam_tutup,
-            data.bukaHari,
+            data.buka_hari,
+            data.no_va,
         ];
 
         setDataFotoFasilitas(dataFoto);
@@ -124,6 +126,8 @@ export default function Home() {
             router.push(`/booking/${dataInfo[0]}`);
         }
     };
+
+    console.log(dataFasilitas);
 
     return (
         <div className="bg-[#F7F8FA] h-screen md:h-full">
@@ -145,7 +149,9 @@ export default function Home() {
                                         >
                                             <Image
                                                 src={`https://api.ricogann.com/assets/${
-                                                    JSON.parse(data.foto)[0]
+                                                    JSON.parse(
+                                                        data && data.foto
+                                                    )[0]
                                                 }`}
                                                 width={150}
                                                 height={150}
@@ -166,55 +172,71 @@ export default function Home() {
                         return (
                             <div
                                 id={`slide${index}`}
-                                className="carousel-item relative w-full grid grid-cols-3 grid-row-2 gap-4"
+                                className="carousel-item relative w-full h-[450px] grid grid-cols-3 grid-row-2 gap-4 overflow-hidden rounded-xl"
                                 key={index}
                             >
                                 {data.map((data, index) => {
                                     return index === 0 ? (
                                         <div
-                                            className="row-span-2 cursor-pointer"
+                                            className="row-span-2 cursor-pointer relative"
                                             onClick={() => handleFoto(data)}
                                             key={index}
                                         >
+                                            <div className="absolute bottom-0 text-black bg-gray-500 text-center p-5 w-full">
+                                                <h1 className="font-bold text-[20px]">
+                                                    {data.nama}
+                                                </h1>
+                                            </div>
                                             <Image
                                                 src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
-                                                className="h-full"
+                                                className="h-[450px]"
                                                 width={500}
                                                 height={500}
                                             />
                                         </div>
                                     ) : index === 2 ? (
                                         <div
-                                            className="row-span-2 cursor-pointer"
+                                            className="row-span-2 cursor-pointer relative"
                                             onClick={() => handleFoto(data)}
                                             key={index}
                                         >
+                                            <div className="absolute bottom-0 text-black bg-gray-500 text-center p-5 w-full">
+                                                <h1 className="font-bold text-[20px]">
+                                                    {data.nama}
+                                                </h1>
+                                            </div>
                                             <Image
                                                 src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
-                                                className="h-full"
-                                                width={500}
-                                                height={500}
+                                                className="h-[450px]"
+                                                width={400}
+                                                height={400}
                                             />
                                         </div>
                                     ) : (
                                         <div
-                                            className="cursor-pointer"
+                                            className="cursor-pointer relative overflow-hidden"
                                             onClick={() => handleFoto(data)}
                                             key={index}
                                         >
+                                            <div className="absolute bottom-0 text-black bg-gray-500 text-center p-5 w-full">
+                                                <h1 className="font-bold text-[20px]">
+                                                    {data.nama}
+                                                </h1>
+                                            </div>
                                             <Image
                                                 src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
-                                                width={500}
-                                                height={500}
+                                                className="h-[225px]"
+                                                width={400}
+                                                height={400}
                                             />
                                         </div>
                                     );
@@ -245,10 +267,10 @@ export default function Home() {
                 </div>
 
                 <div className={`mt-5 bg-[#FFFFFF] rounded-[13px] border`}>
-                    <div className="px-5 py-5 lg:px-14 lg:py-14 lg:flex-row">
+                    <div className="px-5 py-5 xl:px-24 xl:py-16 lg:flex-row">
                         {/* Content here */}
                         <div className="p-2 md:p-3 xl:p-0">
-                            <h1 className="font-bold md:text-[25px] xl:text-[35px] text-black">
+                            <h1 className="font-bold md:text-[25px] xl:text-[40px] text-black">
                                 {dataInfo[1] === undefined
                                     ? dataFasilitas.length > 0
                                         ? dataFasilitas[0][0].nama
@@ -256,27 +278,37 @@ export default function Home() {
                                     : dataInfo[1]}
                             </h1>
 
-                            <div className="mt-6">
-                                <div className="flex gap-5 mt-3">
+                            <div className="flex flex-col gap-2 mt-6 ">
+                                <div className="flex gap-5 items-center mt-3">
                                     <BsFillPinMapFill className="text-black font-bold text-2xl" />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                    <div className="">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black xl:flex xl:gap-5">
                                             {dataInfo[3] === undefined
                                                 ? dataFasilitas.length > 0
                                                     ? dataFasilitas[0][0].alamat
                                                     : ""
                                                 : dataInfo[3]}
-                                            <a href="">Get directions</a>
+                                            <a
+                                                href=""
+                                                className="text-blue-900 font-semibold"
+                                            >
+                                                Get directions
+                                            </a>
                                         </h2>
                                     </div>
                                 </div>
-                                <div className="flex gap-5 mt-3">
+                                <div className="flex gap-5 items-center mt-3">
                                     <MdOutlineWatchLater className="text-black font-bold text-2xl" />
                                     <div className="flex flex-col">
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
-                                            Senin - Kamis
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
+                                            {dataInfo[6] === undefined
+                                                ? dataFasilitas.length > 0
+                                                    ? dataFasilitas[0][0]
+                                                          .buka_hari
+                                                    : ""
+                                                : dataInfo[6]}
                                         </h2>
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
                                             {dataInfo[4] === undefined
                                                 ? dataFasilitas.length > 0
                                                     ? dataFasilitas[0][0]
@@ -293,13 +325,13 @@ export default function Home() {
                                         </h2>
                                     </div>
                                 </div>
-                                <div className="flex gap-5 mt-3">
+                                <div className="flex gap-5 items-center mt-3">
                                     <MdPayment className="text-black font-bold text-2xl" />
                                     <div className="flex flex-col">
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
                                             Mode Of Payment
                                         </h2>
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[17px] text-black">
+                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
                                             Virtual Account
                                         </h2>
                                     </div>

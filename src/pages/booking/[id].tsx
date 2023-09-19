@@ -43,6 +43,7 @@ interface Booking {
     jam_checkout: string;
     durasi: number;
     total_harga: number;
+    keterangan: string;
     status: string;
 }
 
@@ -65,6 +66,7 @@ export default function Booking() {
     const [noTelpAccount, setNoTelpAccount] = useState<string>("");
     const [durasi, setDurasi] = useState<number>(0);
     const [totalHarga, setTotalHarga] = useState<number>(0);
+    const [keterangan, setKeterangan] = useState<string>("");
 
     //auth check
     useEffect(() => {
@@ -99,6 +101,12 @@ export default function Booking() {
             setHarga(parseInt(e.target.value));
         } else if (e.target.name === "no_telp") {
             setNoTelpAccount(e.target.value);
+        }
+    };
+
+    const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (e.target.name === "keterangan") {
+            setKeterangan(e.target.value);
         }
     };
 
@@ -185,6 +193,7 @@ export default function Booking() {
             jam_checkout: jam_checkout,
             total_harga: harga * (setDurasiBooking() / 60),
             durasi: setDurasiBooking(),
+            keterangan: keterangan,
             status: "Menunggu Pembayaran",
         };
 
@@ -366,6 +375,18 @@ export default function Booking() {
                                         className="text-[10px] lg:text-[12px] ml-2 text-black bg-[#fff] xl:bg-[#f7f8fa] rounded"
                                         value={noTelpAccount}
                                         onChange={handleInput}
+                                    />
+                                </div>
+                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                    Keterangan
+                                </h2>
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <BiSolidPhoneCall className="text-black" />
+                                    <textarea
+                                        name="keterangan"
+                                        className="text-[10px] lg:text-[12px] ml-2 text-black bg-[#fff] xl:bg-[#f7f8fa] rounded w-full"
+                                        value={keterangan}
+                                        onChange={handleTextarea}
                                     />
                                 </div>
 

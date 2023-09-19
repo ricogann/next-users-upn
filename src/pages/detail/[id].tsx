@@ -296,14 +296,14 @@ export default function DetailFasilitas() {
                 </div>
 
                 <div className={`mt-5 bg-[#FFFFFF] rounded-[13px] border`}>
-                    <div className="px-5 py-5 lg:px-14 lg:py-14 lg:flex-row">
+                    <div className="px-5 py-5 lg:px-14 lg:py-14">
                         {/* Content here */}
                         <div className="p-2 md:p-3 xl:p-0">
-                            <h1 className="font-bold md:text-[25px] xl:text-[35px] text-black">
+                            <h1 className="font-bold md:text-[25px] xl:text-[35px] text-black  xl:text-center">
                                 {data?.data.nama}
                             </h1>
 
-                            <div className="flex flex-col gap-2 mt-6">
+                            <div className="flex flex-col gap-2 mt-6 xl:grid xl:grid-cols-3 xl:items-start">
                                 <div className="flex gap-5 mt-3">
                                     <BsFillPinMapFill className="text-black font-bold text-2xl" />
                                     <div className="flex flex-col">
@@ -333,7 +333,7 @@ export default function DetailFasilitas() {
                                         {data?.data.deskripsi}
                                     </h2>
                                 </div>
-                                <div className="flex items-center gap-5 mt-3">
+                                <div className="flex items-center gap-5 mt-3 xl:items-start">
                                     <FaDollarSign className="text-black font-bold text-2xl" />
 
                                     <div className="flex flex-col">
