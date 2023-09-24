@@ -1,8 +1,5 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import picture_kantin from "../../../public/images/fasilitas_kantin.jpg";
-import picture_tennis from "../../../public/images/fasilitas_tennis.jpg";
-import picture_giriloka from "../../../public/images/fasilitas_giriloka.jpg";
 import { Navbar } from "@/components/navbar";
 import { BsFillPinMapFill } from "react-icons/bs";
 import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
@@ -25,7 +22,6 @@ import PemesananDTO from "@/interfaces/pemesananDTO";
 
 export default function DetailFasilitas() {
     const router = useRouter();
-    const { id } = router.query;
     const [isLogin, setIsLogin] = useState(false);
     const [harga, setHarga] = useState<HargaDTO[]>([]);
     const [date, setDate] = useState("");
@@ -34,16 +30,26 @@ export default function DetailFasilitas() {
     const [cookies, setCookies] = useState<CookiesDTO>();
     const [data, setData] = useState<FasilitasDTO>();
     const [nama, setNama] = useState("");
+    const [id, setId] = useState("");
+
+    const [dataBooked, setDataBooked] = useState<PemesananDTO[]>([]);
 
     useEffect(() => {
-        const init = async () => {
+        if (router.isReady) {
+            setId(router.query.id as string);
+        }
+    }, [router.isReady]);
+
+    useEffect(() => {
+        const init = async (id: number) => {
             const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
             const data = await fasilitas.getFasilitasById(Number(id));
             const harga = await fasilitas.getHarga(Number(id));
+
             setData(data);
             setHarga(harga);
 
-            const booking = new _serviceBooking("httpsL//api.ricogann.com");
+            const booking = new _serviceBooking("https://api.ricogann.com");
             const dataBooking = await booking.getPemesanan(Number(id));
             setPemesanan(dataBooking);
 
@@ -59,45 +65,35 @@ export default function DetailFasilitas() {
             }
         };
 
-        init();
+        if (id !== "") {
+            init(Number(id));
+        }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [id]);
 
     const handleDate = (e: React.ChangeEvent<HTMLInputElement>) => {
         const date = e.target.value;
         setDate(date);
     };
 
-    useEffect(() => {
-        setIsAvailable(true);
+    const checkAvailability = async () => {
+        let dataBooked: PemesananDTO[] = [];
 
-        const datePemesanan = pemesanan.map((item) => {
-            console.log("11", item.tanggal_pemesanan.split("T")[0]);
-            console.log("12", date);
-            if (
-                item.tanggal_pemesanan
-                    .split("T")[0]
-                    .split("-")
-                    .reverse()
-                    .join("-") === date.split("-").reverse().join("-")
-            ) {
-                setIsAvailable(false);
+        pemesanan.map((item) => {
+            if (item.tanggal_pemesanan.split("T")[0] === date) {
+                dataBooked.push(item);
             }
         });
 
-        const dataBooking = pemesanan.filter((item) => {
-            return (
-                item.tanggal_pemesanan
-                    .split("T")[0]
-                    .split("-")
-                    .reverse()
-                    .join("-") === date
-            );
-        });
+        if (dataBooked.length > 0) {
+            setIsAvailable(false);
+        } else {
+            setIsAvailable(true);
+        }
 
-        setPemesanan(dataBooking);
-    }, [date]);
+        setDataBooked(dataBooked);
+    };
 
     return (
         <div className="bg-[#D2D7DF] font-montserrat">
@@ -105,48 +101,19 @@ export default function DetailFasilitas() {
             <div className="p-10 xl:mx-24">
                 <div className="carousel carousel-center md:hidden">
                     <div className="carousel-item grid grid-cols-2 gap-3 mx-5">
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                    </div>
-                    <div className="carousel-item grid grid-cols-2 gap-2">
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            className="rounded-xl w-[150px] h-[150px]"
-                        />
+                        {data &&
+                            JSON.parse(data.foto).map(
+                                (item: string, index: number) => (
+                                    <Image
+                                        src={`https://api.ricogann.com/assets/${item}`}
+                                        alt="asrama"
+                                        key={index}
+                                        width={150}
+                                        height={150}
+                                        className="rounded-xl w-[150px] h-[150px]"
+                                    />
+                                )
+                            )}
                     </div>
                 </div>
 
@@ -156,93 +123,36 @@ export default function DetailFasilitas() {
                         id="slide1"
                         className="carousel-item relative w-full grid grid-cols-3 grid-row-2 gap-4"
                     >
-                        <div className="row-span-2">
-                            <Image
-                                src={picture_kantin}
-                                alt="asrama"
-                                className="h-full"
-                            />
-                        </div>
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            width={500}
-                            height={500}
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            width={500}
-                            height={500}
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            width={500}
-                            height={500}
-                        />
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            width={500}
-                            height={500}
-                        />
-                        <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                            <a href="#slide4" className="btn btn-circle">
-                                ❮
-                            </a>
-                            <a href="#slide2" className="btn btn-circle">
-                                ❯
-                            </a>
-                        </div>
-                    </div>
-                    <div id="slide2" className="carousel-item relative w-full">
-                        <Image
-                            src={picture_kantin}
-                            alt="asrama"
-                            width={100}
-                            height={100}
-                        />
-                        <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                            <a href="#slide1" className="btn btn-circle">
-                                ❮
-                            </a>
-                            <a href="#slide3" className="btn btn-circle">
-                                ❯
-                            </a>
-                        </div>
-                    </div>
-                    <div id="slide3" className="carousel-item relative w-full">
-                        <Image
-                            src={picture_giriloka}
-                            alt="asrama"
-                            width={100}
-                            height={100}
-                        />
-                        <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                            <a href="#slide2" className="btn btn-circle">
-                                ❮
-                            </a>
-                            <a href="#slide4" className="btn btn-circle">
-                                ❯
-                            </a>
-                        </div>
-                    </div>
-                    <div id="slide4" className="carousel-item relative w-full">
-                        <Image
-                            src={picture_tennis}
-                            alt="asrama"
-                            width={100}
-                            height={100}
-                        />
-                        <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                            <a href="#slide3" className="btn btn-circle">
-                                ❮
-                            </a>
-                            <a href="#slide1" className="btn btn-circle">
-                                ❯
-                            </a>
-                        </div>
+                        {data &&
+                            JSON.parse(data.foto).map(
+                                (item: string, index: number) => (
+                                    <div className="" key={index}>
+                                        {index === 0 ? (
+                                            <div className="row-span-2">
+                                                <Image
+                                                    src={`https://api.ricogann.com/assets/${item}`}
+                                                    alt="asrama"
+                                                    key={index}
+                                                    width={1000}
+                                                    height={1000}
+                                                    className="rounded-xl h-full"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="">
+                                                <Image
+                                                    src={`https://api.ricogann.com/assets/${item}`}
+                                                    alt="asrama"
+                                                    key={index}
+                                                    width={500}
+                                                    height={500}
+                                                    className="rounded-xl"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            )}
                     </div>
                 </div>
 
@@ -270,19 +180,20 @@ export default function DetailFasilitas() {
                                         <FaDollarSign className="text-black font-bold text-3xl" />
 
                                         <div className="flex flex-col">
-                                            {harga.map((item, index) => (
-                                                <h2
-                                                    className="text-[10px] md:text-[12px] xl:text-[17px] text-black"
-                                                    key={index}
-                                                >
-                                                    {`Rp${item.harga
-                                                        .toString()
-                                                        .replace(
-                                                            /\B(?=(\d{3})+(?!\d))/g,
-                                                            "."
-                                                        )} - ${item.nama}`}
-                                                </h2>
-                                            ))}
+                                            {harga &&
+                                                harga.map((item, index) => (
+                                                    <h2
+                                                        className="text-[10px] md:text-[12px] xl:text-[17px] text-black"
+                                                        key={index}
+                                                    >
+                                                        {`Rp${item.harga
+                                                            .toString()
+                                                            .replace(
+                                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                                "."
+                                                            )} - ${item.nama}`}
+                                                    </h2>
+                                                ))}
                                         </div>
                                     </div>
                                 </div>
@@ -310,6 +221,12 @@ export default function DetailFasilitas() {
                                                     className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
                                                     onChange={handleDate}
                                                 />
+                                                <button
+                                                    className="bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg"
+                                                    onClick={checkAvailability}
+                                                >
+                                                    Check
+                                                </button>
                                             </div>
                                             <div className=" gap-2 mt-2">
                                                 {isAvailable ? (
@@ -328,7 +245,7 @@ export default function DetailFasilitas() {
                                                             </h1>
                                                         </div>
                                                         <div className="">
-                                                            {pemesanan.map(
+                                                            {dataBooked.map(
                                                                 (
                                                                     item,
                                                                     index

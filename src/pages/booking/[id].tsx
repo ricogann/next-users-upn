@@ -158,7 +158,7 @@ export default function Booking() {
             return;
         }
 
-        booking.addPemesanan(data);
+        await booking.addPemesanan(data);
     };
 
     return (

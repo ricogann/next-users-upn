@@ -20,6 +20,9 @@ import CookiesDTO from "@/interfaces/cookiesDTO";
 
 export default function Home() {
     const router = useRouter();
+    const cookies = new _libCookies();
+    const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
+    const libFasilitas = new _libFasilitas();
 
     const [isLogin, setIsLogin] = useState(false);
     const [namaAccount, setNama] = useState<string>("");
@@ -44,18 +47,13 @@ export default function Home() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const fasilitas = new _serviceFasilitas(
-                    "https://api.ricogann.com"
-                );
                 const data: FasilitasDTO[] = await fasilitas.getFasilitas();
 
-                const libFasilitas = new _libFasilitas();
                 const splitData: FasilitasDTO[][] =
                     await libFasilitas.splitData(data);
 
                 setDataFasilitas(splitData);
 
-                const cookies = new _libCookies();
                 const dataCookies: CookiesDTO = await cookies.getCookies();
 
                 if (dataCookies.CERT !== undefined) {
@@ -74,8 +72,13 @@ export default function Home() {
         fetchData();
     }, []);
 
-    const handleBook = () => {
-        if (dataInfo === undefined) {
+    const handleBook = async () => {
+        const getCookies = await cookies.getCookies();
+
+        if (getCookies.CERT === undefined) {
+            setOpenModal(true);
+            return;
+        } else if (dataInfo === undefined) {
             router.push(`/booking/${dataFasilitas[0][0].id_fasilitas}`);
         } else {
             router.push(`/booking/${dataInfo?.id_fasilitas}`);

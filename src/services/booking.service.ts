@@ -13,16 +13,13 @@ class _serviceBooking {
     }
 
     async addPemesanan(data: BookingDTO) {
-        const response = await fetch(
-            `${this.baseUrl}/api/booking/fasilitas/add`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            }
-        );
+        const response = await fetch(`${this.baseUrl}/api/booking/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
 
         return await response.json();
     }
