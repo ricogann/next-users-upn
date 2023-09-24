@@ -4,95 +4,68 @@ import { Navbar } from "@/components/navbar";
 import { BsFillPinMapFill } from "react-icons/bs";
 import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { useRouter } from "next/router";
+import { Login } from "@/components/login-form";
+import { Regis } from "@/components/registration-form";
 
-interface Fasilitas {
-    id_fasilitas: number;
-    nama: string;
-    deskripsi: string;
-    alamat: string;
-    foto: string;
-    jam_buka: string;
-    jam_tutup: string;
-    buka_hari: string;
-    durasi: number;
-    no_va: string;
-}
+// Services
+import _serviceFasilitas from "@/services/fasilitas.service";
 
-interface Cookies {
-    CERT: string;
-}
+// Lib
+import _libFasilitas from "@/lib/fasilitas";
+import _libCookies from "@/lib/cookies";
+
+// Interfaces
+import FasilitasDTO from "@/interfaces/fasilitasDTO";
+import CookiesDTO from "@/interfaces/cookiesDTO";
 
 export default function Home() {
     const router = useRouter();
 
-    const [isLogin, setIsLogin] = useState(true);
-    const [cookies, setCookies] = useState<Cookies>();
+    const [isLogin, setIsLogin] = useState(false);
+    const [namaAccount, setNama] = useState<string>("");
 
-    useEffect(() => {
-        const getCookies = document.cookie.split(";").reduce((res, c) => {
-            const [key, val] = c.trim().split("=");
-            try {
-                return Object.assign(res, { [key]: JSON.parse(val) });
-            } catch (e) {
-                return Object.assign(res, { [key]: val });
-            }
-        }, {} as Cookies);
+    const [dataFasilitas, setDataFasilitas] = useState<FasilitasDTO[][]>([]);
+    const [dataInfo, setInfo] = useState<FasilitasDTO>();
 
-        setCookies(cookies);
+    const [openModal, setOpenModal] = useState(false);
+    const [openRegisModal, setOpenRegisModal] = useState(false);
 
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const [dataFasilitas, setDataFasilitas] = useState<Fasilitas[][]>([]);
-    const [dataFotoFasilitas, setDataFotoFasilitas] = useState<string[][]>([]);
-    const [dataInfo, setInfo] = useState<string[]>([]);
-
-    async function getDataFasilitas() {
-        try {
-            const res = await fetch("https://api.ricogann.com/api/fasilitas");
-            const data = await res.json();
-
-            return data;
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    const handleModal = () => {
+        setOpenModal(!openModal);
+    };
+    const handleRegisModal = () => {
+        setOpenRegisModal(!openRegisModal);
+    };
+    const changeModal = () => {
+        setOpenModal(!openModal);
+        setOpenRegisModal(!openRegisModal);
+    };
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const data = await getDataFasilitas();
+                const fasilitas = new _serviceFasilitas(
+                    "https://api.ricogann.com"
+                );
+                const data: FasilitasDTO[] = await fasilitas.getFasilitas();
 
-                const dataFoto: string[][] = [];
-                let group: Array<string> = [];
+                const libFasilitas = new _libFasilitas();
+                const splitData: FasilitasDTO[][] =
+                    await libFasilitas.splitData(data);
 
-                for (let i = 0; i < data.data.length; i++) {
-                    group.push(data.data[i]);
+                setDataFasilitas(splitData);
 
-                    if (group.length === 4 || i === data.data.length - 1) {
-                        dataFoto.push(group);
-                        group = [];
-                    }
+                const cookies = new _libCookies();
+                const dataCookies: CookiesDTO = await cookies.getCookies();
+
+                if (dataCookies.CERT !== undefined) {
+                    setIsLogin(true);
+                    setNama(
+                        JSON.parse(atob(dataCookies.CERT.split(".")[1])).nama
+                    );
+                } else {
+                    setIsLogin(false);
                 }
-
-                const dataFasilitas: Fasilitas[][] = [];
-                let groupFasilitas: Array<Fasilitas> = [];
-
-                for (let i = 0; i < data.data.length; i++) {
-                    groupFasilitas.push(data.data[i]);
-
-                    if (
-                        groupFasilitas.length === 4 ||
-                        i === data.data.length - 1
-                    ) {
-                        dataFasilitas.push(groupFasilitas);
-                        groupFasilitas = [];
-                    }
-                }
-
-                setInfo(dataFasilitas[0][0] as any);
-                setDataFotoFasilitas(dataFoto);
-                setDataFasilitas(dataFasilitas);
             } catch (error) {
                 console.error("error fetching data fasilitas ", error);
             }
@@ -101,37 +74,43 @@ export default function Home() {
         fetchData();
     }, []);
 
-    const handleFoto = (data: Fasilitas) => {
-        const dataFoto = JSON.parse(data.foto);
-
-        const dataInfo = [
-            String(data.id_fasilitas),
-            data.nama,
-            data.deskripsi,
-            data.alamat,
-            data.jam_buka,
-            data.jam_tutup,
-            data.buka_hari,
-            data.no_va,
-        ];
-
-        setDataFotoFasilitas(dataFoto);
-        setInfo(dataInfo);
-    };
-
     const handleBook = () => {
-        if (dataInfo.length === 0) {
+        if (dataInfo === undefined) {
             router.push(`/booking/${dataFasilitas[0][0].id_fasilitas}`);
         } else {
-            router.push(`/booking/${dataInfo[0]}`);
+            router.push(`/booking/${dataInfo?.id_fasilitas}`);
         }
     };
 
-    console.log(dataFasilitas);
-
     return (
-        <div className="bg-[#F7F8FA] h-screen md:h-full">
-            <Navbar isLogin={isLogin} />
+        <div className="bg-[#D2D7DF] h-screen md:h-full font-montserrat relative">
+            <Navbar
+                isLogin={isLogin}
+                nama={namaAccount}
+                setModal={handleModal}
+                setRegisModal={handleRegisModal}
+            />
+            <div
+                className={`${
+                    openModal ? "flex" : "hidden"
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+            >
+                <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
+                    <Login setModal={handleModal} changeModal={changeModal} />
+                </div>
+            </div>
+            <div
+                className={`${
+                    openRegisModal ? "flex" : "hidden"
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+            >
+                <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
+                    <Regis
+                        setRegisModal={handleRegisModal}
+                        changeModal={changeModal}
+                    />
+                </div>
+            </div>
             <div className="p-10 xl:mx-24">
                 <div className="carousel carousel-center md:hidden">
                     {dataFasilitas.map((data, index) => {
@@ -145,7 +124,7 @@ export default function Home() {
                                         <div
                                             className=""
                                             key={index}
-                                            onClick={() => handleFoto(data)}
+                                            onClick={() => setInfo(data)}
                                         >
                                             <Image
                                                 src={`https://api.ricogann.com/assets/${
@@ -172,60 +151,39 @@ export default function Home() {
                         return (
                             <div
                                 id={`slide${index}`}
-                                className="carousel-item relative w-full h-[450px] grid grid-cols-3 grid-row-2 gap-4 overflow-hidden rounded-xl"
+                                className="carousel-item relative w-full h-[300px] lg:h-[400px] grid grid-cols-3 grid-row-2 gap-4 overflow-hidden rounded-xl"
                                 key={index}
                             >
                                 {data.map((data, index) => {
                                     return index === 0 ? (
                                         <div
-                                            className="row-span-2 cursor-pointer relative"
-                                            onClick={() => handleFoto(data)}
+                                            className="row-span-2 cursor-pointer relative flex flex-col rounded-lg"
+                                            onClick={() => setInfo(data)}
                                             key={index}
                                         >
-                                            <div className="absolute bottom-0 text-black bg-gray-500 text-center p-5 w-full">
-                                                <h1 className="font-bold text-[20px]">
-                                                    {data.nama}
-                                                </h1>
-                                            </div>
                                             <Image
                                                 src={`https://api.ricogann.com/assets/${
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
-                                                className="h-[450px]"
+                                                className="h-[250px] lg:h-[350px] rounded-t-lg"
                                                 width={500}
                                                 height={500}
                                             />
-                                        </div>
-                                    ) : index === 2 ? (
-                                        <div
-                                            className="row-span-2 cursor-pointer relative"
-                                            onClick={() => handleFoto(data)}
-                                            key={index}
-                                        >
-                                            <div className="absolute bottom-0 text-black bg-gray-500 text-center p-5 w-full">
-                                                <h1 className="font-bold text-[20px]">
+                                            <div className="text-black bg-gray-500 text-center p-3 w-full rounded-b-lg">
+                                                <h1 className="font-medium text-[15px]">
                                                     {data.nama}
                                                 </h1>
                                             </div>
-                                            <Image
-                                                src={`https://api.ricogann.com/assets/${
-                                                    JSON.parse(data.foto)[0]
-                                                }`}
-                                                alt="asrama"
-                                                className="h-[450px]"
-                                                width={400}
-                                                height={400}
-                                            />
                                         </div>
                                     ) : (
                                         <div
-                                            className="cursor-pointer relative overflow-hidden"
-                                            onClick={() => handleFoto(data)}
+                                            className="cursor-pointer relative overflow-hidden flex flex-col-reverse rounded-lg"
+                                            onClick={() => setInfo(data)}
                                             key={index}
                                         >
-                                            <div className="absolute bottom-0 text-black bg-gray-500 text-center p-5 w-full">
-                                                <h1 className="font-bold text-[20px]">
+                                            <div className="text-black bg-gray-500 text-center p-3 w-full">
+                                                <h1 className="font-medium text-[15px]">
                                                     {data.nama}
                                                 </h1>
                                             </div>
@@ -234,7 +192,7 @@ export default function Home() {
                                                     JSON.parse(data.foto)[0]
                                                 }`}
                                                 alt="asrama"
-                                                className="h-[225px]"
+                                                className="h-[150px] lg:h-[200px] w-full"
                                                 width={400}
                                                 height={400}
                                             />
@@ -267,100 +225,110 @@ export default function Home() {
                 </div>
 
                 <div className={`mt-5 bg-[#FFFFFF] rounded-[13px] border`}>
-                    <div className="px-5 py-5 xl:px-24 xl:py-16 lg:flex-row">
+                    <div className="lg:flex-row">
                         {/* Content here */}
-                        <div className="p-2 md:p-3 xl:p-0">
-                            <h1 className="font-bold md:text-[25px] xl:text-[40px] text-black">
-                                {dataInfo[1] === undefined
-                                    ? dataFasilitas.length > 0
-                                        ? dataFasilitas[0][0].nama
-                                        : ""
-                                    : dataInfo[1]}
-                            </h1>
+                        <div className="">
+                            <div className="flex items-start justify-between p-5 md:p-8 xl:px-14 xl:py-10">
+                                <div className="w-[150px] md:w-full flex flex-col gap-2">
+                                    <h1 className="text-xl text-black font-bold md:text-[25px] xl:text-[35px]">
+                                        {dataInfo?.nama === undefined
+                                            ? dataFasilitas.length > 0
+                                                ? dataFasilitas[0][0].nama
+                                                : ""
+                                            : dataInfo.nama}
+                                    </h1>
+                                    <div className="flex items-center gap-3 lg:mt-2">
+                                        <div className="w-2 h-2 xl:w-2 xl:h-2 bg-black rounded-full"></div>
+                                        <div className="text-black text-[10px] lg:text-[15px]">
+                                            <span>Closed</span> opens soon at
+                                            9:00 a.m
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col md:flex-row items-end gap-1">
+                                    <button
+                                        className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold p-1 lg:p-2 text-[10px] text-black border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
+                                        onClick={() =>
+                                            router.push(
+                                                `/detail/${
+                                                    dataInfo?.id_fasilitas ===
+                                                    undefined
+                                                        ? dataFasilitas.length >
+                                                          0
+                                                            ? dataFasilitas[0][0]
+                                                                  .id_fasilitas
+                                                            : ""
+                                                        : dataInfo.id_fasilitas
+                                                }`
+                                            )
+                                        }
+                                    >
+                                        More Info
+                                    </button>
+                                    <button
+                                        className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-1 lg:p-2 text-[10px] border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
+                                        onClick={handleBook}
+                                    >
+                                        Book Now
+                                    </button>
+                                </div>
+                            </div>
 
-                            <div className="flex flex-col gap-2 mt-6 ">
-                                <div className="flex gap-5 items-center mt-3">
-                                    <BsFillPinMapFill className="text-black font-bold text-2xl" />
-                                    <div className="">
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black xl:flex xl:gap-5">
-                                            {dataInfo[3] === undefined
+                            <div className="flex flex-col items-start gap-5 md:flex-row text-[8px] md:text-[12px] xl:text-[18px] border-[#D3D3D3] border-t-[2px] p-5 md:p-8 xl:px-14 xl:py-10">
+                                <div className="flex gap-3 items-start">
+                                    <BsFillPinMapFill className="text-black font-bold text-lg lg:text-xl" />
+
+                                    <div className="text-black text-[12px] xl:text-[16px]">
+                                        <div className="w-[230px] xl:w-[360px]">
+                                            {dataInfo?.alamat === undefined
                                                 ? dataFasilitas.length > 0
                                                     ? dataFasilitas[0][0].alamat
                                                     : ""
-                                                : dataInfo[3]}
-                                            <a
-                                                href=""
-                                                className="text-blue-900 font-semibold"
-                                            >
-                                                Get directions
-                                            </a>
-                                        </h2>
+                                                : dataInfo.alamat}
+                                        </div>
+                                        <a
+                                            href=""
+                                            className="text-blue-900 font-semibold"
+                                        >
+                                            Get directions
+                                        </a>
                                     </div>
                                 </div>
-                                <div className="flex gap-5 items-center mt-3">
-                                    <MdOutlineWatchLater className="text-black font-bold text-2xl" />
+                                <div className="flex gap-3 items-start">
+                                    <MdOutlineWatchLater className="text-black font-bold text-lg lg:text-xl" />
                                     <div className="flex flex-col">
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
-                                            {dataInfo[6] === undefined
+                                        <h2 className="text-[12px] lg:text-[16px] text-black">
+                                            {dataInfo?.buka_hari === undefined
                                                 ? dataFasilitas.length > 0
                                                     ? dataFasilitas[0][0]
                                                           .buka_hari
                                                     : ""
-                                                : dataInfo[6]}
+                                                : dataInfo.buka_hari}
                                         </h2>
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
-                                            {dataInfo[4] === undefined
+                                        <h2 className="text-[12px] lg:text-[16px] text-black">
+                                            {dataInfo?.jam_buka === undefined
                                                 ? dataFasilitas.length > 0
                                                     ? dataFasilitas[0][0]
                                                           .jam_buka
                                                     : ""
-                                                : dataInfo[4]}{" "}
+                                                : dataInfo.jam_buka}{" "}
                                             -{" "}
-                                            {dataInfo[5] === undefined
+                                            {dataInfo?.jam_tutup === undefined
                                                 ? dataFasilitas.length > 0
                                                     ? dataFasilitas[0][0]
                                                           .jam_tutup
                                                     : ""
-                                                : dataInfo[5]}
+                                                : dataInfo.jam_tutup}
                                         </h2>
                                     </div>
                                 </div>
-                                <div className="flex gap-5 items-center mt-3">
-                                    <MdPayment className="text-black font-bold text-2xl" />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
-                                            Mode Of Payment
-                                        </h2>
-                                        <h2 className="text-[8px] md:text-[12px] xl:text-[20px] text-black">
-                                            Virtual Account
-                                        </h2>
+                                <div className="flex gap-3 items-start">
+                                    <MdPayment className="text-black font-bold text-lg lg:text-xl" />
+                                    <div className="flex flex-col text-[12px] lg:text-[16px] text-black">
+                                        <h2 className="">Mode Of Payment</h2>
+                                        <h2 className="">Virtual Account</h2>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="flex justify-end mt-5">
-                                <button
-                                    className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold py-2 px-2 text-black border-black border-[2px] text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2 "
-                                    onClick={() =>
-                                        router.push(
-                                            `/detail/${
-                                                dataInfo[0] === undefined
-                                                    ? dataFasilitas.length > 0
-                                                        ? dataFasilitas[0][0]
-                                                              .id_fasilitas
-                                                        : ""
-                                                    : dataInfo[0]
-                                            }`
-                                        )
-                                    }
-                                >
-                                    More Info
-                                </button>
-                                <button
-                                    className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg mx-2"
-                                    onClick={handleBook}
-                                >
-                                    Book Now
-                                </button>
                             </div>
                         </div>
                     </div>

@@ -4,42 +4,32 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 
 import { RxHamburgerMenu } from "react-icons/rx";
+import { BsPersonCircle } from "react-icons/bs";
 
 interface Props {
     isLogin: boolean;
+    nama: string;
+    setModal: () => void;
+    setRegisModal: () => void;
 }
 
-const Navbar: React.FC<Props> = ({ isLogin }) => {
+interface Cookies {
+    CERT: string;
+}
+
+const Navbar: React.FC<Props> = ({
+    isLogin,
+    nama,
+    setModal,
+    setRegisModal,
+}) => {
     const router = useRouter();
 
-    useEffect(() => {
-        const getCookie = (name: string) => {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop()?.split(";").shift();
-        };
-
-        if (getCookie("CERT") === undefined) {
-            isLogin = false;
-        } else {
-            isLogin = true;
-        }
-    }, []);
-
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [openProfile, setOpenProfile] = useState(false);
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
-    };
-
-    const handleAuth = (e: React.MouseEvent) => {
-        const button = event?.target as HTMLButtonElement;
-
-        if (button.name === "login") {
-            router.push("/auth/login");
-        } else {
-            router.push("/auth/registrasi");
-        }
     };
 
     const handleProfile = () => {
@@ -48,7 +38,7 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
 
     const handleLogout = () => {
         deleteCookie("CERT");
-        router.push("/auth/login");
+        router.reload();
     };
 
     const deleteCookie = (name: string) => {
@@ -57,14 +47,14 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
     };
 
     return (
-        <nav className="p-5 bg-[#ffffff]">
+        <nav className="bg-[#ffffff]">
             <div className=" container mx-auto flex justify-between items-center">
                 <div className="flex items-center justify-between w-full px-6 py-3 md:px-8">
                     <a className="text-white font-semibold text-lg ">
                         <Image
                             src={logo_bpu}
                             alt="logo"
-                            className="w-[150px] h-[100px]"
+                            className="w-[130px] h-[90px]"
                         />
                     </a>
 
@@ -90,7 +80,7 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
                                     className={`text-black font-semibold ${
                                         isLogin ? "hidden" : "block"
                                     }`}
-                                    onClick={handleAuth}
+                                    onClick={setRegisModal}
                                 >
                                     Sign Up
                                 </button>
@@ -99,7 +89,7 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
                                     className={`text-black font-semibold ${
                                         isLogin ? "hidden" : "block"
                                     }`}
-                                    onClick={() => router.push("/auth/login")}
+                                    onClick={setModal}
                                 >
                                     Login
                                 </button>
@@ -125,26 +115,51 @@ const Navbar: React.FC<Props> = ({ isLogin }) => {
                         </div>
                     </div>
 
-                    <div className="hidden md:flex md:gap-14">
-                        <button className="text-black font-bold">Home</button>
+                    <div className="hidden md:flex md:gap-14 text-black font-semibold font-montserrat">
+                        <button className="" onClick={() => router.push("/")}>
+                            Home
+                        </button>
                         <button
                             name="register"
-                            className={`text-black font-bold ${
-                                isLogin ? "hidden" : "block"
-                            }`}
-                            onClick={handleAuth}
+                            className={`${isLogin ? "hidden" : "block"}`}
+                            onClick={setRegisModal}
                         >
                             Sign Up
                         </button>
                         <button
                             name="login"
-                            className={`text-black font-bold ${
-                                isLogin ? "hidden" : "block"
-                            }`}
-                            onClick={handleAuth}
+                            className={`${isLogin ? "hidden" : "block"}`}
+                            onClick={setModal}
                         >
                             Login
                         </button>
+                        <div className={`${isLogin ? "relative" : "hidden"}`}>
+                            <div
+                                className={`relative flex p-3 items-center gap-5 shadow-xl border border-black ${
+                                    openProfile
+                                        ? `rounded-t-xl border-0`
+                                        : ` rounded-xl`
+                                } cursor-pointer`}
+                                onClick={() => setOpenProfile(!openProfile)}
+                            >
+                                <BsPersonCircle className={`text-2xl`} />
+                                <>{nama && nama.split(" ")[0]}</>
+                            </div>
+                            <div
+                                className={`${
+                                    openProfile
+                                        ? `flex flex-col gap-2`
+                                        : `hidden`
+                                } absolute right-0 -bottom-[95px] border w-[200px] p-5 bg-[#ffffff] z-50`}
+                            >
+                                <div className="" onClick={handleProfile}>
+                                    Profile
+                                </div>
+                                <div className="" onClick={handleLogout}>
+                                    Logout
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

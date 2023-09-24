@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import picture_asrama from "../../../public/images/fasilitas_asrama.jpg";
 import picture_kantin from "../../../public/images/fasilitas_kantin.jpg";
 import picture_tennis from "../../../public/images/fasilitas_tennis.jpg";
 import picture_giriloka from "../../../public/images/fasilitas_giriloka.jpg";
@@ -9,109 +8,61 @@ import { BsFillPinMapFill } from "react-icons/bs";
 import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { BiCalendar, BiBookmark } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
-import useSwr from "swr";
 import { useRouter } from "next/router";
 
-interface Harga {
-    id: number;
-    id_fasilitas: number;
-    nama: string;
-    harga: number;
-}
+// Services
+import _serviceFasilitas from "@/services/fasilitas.service";
+import _serviceBooking from "@/services/booking.service";
 
-interface Mahasiswa {
-    nama: string;
-}
+// Lib
+import _libCookies from "@/lib/cookies";
 
-interface Dosen {
-    nama: string;
-}
-
-interface Umum {
-    nama: string;
-}
-
-interface Fasilitas {
-    nama: string;
-}
-
-interface Harga {
-    harga: number;
-}
-
-interface Account {
-    Dosen: Dosen[];
-    Mahasiswa: Mahasiswa[];
-    Umum: Umum[];
-}
-
-interface Pemesanan {
-    Account: Account;
-    Fasilitas: Fasilitas;
-    Harga: Harga;
-    id_pemesanan: number;
-    jam_checkin: string;
-    jam_checkout: string;
-    total_harga: number;
-    tanggal_pemesanan: string;
-    status: string;
-    createdAt: string;
-}
+// Interfaces
+import CookiesDTO from "@/interfaces/cookiesDTO";
+import HargaDTO from "@/interfaces/hargaDTO";
+import FasilitasDTO from "@/interfaces/fasilitasDTO";
+import PemesananDTO from "@/interfaces/pemesananDTO";
 
 export default function DetailFasilitas() {
     const router = useRouter();
     const { id } = router.query;
-    const [isLogin, setIsLogin] = useState(true);
-    const [harga, setHarga] = useState<Harga[]>([]);
+    const [isLogin, setIsLogin] = useState(false);
+    const [harga, setHarga] = useState<HargaDTO[]>([]);
     const [date, setDate] = useState("");
-    const [pemesanan, setPemesanan] = useState<Pemesanan[]>([]);
+    const [pemesanan, setPemesanan] = useState<PemesananDTO[]>([]);
     const [isAvailable, setIsAvailable] = useState(true);
-
-    const fetcher = async (url: string): Promise<any> => {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
-        return await response.json();
-    };
-
-    const { data, error, isLoading } = useSwr(
-        id ? `https://api.ricogann.com/api/fasilitas/${id}` : null,
-        fetcher
-    );
+    const [cookies, setCookies] = useState<CookiesDTO>();
+    const [data, setData] = useState<FasilitasDTO>();
+    const [nama, setNama] = useState("");
 
     useEffect(() => {
-        async function getHarga(id: string) {
-            if (id !== undefined) {
-                const response = await fetch(
-                    `https://api.ricogann.com/api/harga/${id}`
-                );
-                const result = await response.json();
+        const init = async () => {
+            const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
+            const data = await fasilitas.getFasilitasById(Number(id));
+            const harga = await fasilitas.getHarga(Number(id));
+            setData(data);
+            setHarga(harga);
 
-                if (result.data.length > 0) {
-                    setHarga(result.data);
-                }
+            const booking = new _serviceBooking("httpsL//api.ricogann.com");
+            const dataBooking = await booking.getPemesanan(Number(id));
+            setPemesanan(dataBooking);
+
+            const libCookies = new _libCookies();
+            const cookies: CookiesDTO = await libCookies.getCookies();
+
+            if (cookies.CERT !== undefined) {
+                setIsLogin(true);
+                setCookies(cookies);
+                setNama(JSON.parse(atob(cookies.CERT.split(".")[1])).nama);
+            } else {
+                setIsLogin(false);
             }
-        }
+        };
 
-        async function getPemesanan(id: string) {
-            if (id !== undefined) {
-                const response = await fetch(
-                    `https://api.ricogann.com/api/booking/fasilitas/${id}`
-                );
-                const result = await response.json();
+        init();
 
-                if (result.data.length > 0) {
-                    setPemesanan(result.data);
-                }
-            }
-        }
-
-        if (id) {
-            getHarga(id as string);
-            getPemesanan(id as string);
-        }
-    }, [id]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleDate = (e: React.ChangeEvent<HTMLInputElement>) => {
         const date = e.target.value;
@@ -149,8 +100,8 @@ export default function DetailFasilitas() {
     }, [date]);
 
     return (
-        <div className="bg-[#F7F8FA]">
-            <Navbar isLogin={isLogin} />
+        <div className="bg-[#D2D7DF] font-montserrat">
+            <Navbar isLogin={isLogin} nama={nama} />
             <div className="p-10 xl:mx-24">
                 <div className="carousel carousel-center md:hidden">
                     <div className="carousel-item grid grid-cols-2 gap-3 mx-5">
@@ -296,140 +247,144 @@ export default function DetailFasilitas() {
                 </div>
 
                 <div className={`mt-5 bg-[#FFFFFF] rounded-[13px] border`}>
-                    <div className="px-5 py-5 lg:px-14 lg:py-14">
-                        {/* Content here */}
-                        <div className="p-2 md:p-3 xl:p-0">
+                    <div className="p-5 lg:p-14">
+                        <div className="">
                             <h1 className="font-bold md:text-[25px] xl:text-[35px] text-black  xl:text-center">
-                                {data?.data.nama}
+                                {data?.nama}
                             </h1>
 
-                            <div className="flex flex-col gap-2 mt-6 xl:grid xl:grid-cols-3 xl:items-start">
-                                <div className="flex gap-5 mt-3">
-                                    <BsFillPinMapFill className="text-black font-bold text-2xl" />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black flex flex-col">
-                                            <div className="w-[200px]">
-                                                {data?.data.alamat}
-                                            </div>
-                                            <a href="">Get directions</a>
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div className="flex gap-5 mt-3">
-                                    <MdOutlineWatchLater className="text-black font-bold text-2xl" />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            {data?.data.buka_hari}
-                                        </h2>
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            {`${data?.data.jam_buka} am - ${data?.data.jam_tutup} pm`}
-                                        </h2>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-5 mt-3">
-                                    <BiBookmark className="text-black font-bold text-2xl" />
-
-                                    <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black w-[180px] md:w-1/2">
-                                        {data?.data.deskripsi}
-                                    </h2>
-                                </div>
-                                <div className="flex items-center gap-5 mt-3 xl:items-start">
-                                    <FaDollarSign className="text-black font-bold text-2xl" />
-
-                                    <div className="flex flex-col">
-                                        {harga.map((item, index) => (
-                                            <h2
-                                                className="text-[10px] md:text-[12px] xl:text-[17px] text-black"
-                                                key={index}
-                                            >
-                                                {`Rp${item.harga
-                                                    .toString()
-                                                    .replace(
-                                                        /\B(?=(\d{3})+(?!\d))/g,
-                                                        "."
-                                                    )} - ${item.nama}`}
+                            <div className="flex flex-col gap-2 mt-6 xl:flex-row xl:justify-evenly">
+                                <div className="flex flex-col">
+                                    <div className="flex gap-8 mt-3">
+                                        <BsFillPinMapFill className="text-black font-bold text-3xl" />
+                                        <div className="flex flex-col">
+                                            <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black flex flex-col">
+                                                <div className="w-[200px] xl:w-[300px]">
+                                                    {data?.alamat}
+                                                </div>
+                                                <a href="">Get directions</a>
                                             </h2>
-                                        ))}
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-8 mt-3 xl:items-start">
+                                        <FaDollarSign className="text-black font-bold text-3xl" />
+
+                                        <div className="flex flex-col">
+                                            {harga.map((item, index) => (
+                                                <h2
+                                                    className="text-[10px] md:text-[12px] xl:text-[17px] text-black"
+                                                    key={index}
+                                                >
+                                                    {`Rp${item.harga
+                                                        .toString()
+                                                        .replace(
+                                                            /\B(?=(\d{3})+(?!\d))/g,
+                                                            "."
+                                                        )} - ${item.nama}`}
+                                                </h2>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-5 mt-3">
-                                    <MdPayment className="text-black font-bold text-2xl" />
-                                    <div className="flex flex-col">
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            Mode Of Payment
-                                        </h2>
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            Virtual Account
-                                        </h2>
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex gap-8 mt-3">
+                                        <MdOutlineWatchLater className="text-black font-bold text-3xl" />
+                                        <div className="flex flex-col">
+                                            <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                {data?.buka_hari}
+                                            </h2>
+                                            <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                {`${data?.jam_buka} am - ${data?.jam_tutup} pm`}
+                                            </h2>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-8 mt-3">
+                                        <BiCalendar className="text-black font-bold text-3xl" />
+                                        <div className="flex flex-col gap-2">
+                                            <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                Cek Ketersediaan Fasilitas
+                                            </h2>
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="date"
+                                                    className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
+                                                    onChange={handleDate}
+                                                />
+                                            </div>
+                                            <div className=" gap-2 mt-2">
+                                                {isAvailable ? (
+                                                    <div className=" flex text-black items-center gap-3">
+                                                        <div className="">
+                                                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                                        </div>
+                                                        <h1>Available</h1>
+                                                    </div>
+                                                ) : (
+                                                    <div className="">
+                                                        <div className="text-black flex items-center gap-3">
+                                                            <div className="w-2 h-2 xl:w-3 xl:h-3 bg-red-500 rounded-full"></div>
+                                                            <h1 className="text-[15px] xl:text-[17px]">
+                                                                Booked
+                                                            </h1>
+                                                        </div>
+                                                        <div className="">
+                                                            {pemesanan.map(
+                                                                (
+                                                                    item,
+                                                                    index
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            index
+                                                                        }
+                                                                        className="text-black flex gap-3"
+                                                                    >
+                                                                        <h1 className="text-[15px] xl:text-[17px]">
+                                                                            {index +
+                                                                                1}
+                                                                            .
+                                                                        </h1>
+                                                                        <div className="text-[15px] xl:text-[17px]">
+                                                                            {
+                                                                                item.jam_checkin
+                                                                            }
+                                                                        </div>
+                                                                        <div className="text-[15px] xl:text-[17px]">
+                                                                            to
+                                                                        </div>
+                                                                        <div className="text-[15px] xl:text-[17px]">
+                                                                            {
+                                                                                item.jam_checkout
+                                                                            }
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-8 mt-3">
+                                        <MdPayment className="text-black font-bold text-3xl" />
+                                        <div className="flex flex-col">
+                                            <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                Mode Of Payment
+                                            </h2>
+                                            <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                Virtual Account
+                                            </h2>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-5 mt-3">
-                                    <BiCalendar className="text-black font-bold text-2xl" />
-                                    <div className="flex flex-col gap-2">
-                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
-                                            Cek Ketersediaan Fasilitas
+                                <div className="">
+                                    <div className="flex items-center gap-8 mt-3 justify-center">
+                                        <BiBookmark className="text-black font-bold text-3xl" />
+
+                                        <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black w-[180px] md:w-1/2">
+                                            {data?.deskripsi}
                                         </h2>
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="date"
-                                                className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
-                                                onChange={handleDate}
-                                            />
-                                            {/* <button
-                                                className="text-[8px] p-[5px] bg-gray-500 text-white rounded-md"
-                                                onClick={checkAvailability}
-                                            >
-                                                Check Availability
-                                            </button> */}
-                                        </div>
-                                        <div className=" gap-2 mt-2">
-                                            {isAvailable ? (
-                                                <div className=" flex text-black items-center gap-3">
-                                                    <div className="">
-                                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                                    </div>
-                                                    <h1>Available</h1>
-                                                </div>
-                                            ) : (
-                                                <div className="">
-                                                    <div className="text-black flex items-center gap-3">
-                                                        <div className="w-2 h-2 xl:w-3 xl:h-3 bg-red-500 rounded-full"></div>
-                                                        <h1 className="text-[15px] xl:text-[17px]">
-                                                            Booked
-                                                        </h1>
-                                                    </div>
-                                                    <div className="">
-                                                        {pemesanan.map(
-                                                            (item, index) => (
-                                                                <div
-                                                                    key={index}
-                                                                    className="text-black flex gap-3"
-                                                                >
-                                                                    <h1 className="text-[15px] xl:text-[17px]">
-                                                                        {index +
-                                                                            1}
-                                                                        .
-                                                                    </h1>
-                                                                    <div className="text-[15px] xl:text-[17px]">
-                                                                        {
-                                                                            item.jam_checkin
-                                                                        }
-                                                                    </div>
-                                                                    <div className="text-[15px] xl:text-[17px]">
-                                                                        to
-                                                                    </div>
-                                                                    <div className="text-[15px] xl:text-[17px]">
-                                                                        {
-                                                                            item.jam_checkout
-                                                                        }
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
                                 </div>
                             </div>

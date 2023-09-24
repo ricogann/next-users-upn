@@ -10,6 +10,16 @@ import { AiFillClockCircle } from "react-icons/ai";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
+import _serviceBooking from "@/services/booking.service";
+
+import _libCookies from "@/lib/cookies";
+
+import BookingDTO from "@/interfaces/bookingDTO";
+import CookiesDTO from "@/interfaces/cookiesDTO";
+import PemesananDTO from "@/interfaces/pemesananDTO";
+import _serviceFasilitas from "@/services/fasilitas.service";
+import AccountDTO from "@/interfaces/accountDTO";
+
 interface Fasilitas {
     id_fasilitas: number;
     nama: string;
@@ -30,28 +40,16 @@ interface Account {
     status: boolean;
 }
 
-interface Cookies {
-    CERT: string;
-}
-
-interface Booking {
-    id_fasilitas: number;
-    id_harga: number;
-    id_account: number;
-    tanggal_pemesanan: string;
-    jam_checkin: string;
-    jam_checkout: string;
-    durasi: number;
-    total_harga: number;
-    keterangan: string;
-    status: string;
-}
-
 export default function Booking() {
     const router = useRouter();
     const { id } = router.query;
+    const booking = new _serviceBooking("https://api.ricogann.com");
+    const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
+    const libCookies = new _libCookies();
+
     const [isLogin, setIsLogin] = useState(true);
     const [dataHarga, setDataHarga] = useState<any>([]);
+    const [dataFasilitas, setDataFasilitas] = useState<Fasilitas>();
 
     //data booking
     const [idAccount, setIdAccount] = useState<number>(0);
@@ -67,26 +65,6 @@ export default function Booking() {
     const [durasi, setDurasi] = useState<number>(0);
     const [totalHarga, setTotalHarga] = useState<number>(0);
     const [keterangan, setKeterangan] = useState<string>("");
-
-    //auth check
-    useEffect(() => {
-        const cookiesGet = document.cookie.split(";").reduce((res, c) => {
-            const [key, val] = c.trim().split("=");
-            try {
-                return Object.assign(res, { [key]: JSON.parse(val) });
-            } catch (e) {
-                return Object.assign(res, { [key]: val });
-            }
-        }, {});
-
-        const cookies = cookiesGet as Cookies;
-        if (cookies.CERT === undefined) {
-            setIsLogin(false);
-            router.push("/auth/login");
-        } else {
-            setAccount(cookiesGet as Cookies);
-        }
-    }, []);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.name === "nama") {
@@ -115,55 +93,39 @@ export default function Booking() {
         setHarga(parseInt(e.target.value.split(",")[1]));
     };
 
-    const fetcher = async (url: string): Promise<any> => {
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
-        return await response.json();
-    };
-
-    const { data, error, isLoading } = useSwr(
-        id ? `https://api.ricogann.com/api/fasilitas/${id}` : null,
-        fetcher
-    );
-
-    async function getHarga() {
-        const response = await fetch(
-            `https://api.ricogann.com/api/harga/${id}`
-        );
-        const result = await response.json();
-        return result.data;
-    }
-
     useEffect(() => {
-        async function getHarga(id: string) {
-            if (id !== undefined) {
-                const response = await fetch(
-                    `https://api.ricogann.com/api/harga/${id}`
-                );
-                const result = await response.json();
+        async function init(id: string) {
+            const cookies: CookiesDTO = await libCookies.getCookies();
+            console.log(await libCookies.parseJwt(cookies));
 
-                if (result.data.length > 0) {
-                    setDataHarga(result.data);
-                    setIdHarga(result.data[0].id);
-                    setHarga(result.data[0].harga);
-                }
+            if (cookies.CERT === undefined) {
+                setIsLogin(false);
+                router.push("/auth/login");
+            } else {
+                setIsLogin(true);
             }
+
+            const dataHarga = await fasilitas.getHarga(Number(id));
+            const dataFasilitas: Fasilitas = await fasilitas.getFasilitasById(
+                Number(id)
+            );
+
+            const Account: AccountDTO = await libCookies.parseJwt(cookies);
+
+            setIdAccount(Account.id_account);
+            setNamaAccount(Account.nama);
+            setNoTelpAccount(Account.no_telp);
+            setDataHarga(dataHarga);
+            setIdHarga(dataHarga[0].id);
+            setHarga(dataHarga[0].harga);
+
+            setDataFasilitas(dataFasilitas);
         }
 
         if (id) {
-            getHarga(id as string);
+            init(id as string);
         }
-    }, [id]);
-
-    const parseJwt = (token: Cookies) => {
-        try {
-            return JSON.parse(atob(token.CERT.split(".")[1]));
-        } catch (e) {
-            return null;
-        }
-    };
+    }, []);
 
     const timeStringToMinutes = (timeString: string) => {
         const [hours, minutes] = timeString.split(/[:.]/).map(Number);
@@ -177,14 +139,8 @@ export default function Booking() {
         return checkout - checkin;
     };
 
-    const setAccount = (cookies: Cookies) => {
-        setIdAccount(parseJwt(cookies).id_account);
-        setNamaAccount(parseJwt(cookies).nama);
-        setNoTelpAccount(parseJwt(cookies).no_telp);
-    };
-
     const handleBooking = async () => {
-        const data: Booking = {
+        const data: BookingDTO = {
             id_fasilitas: Number(id),
             id_harga: idHarga,
             id_account: idAccount,
@@ -202,30 +158,14 @@ export default function Booking() {
             return;
         }
 
-        const response = await fetch(
-            `https://api.ricogann.com/api/booking/add`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
-            }
-        );
-        const result = await response.json();
-
-        if (result.status === true) {
-            router.push(`/booking/pembayaran/${result.data.id_pemesanan}`);
-        }
+        booking.addPemesanan(data);
     };
-
-    console.log(dataHarga);
 
     return (
         <div className="">
             {isLogin ? (
                 <div className="h-full bg-[#F7F8FA]">
-                    <Navbar isLogin={isLogin} />
+                    <Navbar isLogin={isLogin} nama={namaAccount} />
 
                     <div className="p-10 xl:px-28">
                         <div className=" flex flex-col rounded-[13px] xl:mb-5">
@@ -239,10 +179,12 @@ export default function Booking() {
                         <div className="flex-col flex lg:gap-5 lg:flex-row-reverse">
                             <div className="  bg-[#FFFFFF] flex flex-wrap rounded-[15px] lg:bg-[#FFFFFF] xl:flex-col ">
                                 <div className="p-7 flex flex-row lg:flex-col lg:items-center gap-3">
-                                    {data && (
+                                    {dataFasilitas && (
                                         <Image
                                             src={`https://api.ricogann.com/assets/${
-                                                JSON.parse(data.data.foto)[0]
+                                                JSON.parse(
+                                                    dataFasilitas.foto
+                                                )[0]
                                             }`}
                                             alt="foto"
                                             width={100}
@@ -252,12 +194,14 @@ export default function Booking() {
                                     )}
                                     <div className="flex flex-col lg:items-center">
                                         <h2 className="text-[16px] md:text-[20px] font-semibold text-black xl:text-[35px]">
-                                            {data && data.data.nama}
+                                            {dataFasilitas &&
+                                                dataFasilitas.nama}
                                         </h2>
                                         <div className="flex items-center gap-2">
                                             <HiLocationMarker className="hidden md:block text-black xl:text-2xl" />
                                             <h2 className="text-[10px] md:text-[14px] mt-2 text-black xl:w-[380px]">
-                                                {data && data.data.alamat}
+                                                {dataFasilitas &&
+                                                    dataFasilitas.alamat}
                                             </h2>
                                         </div>
                                     </div>
