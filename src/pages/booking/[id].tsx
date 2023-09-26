@@ -1,12 +1,12 @@
 import { Navbar } from "@/components/navbar";
 import { BsFillPersonFill, BsFillCalendarFill } from "react-icons/bs";
 import { useState, useEffect, useCallback } from "react";
-import useSwr from "swr";
 
 import { FaDollarSign } from "react-icons/fa";
-import { BiSolidPhoneCall } from "react-icons/bi";
+import { BiSolidPhoneCall, BiSolidPencil, BiCalendar } from "react-icons/bi";
 import { HiLocationMarker } from "react-icons/hi";
 import { AiFillClockCircle } from "react-icons/ai";
+import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
@@ -19,6 +19,7 @@ import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
 import _serviceFasilitas from "@/services/fasilitas.service";
 import AccountDTO from "@/interfaces/accountDTO";
+import _libBooking from "@/lib/booking";
 
 interface Fasilitas {
     id_fasilitas: number;
@@ -42,19 +43,33 @@ interface Account {
 
 export default function Booking() {
     const router = useRouter();
-    const { id } = router.query;
-    const booking = new _serviceBooking("https://api.ricogann.com");
     const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
     const libCookies = new _libCookies();
+    const libBooking = new _libBooking();
 
     const [isLogin, setIsLogin] = useState(true);
     const [dataHarga, setDataHarga] = useState<any>([]);
     const [dataFasilitas, setDataFasilitas] = useState<Fasilitas>();
+    const [isAvailable, setIsAvailable] = useState(true);
+    const [pemesanan, setPemesanan] = useState<PemesananDTO[]>([]);
+    const [date, setDate] = useState("");
+    const [id, setId] = useState("");
+
+    useEffect(() => {
+        if (router.isReady) {
+            setId(router.query.id as string);
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [router.isReady]);
+
+    const [dataBooked, setDataBooked] = useState<PemesananDTO[]>([]);
 
     //data booking
     const [idAccount, setIdAccount] = useState<number>(0);
     const [idHarga, setIdHarga] = useState<number>(0);
     const [namaAccount, setNamaAccount] = useState<string>("");
+    const [role, setRole] = useState<string>("");
     const [tanggal, setTanggal] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
@@ -62,8 +77,6 @@ export default function Booking() {
     const [jam_checkout, setJamCheckout] = useState<string>("22:00");
     const [harga, setHarga] = useState<number>(0);
     const [noTelpAccount, setNoTelpAccount] = useState<string>("");
-    const [durasi, setDurasi] = useState<number>(0);
-    const [totalHarga, setTotalHarga] = useState<number>(0);
     const [keterangan, setKeterangan] = useState<string>("");
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +109,6 @@ export default function Booking() {
     useEffect(() => {
         async function init(id: string) {
             const cookies: CookiesDTO = await libCookies.getCookies();
-            console.log(await libCookies.parseJwt(cookies));
 
             if (cookies.CERT === undefined) {
                 setIsLogin(false);
@@ -110,22 +122,31 @@ export default function Booking() {
                 Number(id)
             );
 
+            const dataBooking = await libBooking.getPemesanan(Number(id));
+            setPemesanan(dataBooking);
+
             const Account: AccountDTO = await libCookies.parseJwt(cookies);
 
             setIdAccount(Account.id_account);
             setNamaAccount(Account.nama);
             setNoTelpAccount(Account.no_telp);
+            setRole(Account.role);
+
             setDataHarga(dataHarga);
             setIdHarga(dataHarga[0].id);
-            setHarga(dataHarga[0].harga);
+            if (role === "umum") {
+                setHarga(dataHarga[0].harga);
+            }
 
             setDataFasilitas(dataFasilitas);
         }
 
-        if (id) {
+        if (id !== "") {
             init(id as string);
         }
-    }, []);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
     const timeStringToMinutes = (timeString: string) => {
         const [hours, minutes] = timeString.split(/[:.]/).map(Number);
@@ -158,13 +179,42 @@ export default function Booking() {
             return;
         }
 
-        await booking.addPemesanan(data);
+        const createPemesanan = await libBooking.addPemesanan(data);
+        if (createPemesanan.status === true) {
+            alert("Berhasil Booking");
+            router.push(
+                `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
+            );
+        }
+    };
+
+    const handleDate = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const date = e.target.value;
+        setDate(date);
+    };
+
+    const checkAvailability = async () => {
+        let dataBooked: PemesananDTO[] = [];
+
+        pemesanan.map((item) => {
+            if (item.tanggal_pemesanan.split("T")[0] === date) {
+                dataBooked.push(item);
+            }
+        });
+
+        if (dataBooked.length > 0) {
+            setIsAvailable(false);
+        } else {
+            setIsAvailable(true);
+        }
+
+        setDataBooked(dataBooked);
     };
 
     return (
         <div className="">
             {isLogin ? (
-                <div className="h-full bg-[#F7F8FA]">
+                <div className="h-screen md:h-full bg-[#F7F8FA]">
                     <Navbar isLogin={isLogin} nama={namaAccount} />
 
                     <div className="p-10 xl:px-28">
@@ -172,7 +222,7 @@ export default function Booking() {
                             <h1 className="text-[14px] font-regular text-[#7F8FA4]">
                                 Step 1 of 2
                             </h1>
-                            <h1 className="text-[29px] font-semibold text-[#11141A]">
+                            <h1 className="text-[29px] font-bold text-[#11141A]">
                                 Form Sewa Fasilitas
                             </h1>
                         </div>
@@ -192,83 +242,188 @@ export default function Booking() {
                                             className="xl:w-full xl:h-[300px] rounded-[15px]"
                                         />
                                     )}
-                                    <div className="flex flex-col lg:items-center">
-                                        <h2 className="text-[16px] md:text-[20px] font-semibold text-black xl:text-[35px]">
+                                    <div className="flex flex-col md:mt-6 gap-3">
+                                        <h2 className="text-[16px] md:text-[20px] font-bold text-black xl:text-[35px]">
                                             {dataFasilitas &&
                                                 dataFasilitas.nama}
                                         </h2>
-                                        <div className="flex items-center gap-2">
-                                            <HiLocationMarker className="hidden md:block text-black xl:text-2xl" />
-                                            <h2 className="text-[10px] md:text-[14px] mt-2 text-black xl:w-[380px]">
+                                        <div className="flex items-start gap-2">
+                                            <HiLocationMarker className="hidden md:block text-black xl:text-3xl" />
+                                            <h2 className="text-[10px] md:text-[18px] mt-2 md:mt-0 text-black xl:w-[380px]">
                                                 {dataFasilitas &&
                                                     dataFasilitas.alamat}
                                             </h2>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                            <MdPayment className="text-black font-bold text-3xl" />
+                                            <div className="flex flex-col">
+                                                <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                    Mode Of Payment
+                                                </h2>
+                                                <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                    Virtual Account
+                                                </h2>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <div className="flex gap-2">
+                                                <BiCalendar className="text-black font-bold text-3xl" />
+                                                <div className="flex flex-col gap-2">
+                                                    <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-black">
+                                                        Cek Ketersediaan
+                                                        Fasilitas
+                                                    </h2>
+                                                    <div className="flex flex-col md:flex-row items-start gap-5">
+                                                        <div className="flex items-center gap-3">
+                                                            <input
+                                                                type="date"
+                                                                className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
+                                                                onChange={
+                                                                    handleDate
+                                                                }
+                                                            />
+                                                            <button
+                                                                className="bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-[4px] text-[12px] xl:text-[15px] xl:w-24 rounded-lg"
+                                                                onClick={
+                                                                    checkAvailability
+                                                                }
+                                                            >
+                                                                Check
+                                                            </button>
+                                                        </div>
+                                                        <div className="">
+                                                            {isAvailable ? (
+                                                                <div className="flex text-black items-center gap-3">
+                                                                    <div className="">
+                                                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                                                    </div>
+                                                                    <h1>
+                                                                        Available
+                                                                    </h1>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="">
+                                                                    <div className="text-black flex items-center gap-3">
+                                                                        <div className="w-2 h-2 xl:w-3 xl:h-3 bg-red-500 rounded-full"></div>
+                                                                        <h1 className="text-[15px] xl:text-[17px]">
+                                                                            Booked
+                                                                        </h1>
+                                                                    </div>
+                                                                    <div className="">
+                                                                        {dataBooked.map(
+                                                                            (
+                                                                                item,
+                                                                                index
+                                                                            ) => (
+                                                                                <div
+                                                                                    key={
+                                                                                        index
+                                                                                    }
+                                                                                    className="text-black flex gap-3"
+                                                                                >
+                                                                                    <h1 className="text-[15px] xl:text-[17px]">
+                                                                                        {index +
+                                                                                            1}
+
+                                                                                        .
+                                                                                    </h1>
+                                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                                        {
+                                                                                            item.jam_checkin
+                                                                                        }
+                                                                                    </div>
+                                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                                        to
+                                                                                    </div>
+                                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                                        {
+                                                                                            item.jam_checkout
+                                                                                        }
+                                                                                    </div>
+                                                                                </div>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex flex-col xl:gap-4 xl:p-7 lg:bg-[#FFFFFF] rounded-[15px] lg:flex-1 mt-5 xl:mt-0">
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
                                     Nama
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <BsFillPersonFill className="text-black" />
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <BsFillPersonFill className="text-black md:text-2xl" />
                                     <input
                                         name={`nama`}
                                         type="text"
-                                        className="text-[10px] lg:text-[12px] ml-2 w-full p-1 text-black font-semibold bg-[#fff] xl:bg-[#F7F8FA]"
+                                        className="text-[10px] lg:text-[14px] ml-2 w-full p-1 text-black font-regular bg-[#fff] xl:bg-[#F7F8FA]"
                                         value={namaAccount}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
                                     Tanggal
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <BsFillCalendarFill className="text-black" />
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <BsFillCalendarFill className="text-black md:text-xl" />
                                     <input
                                         name={`tanggal`}
                                         type="date"
-                                        className="text-[10px] lg:text-[12px] ml-2 rounded bg-[#fff] xl:bg-[#F7F8FA] text-black"
+                                        className="text-[10px] lg:text-[14px] ml-4 rounded bg-[#fff] xl:bg-[#F7F8FA] text-black"
                                         value={tanggal}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
                                     Jam Checkin
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <AiFillClockCircle className="text-black" />
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <AiFillClockCircle className="text-black text-xl" />
                                     <input
                                         name="jam_checkin"
                                         type="time"
-                                        className=" text-[10px] lg:text-[12px] ml-2 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa]"
+                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
                                         value={jam_checkin}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
                                     Jam Checkout
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <AiFillClockCircle className="text-black" />
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <AiFillClockCircle className="text-black text-xl" />
                                     <input
                                         name="jam_checkout"
                                         type="time"
-                                        className=" text-[10px] lg:text-[12px] ml-2 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa]"
+                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
                                         value={jam_checkout}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2
+                                    className={`${
+                                        role !== "umum" ? "hidden" : "block"
+                                    } text-[12px] lg:text-[18px] text-black font-semibold`}
+                                >
                                     Tipe Harga
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <AiFillClockCircle className="text-black" />
+                                <div
+                                    className={`${
+                                        role !== "umum" ? "hidden" : "block"
+                                    } bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA] lg:flex-row `}
+                                >
+                                    <AiFillClockCircle className="text-black text-xl" />
                                     <select
                                         name={`harga`}
-                                        className=" text-[10px] lg:text-[12px] ml-2 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
+                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
                                         onChange={handleHarga}
                                     >
                                         {dataHarga &&
@@ -289,14 +444,22 @@ export default function Booking() {
                                             )}
                                     </select>
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2
+                                    className={`${
+                                        role !== "umum" ? "hidden" : "block"
+                                    } text-[12px] lg:text-[18px] text-black font-semibold `}
+                                >
                                     Biaya
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <FaDollarSign className="text-black" />
+                                <div
+                                    className={`${
+                                        role !== "umum" ? "hidden" : "block"
+                                    } bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row`}
+                                >
+                                    <FaDollarSign className="text-black text-xl" />
                                     <input
                                         type="text"
-                                        className=" text-[10px] lg:text-[12px] ml-2 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa]"
+                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
                                         readOnly
                                         value={`Rp${(
                                             harga *
@@ -309,32 +472,33 @@ export default function Booking() {
                                             )}`}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
                                     No. Telp
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <BiSolidPhoneCall className="text-black" />
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <BiSolidPhoneCall className="text-black text-xl" />
                                     <input
                                         type="number"
-                                        className="text-[10px] lg:text-[12px] ml-2 text-black bg-[#fff] xl:bg-[#f7f8fa] rounded"
+                                        className="text-[10px] lg:text-[14px] ml-4 text-black bg-[#fff] xl:bg-[#f7f8fa] rounded"
                                         value={noTelpAccount}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[12px] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
                                     Keterangan
                                 </h2>
                                 <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <BiSolidPhoneCall className="text-black" />
+                                    <BiSolidPencil className="text-black" />
                                     <textarea
                                         name="keterangan"
-                                        className="text-[10px] lg:text-[12px] ml-2 text-black bg-[#fff] xl:bg-[#f7f8fa] rounded w-full"
+                                        className="text-[10px] lg:text-[12px] ml-2 text-black bg-[#fff] xl:bg-[#f7f8fa] rounded w-full h-full"
+                                        placeholder="Saya meminjam fasilitas ini untuk..."
                                         value={keterangan}
                                         onChange={handleTextarea}
                                     />
                                 </div>
 
-                                <div className="mt-5 bg-[#FFFFFF] flex flex-wrap rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                {/* <div className="mt-5 bg-[#FFFFFF] flex flex-wrap rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
                                     <div className="p-3 flex flex-row ">
                                         <input
                                             type="checkbox"
@@ -351,7 +515,7 @@ export default function Booking() {
                                             </a>
                                         </h2>
                                     </div>
-                                </div>
+                                </div> */}
                                 <button
                                     className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-4 rounded-lg mt-7"
                                     onClick={handleBooking}

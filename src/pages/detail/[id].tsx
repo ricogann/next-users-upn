@@ -7,6 +7,9 @@ import { BiCalendar, BiBookmark } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
 import { useRouter } from "next/router";
 
+import { Login } from "@/components/login-form";
+import { Regis } from "@/components/registration-form";
+
 // Services
 import _serviceFasilitas from "@/services/fasilitas.service";
 import _serviceBooking from "@/services/booking.service";
@@ -43,6 +46,10 @@ export default function DetailFasilitas() {
     const handleRegisModal = () => {
         setOpenRegisModal(!openRegisModal);
     };
+    const changeModal = () => {
+        setOpenModal(!openModal);
+        setOpenRegisModal(!openRegisModal);
+    };
 
     useEffect(() => {
         if (router.isReady) {
@@ -50,20 +57,21 @@ export default function DetailFasilitas() {
         }
     }, [router.isReady]);
 
+    const libCookies = new _libCookies();
+    const booking = new _serviceBooking("https://api.ricogann.com");
+    const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
+
     useEffect(() => {
         const init = async (id: number) => {
-            const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
             const data = await fasilitas.getFasilitasById(Number(id));
             const harga = await fasilitas.getHarga(Number(id));
 
             setData(data);
             setHarga(harga);
 
-            const booking = new _serviceBooking("https://api.ricogann.com");
             const dataBooking = await booking.getPemesanan(Number(id));
             setPemesanan(dataBooking);
 
-            const libCookies = new _libCookies();
             const cookies: CookiesDTO = await libCookies.getCookies();
 
             if (cookies.CERT !== undefined) {
@@ -105,6 +113,17 @@ export default function DetailFasilitas() {
         setDataBooked(dataBooked);
     };
 
+    const handleBook = async () => {
+        const cookies: CookiesDTO = await libCookies.getCookies();
+
+        if (cookies.CERT === undefined) {
+            setOpenModal(true);
+            return;
+        } else {
+            router.push(`/booking/${id}`);
+        }
+    };
+
     return (
         <div className="bg-[#D2D7DF] font-montserrat">
             <Navbar
@@ -113,6 +132,27 @@ export default function DetailFasilitas() {
                 setModal={handleModal}
                 setRegisModal={handleRegisModal}
             />
+            <div
+                className={`${
+                    openModal ? "flex" : "hidden"
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+            >
+                <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
+                    <Login setModal={handleModal} changeModal={changeModal} />
+                </div>
+            </div>
+            <div
+                className={`${
+                    openRegisModal ? "flex" : "hidden"
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+            >
+                <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
+                    <Regis
+                        setRegisModal={handleRegisModal}
+                        changeModal={changeModal}
+                    />
+                </div>
+            </div>
             <div className="p-10 xl:mx-24">
                 <div className="carousel carousel-center md:hidden">
                     <div className="carousel-item grid grid-cols-2 gap-3 mx-5">
@@ -193,7 +233,7 @@ export default function DetailFasilitas() {
                             </div>
                             <button
                                 className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg"
-                                onClick={() => router.push(`/booking/${id}`)}
+                                onClick={handleBook}
                             >
                                 Book Now
                             </button>

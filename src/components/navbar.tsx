@@ -9,8 +9,8 @@ import { BsPersonCircle } from "react-icons/bs";
 interface Props {
     isLogin: boolean;
     nama: string;
-    setModal: () => void;
-    setRegisModal: () => void;
+    setModal?: () => void;
+    setRegisModal?: () => void;
 }
 
 interface Cookies {
@@ -38,7 +38,7 @@ const Navbar: React.FC<Props> = ({
 
     const handleLogout = () => {
         deleteCookie("CERT");
-        router.reload();
+        router.push("/");
     };
 
     const deleteCookie = (name: string) => {

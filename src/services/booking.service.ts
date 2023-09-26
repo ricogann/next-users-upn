@@ -4,10 +4,9 @@ class _serviceBooking {
     constructor(private baseUrl: string) {}
 
     async getPemesanan(id: number) {
-        const response = await fetch(
-            `${this.baseUrl}/api/booking/fasilitas/${id}`
-        );
+        const response = await fetch(`${this.baseUrl}/api/booking/${id}`);
         const data = await response.json();
+        console.log(data);
 
         return data.data;
     }

@@ -3,6 +3,9 @@ import { useState, useEffect, useCallback } from "react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { useRouter } from "next/router";
 import useSwr from "swr";
+import _libCookies from "@/lib/cookies";
+import _libBooking from "@/lib/booking";
+import CookiesDTO from "@/interfaces/cookiesDTO";
 
 interface Cookies {
     CERT: string;
@@ -48,10 +51,19 @@ interface Pemesanan {
 }
 
 export default function Pembayaran() {
+    const libCookies = new _libCookies();
+    const libBooking = new _libBooking();
     const [isLogin, setIsLogin] = useState(true);
     const router = useRouter();
-    const { id } = router.query;
+    useEffect(() => {
+        if (router.isReady) {
+            setId(router.query.id as string);
+        }
+    }, [router.isReady]);
 
+    const [role, setRole] = useState<string>("");
+    const [nama, setNama] = useState<string>("");
+    const [id, setId] = useState<string>("");
     const [namaPemesan, setNamaPemesan] = useState("");
     const [tanggalPemesanan, setTanggalPemesanan] = useState("");
     const [jam_checkin, setJam_checkin] = useState("");
@@ -62,20 +74,7 @@ export default function Pembayaran() {
     const [createdAt, setCreatedAt] = useState("");
     const [remainingTime, setRemainingTime] = useState(`23:59:59`);
     const [buktiPembayaran, setBuktiPembayaran] = useState<File | null>(null);
-
-    async function getBooking(id: string) {
-        try {
-            const res = await fetch(
-                `https://api.ricogann.com/api/booking/${id}`
-            );
-            const result = await res.json();
-
-            setData(result.data);
-            countdown(result.data.createdAt);
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    const [buktiSik, setBuktiSik] = useState<File | null>(null);
 
     const setData = (data: Pemesanan) => {
         console.log(data);
@@ -101,27 +100,24 @@ export default function Pembayaran() {
     };
 
     useEffect(() => {
-        const cookiesGet = document.cookie.split(";").reduce((res, c) => {
-            const [key, val] = c.trim().split("=");
-            try {
-                return Object.assign(res, { [key]: JSON.parse(val) });
-            } catch (e) {
-                return Object.assign(res, { [key]: val });
+        async function fetchData(id: string) {
+            const data = await libBooking.getPemesanan(Number(id));
+            setData(data);
+
+            const dataCookies: CookiesDTO = await libCookies.getCookies();
+
+            if (dataCookies.CERT !== undefined) {
+                setIsLogin(true);
+                setRole(JSON.parse(atob(dataCookies.CERT.split(".")[1])).role);
+                setNama(JSON.parse(atob(dataCookies.CERT.split(".")[1])).nama);
+            } else {
+                setIsLogin(false);
             }
-        }, {});
-
-        const cookies = cookiesGet as Cookies;
-
-        if (cookies.CERT) {
-            setIsLogin(true);
-        } else {
-            router.push("/auth/login");
         }
 
-        if (id) {
-            getBooking(id as string);
+        if (id !== "") {
+            fetchData(id);
         }
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
@@ -177,8 +173,10 @@ export default function Pembayaran() {
     }
 
     const handleInputFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            setBuktiPembayaran(e.target.files[0]);
+        if (e.target.name === "bukti_pembayaran") {
+            setBuktiPembayaran(e.target.files![0]);
+        } else if (e.target.name === "bukti_sik") {
+            setBuktiSik(e.target.files![0]);
         }
     };
 
@@ -194,9 +192,9 @@ export default function Pembayaran() {
 
     return (
         <div className="flex flex-col bg-[#F7F8FA]">
-            <Navbar isLogin={isLogin} />
+            <Navbar isLogin={isLogin} nama={nama} />
 
-            <div className="p-10">
+            <div className="p-10 md:px-28">
                 <div className="flex flex-col rounded-[13px] mb-5">
                     <h1 className="text-[14px] font-regular text-[#7F8FA4]">
                         Step 2 of 2
@@ -205,15 +203,15 @@ export default function Pembayaran() {
                         Form Sewa Fasilitas
                     </h1>
                 </div>
-                <div className=" bg-[#FFFFFF] flex-row justify-center items-center gap-3 p-10 rounded-[15px] shadow-lg lg:bg-[#FFFFFF] lg:flex-col lg:w-full">
+                <div className=" bg-[#FFFFFF] flex flex-col justify-center items-center gap-3 p-10 rounded-[15px] shadow-lg lg:bg-[#FFFFFF] lg:flex-row lg:w-full lg:justify-evenly">
                     <div className="text-center">
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                        <h2 className="text-[16px] lg:text-[25px] font-semibold ">
                             Selesaikan Pembayaran Dalam
                         </h2>
-                        <h2 className="text-[25px] lg:text-[12px] font-semibold text-[#FFA101]">
+                        <h2 className="text-[25px] lg:text-[25px] font-semibold text-[#FFA101]">
                             {remainingTime}
                         </h2>
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold mt-5">
+                        <h2 className="text-[16px] lg:text-[25px] font-semibold mt-5">
                             Batas akhir pembayaran <br />
                             {`${new Date(createdAt).getDate() + 1} ${new Date(
                                 createdAt
@@ -225,64 +223,69 @@ export default function Pembayaran() {
                                 createdAt
                             ).getMinutes()}`}
                         </h2>
-                    </div>
-
-                    <div className="gap-2 flex flex-col">
                         <div className="mt-5">
-                            <h2 className="text-[20px] lg:text-[12px] font-semibold text-center">
+                            <h2 className="text-[20px] lg:text-[25px] font-semibold text-center">
                                 Kode BNI VA
                             </h2>
-                            <h2 className="text-[25px] lg:text-[12px] font-semibold text-[#FFA101] text-center">
+                            <h2 className="text-[25px] lg:text-[30px] font-semibold text-[#FFA101] text-center">
                                 1693547942887
                             </h2>
                         </div>
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold mt-5">
-                            Informasi Pemesanan
-                        </h2>
+                    </div>
+
+                    <div className="gap-2 flex flex-col">
                         <div className="">
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#7F8FA4]">
+                            <h2 className="text-[16px] lg:text-[22px] font-semibold text-[#7F8FA4]">
                                 Nama
                             </h2>
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                            <h2 className="text-[16px] lg:text-[18px] font-semibold ">
                                 {namaPemesan}
                             </h2>
                         </div>
                         <div className="">
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#7F8FA4]">
+                            <h2 className="text-[16px] lg:text-[22px] font-semibold text-[#7F8FA4] ">
+                                Tanggal Penyewaan
+                            </h2>
+                            <h2 className="text-[16px] lg:text-[18px] font-semibold ">
+                                {tanggalPemesanan}
+                            </h2>
+                        </div>
+                        <div className="">
+                            <h2 className="text-[16px] lg:text-[22px] font-semibold text-[#7F8FA4]">
                                 Fasilitas
                             </h2>
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                            <h2 className="text-[16px] lg:text-[18px] font-semibold ">
                                 {namaFasilitas}
                             </h2>
                         </div>
                         <div className="">
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#7F8FA4]">
+                            <h2 className="text-[16px] lg:text-[22px] font-semibold text-[#7F8FA4]">
                                 Checkin - Checkout
                             </h2>
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                            <h2 className="text-[16px] lg:text-[18px] font-semibold ">
                                 {`${jam_checkin} - ${jam_checkout}`}
                             </h2>
                         </div>
-                        <div className="">
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#7F8FA4] ">
-                                Tanggal Penyewaan
-                            </h2>
-                            <h2 className="text-[16px] lg:text-[12px] font-semibold ">
-                                {tanggalPemesanan}
-                            </h2>
-                        </div>
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#7F8FA4]">
+                        <h2
+                            className={`${
+                                role !== "umum" ? `hidden` : `flex`
+                            } text-[16px] lg:text-[22px] font-semibold text-[#7F8FA4]`}
+                        >
                             Harga
                         </h2>
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                        <h2
+                            className={`${
+                                role !== "umum" ? `hidden` : `flex`
+                            } text-[16px] lg:text-[18px] font-semibold`}
+                        >
                             {`Rp${harga
                                 .toString()
                                 .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`}
                         </h2>
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#7F8FA4]">
+                        <h2 className="text-[16px] lg:text-[22px] font-semibold text-[#7F8FA4]">
                             Status
                         </h2>
-                        <h2 className="text-[16px] lg:text-[12px] font-semibold text-red-500">
+                        <h2 className="text-[16px] lg:text-[18px] font-semibold text-red-500">
                             {status}
                         </h2>
                     </div>
@@ -290,10 +293,26 @@ export default function Pembayaran() {
                 {/* End Of Card */}
 
                 <div className="flex-col flex gap-5 mt-5 p-5 border rounded-xl shadow-lg bg-[#FFFFFF] xl:p-10 xl:items-center">
-                    <h1 className="font-semibold">Upload Bukti Pembayaran</h1>
-                    <form className="flex items-center">
+                    <h1 className="font-semibold">
+                        {role !== "umum"
+                            ? "Upload Surat Izin Kegiatan"
+                            : "Upload Bukti Pembayaran"}
+                    </h1>
+                    <form
+                        className={`${
+                            role !== "umum" ? `hidden` : `flex`
+                        } flex items-center`}
+                    >
                         <input
                             name="bukti_pembayaran"
+                            type="file"
+                            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                            onChange={handleInputFoto}
+                        />
+                    </form>
+                    <form className={` flex items-center`}>
+                        <input
+                            name="bukti_sik"
                             type="file"
                             className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                             onChange={handleInputFoto}
