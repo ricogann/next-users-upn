@@ -29,6 +29,7 @@ export default interface PemesananDTO {
     Fasilitas: Fasilitas;
     Harga: Harga;
     id_pemesanan: number;
+    id_fasilitas: number;
     jam_checkin: string;
     jam_checkout: string;
     total_harga: number;

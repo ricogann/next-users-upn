@@ -1,45 +1,27 @@
-import { Navbar } from "@/components/navbar";
-import { BsFillPersonFill, BsFillCalendarFill } from "react-icons/bs";
-import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 
+import { Navbar } from "@/components/navbar";
+
+import { BsFillPersonFill, BsFillCalendarFill } from "react-icons/bs";
 import { FaDollarSign } from "react-icons/fa";
 import { BiSolidPhoneCall, BiSolidPencil, BiCalendar } from "react-icons/bi";
 import { HiLocationMarker } from "react-icons/hi";
 import { AiFillClockCircle } from "react-icons/ai";
-import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
-import Image from "next/image";
+import { MdPayment } from "react-icons/md";
 import { useRouter } from "next/router";
 
 import _serviceBooking from "@/services/booking.service";
+import _serviceFasilitas from "@/services/fasilitas.service";
 
 import _libCookies from "@/lib/cookies";
+import _libBooking from "@/lib/booking";
 
 import BookingDTO from "@/interfaces/bookingDTO";
 import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
-import _serviceFasilitas from "@/services/fasilitas.service";
 import AccountDTO from "@/interfaces/accountDTO";
-import _libBooking from "@/lib/booking";
-
-interface Fasilitas {
-    id_fasilitas: number;
-    nama: string;
-    deskripsi: string;
-    alamat: string;
-    foto: string;
-    jam_buka: string;
-    jam_tutup: string;
-    durasi: number;
-}
-
-interface Account {
-    id_account: number;
-    nama: string;
-    no_telp: string;
-    npm: string;
-    role: string;
-    status: boolean;
-}
+import FasilitasDTO from "@/interfaces/fasilitasDTO";
 
 export default function Booking() {
     const router = useRouter();
@@ -49,7 +31,7 @@ export default function Booking() {
 
     const [isLogin, setIsLogin] = useState(true);
     const [dataHarga, setDataHarga] = useState<any>([]);
-    const [dataFasilitas, setDataFasilitas] = useState<Fasilitas>();
+    const [dataFasilitas, setDataFasilitas] = useState<FasilitasDTO>();
     const [isAvailable, setIsAvailable] = useState(true);
     const [pemesanan, setPemesanan] = useState<PemesananDTO[]>([]);
     const [date, setDate] = useState("");
@@ -73,11 +55,37 @@ export default function Booking() {
     const [tanggal, setTanggal] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
-    const [jam_checkin, setJamCheckin] = useState<string>("09:00");
-    const [jam_checkout, setJamCheckout] = useState<string>("22:00");
+    const [jam_checkin, setJamCheckin] = useState<string>("00:00");
+    const [jam_checkout, setJamCheckout] = useState<string>("00:00");
     const [harga, setHarga] = useState<number>(0);
     const [noTelpAccount, setNoTelpAccount] = useState<string>("");
     const [keterangan, setKeterangan] = useState<string>("");
+
+    const [statusBook, setStatusBook] = useState<boolean>(true);
+    const [bookMessage, setBookMessage] = useState<string>("");
+
+    const jamToNumber = (jam: string) => {
+        const convertJam = jam.split(":").join("");
+        return parseInt(convertJam);
+    };
+
+    useEffect(() => {
+        const tanggalFiltered = pemesanan.filter(
+            (item) =>
+                item.tanggal_pemesanan.split("T")[0] === tanggal &&
+                jam_checkin >= item.jam_checkin &&
+                jam_checkin <= item.jam_checkout
+        );
+
+        if (tanggalFiltered.length > 0 || jam_checkout <= jam_checkin) {
+            setStatusBook(false);
+            setBookMessage("Pemilihan jam tidak tersedia");
+        } else {
+            setStatusBook(true);
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [jam_checkin, jam_checkout]);
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.name === "nama") {
@@ -86,8 +94,17 @@ export default function Booking() {
             setTanggal(e.target.value);
         } else if (e.target.name === "jam_checkin") {
             setJamCheckin(e.target.value);
+            setJamCheckout(Number(e.target.value.split(":")[0]) + 1 + ":00");
         } else if (e.target.name === "jam_checkout") {
             setJamCheckout(e.target.value);
+            if (jamToNumber(e.target.value) <= jamToNumber(jam_checkin)) {
+                setStatusBook(false);
+                setBookMessage(
+                    "Jam Checkout harus setidaknya 1 jam setelah jam checkin"
+                );
+            } else {
+                setStatusBook(true);
+            }
         } else if (e.target.name === "harga") {
             setHarga(parseInt(e.target.value));
         } else if (e.target.name === "no_telp") {
@@ -112,15 +129,14 @@ export default function Booking() {
 
             if (cookies.CERT === undefined) {
                 setIsLogin(false);
-                router.push("/auth/login");
+                router.push("/");
             } else {
                 setIsLogin(true);
             }
 
             const dataHarga = await fasilitas.getHarga(Number(id));
-            const dataFasilitas: Fasilitas = await fasilitas.getFasilitasById(
-                Number(id)
-            );
+            const dataFasilitas: FasilitasDTO =
+                await fasilitas.getFasilitasById(Number(id));
 
             const dataBooking = await libBooking.getPemesanan(Number(id));
             setPemesanan(dataBooking);
@@ -173,11 +189,6 @@ export default function Booking() {
             keterangan: keterangan,
             status: "Menunggu Pembayaran",
         };
-
-        if (data.durasi % 60 !== 0) {
-            alert("Durasi harus kelipatan 60 menit");
-            return;
-        }
 
         const createPemesanan = await libBooking.addPemesanan(data);
         if (createPemesanan.status === true) {
@@ -516,9 +527,22 @@ export default function Booking() {
                                         </h2>
                                     </div>
                                 </div> */}
+                                <h1
+                                    className={`${
+                                        statusBook === true ? "hidden" : "block"
+                                    } text-red-500`}
+                                >
+                                    {bookMessage}
+                                </h1>
+
                                 <button
-                                    className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-4 rounded-lg mt-7"
+                                    className={`${
+                                        statusBook === true
+                                            ? "block"
+                                            : " bg-gray-600"
+                                    } bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-4 rounded-lg mt-7`}
                                     onClick={handleBooking}
+                                    disabled={statusBook === false}
                                 >
                                     Continue
                                 </button>

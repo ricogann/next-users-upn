@@ -69,7 +69,7 @@ export default function DetailFasilitas() {
             setData(data);
             setHarga(harga);
 
-            const dataBooking = await booking.getPemesanan(Number(id));
+            const dataBooking = await booking.getPemesanan();
             setPemesanan(dataBooking);
 
             const cookies: CookiesDTO = await libCookies.getCookies();
@@ -99,7 +99,10 @@ export default function DetailFasilitas() {
         let dataBooked: PemesananDTO[] = [];
 
         pemesanan.map((item) => {
-            if (item.tanggal_pemesanan.split("T")[0] === date) {
+            if (
+                item.tanggal_pemesanan.split("T")[0] === date &&
+                item.id_fasilitas === Number(id)
+            ) {
                 dataBooked.push(item);
             }
         });

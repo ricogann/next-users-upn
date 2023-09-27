@@ -1,54 +1,13 @@
-import { Navbar } from "@/components/navbar";
 import { useState, useEffect, useCallback } from "react";
-import { AiOutlineCloudUpload } from "react-icons/ai";
 import { useRouter } from "next/router";
-import useSwr from "swr";
+
+import { Navbar } from "@/components/navbar";
+
 import _libCookies from "@/lib/cookies";
 import _libBooking from "@/lib/booking";
+
 import CookiesDTO from "@/interfaces/cookiesDTO";
-
-interface Cookies {
-    CERT: string;
-}
-
-interface Mahasiswa {
-    nama: string;
-}
-
-interface Dosen {
-    nama: string;
-}
-
-interface Umum {
-    nama: string;
-}
-
-interface Fasilitas {
-    nama: string;
-}
-
-interface Harga {
-    harga: number;
-}
-
-interface Account {
-    Dosen: Dosen[];
-    Mahasiswa: Mahasiswa[];
-    Umum: Umum[];
-}
-
-interface Pemesanan {
-    Account: Account;
-    Fasilitas: Fasilitas;
-    Harga: Harga;
-    id_pemesanan: number;
-    jam_checkin: string;
-    jam_checkout: string;
-    total_harga: number;
-    tanggal_pemesanan: string;
-    status: string;
-    createdAt: string;
-}
+import PemesananDTO from "@/interfaces/pemesananDTO";
 
 export default function Pembayaran() {
     const libCookies = new _libCookies();
@@ -76,7 +35,7 @@ export default function Pembayaran() {
     const [buktiPembayaran, setBuktiPembayaran] = useState<File | null>(null);
     const [buktiSik, setBuktiSik] = useState<File | null>(null);
 
-    const setData = (data: Pemesanan) => {
+    const setData = (data: PemesananDTO) => {
         console.log(data);
         // if (data.Account.Dosen.length === 0)
         if (data.Account.Mahasiswa.length > 0) {
@@ -101,7 +60,7 @@ export default function Pembayaran() {
 
     useEffect(() => {
         async function fetchData(id: string) {
-            const data = await libBooking.getPemesanan(Number(id));
+            const data = await libBooking.getDetailPemesanan(Number(id));
             setData(data);
 
             const dataCookies: CookiesDTO = await libCookies.getCookies();
@@ -181,12 +140,17 @@ export default function Pembayaran() {
     };
 
     const handleUpload = async () => {
-        if (!buktiPembayaran) {
-            alert("Harap upload bukti pembayaran terlebih dahulu");
-        } else {
+        if (!buktiSik) {
             const data = new FormData();
-            data.append("bukti_pembayaran", buktiPembayaran);
+            data.append("bukti_pembayaran", buktiPembayaran as File);
             uploadBuktiPembayaran(id as string, data);
+        } else if (!buktiPembayaran) {
+            const data = new FormData();
+            data.append("SIK", buktiSik as File);
+            const res = await libBooking.uploadSIK(data, Number(id));
+            if (res.status === true) {
+                router.push("/account/profile");
+            }
         }
     };
 
@@ -286,7 +250,7 @@ export default function Pembayaran() {
                             Status
                         </h2>
                         <h2 className="text-[16px] lg:text-[18px] font-semibold text-red-500">
-                            {status}
+                            {role !== "umum" ? "Belum upload SIK" : status}
                         </h2>
                     </div>
                 </div>
