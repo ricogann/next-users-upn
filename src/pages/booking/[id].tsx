@@ -16,19 +16,20 @@ import _serviceFasilitas from "@/services/fasilitas.service";
 
 import _libCookies from "@/lib/cookies";
 import _libBooking from "@/lib/booking";
+import _libUsers from "@/lib/users";
 
 import BookingDTO from "@/interfaces/bookingDTO";
 import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
 import AccountDTO from "@/interfaces/accountDTO";
 import FasilitasDTO from "@/interfaces/fasilitasDTO";
-import { error } from "console";
 
 export default function Booking() {
     const router = useRouter();
     const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
     const libCookies = new _libCookies();
     const libBooking = new _libBooking();
+    const libUsers = new _libUsers();
 
     const [isLogin, setIsLogin] = useState(true);
     const [dataHarga, setDataHarga] = useState<any>([]);
@@ -200,23 +201,25 @@ export default function Booking() {
         };
 
         if (isAsrama) {
-            const addMahasiswaToKamar = await libBooking.addMahasiswaToKamar(
-                idHarga,
-                idAccount
-            );
+            if (await libUsers.checkExpiredMahasiswa(idAccount)) {
+                const addMahasiswaToKamar =
+                    await libBooking.addMahasiswaToKamar(idHarga, idAccount);
 
-            if (addMahasiswaToKamar !== undefined) {
-                const createPemesanan = await libBooking.addPemesanan(data);
-                if (createPemesanan.status === true) {
-                    alert("Berhasil Booking");
-                    router.push(
-                        `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
-                    );
+                if (addMahasiswaToKamar !== undefined) {
+                    const createPemesanan = await libBooking.addPemesanan(data);
+                    if (createPemesanan.status === true) {
+                        alert("Berhasil Booking");
+                        router.push(
+                            `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
+                        );
+                    } else {
+                        alert("Gagal Booking");
+                    }
                 } else {
-                    alert("Gagal Booking");
+                    alert("Kamu sudah terdaftar di Asrama");
                 }
             } else {
-                alert("Kamu sudah terdaftar di Asrama");
+                alert("Tidak bisa daftar, semester anda lebih dari semester 3");
             }
         } else {
             const createPemesanan = await libBooking.addPemesanan(data);
@@ -254,8 +257,6 @@ export default function Booking() {
 
         setDataBooked(dataBooked);
     };
-
-    console.log(dataFasilitas);
 
     return (
         <div className="">

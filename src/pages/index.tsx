@@ -13,16 +13,22 @@ import _serviceFasilitas from "@/services/fasilitas.service";
 // Lib
 import _libFasilitas from "@/lib/fasilitas";
 import _libCookies from "@/lib/cookies";
+import _libUsers from "@/lib/users";
 
 // Interfaces
 import FasilitasDTO from "@/interfaces/fasilitasDTO";
 import CookiesDTO from "@/interfaces/cookiesDTO";
+import AccountDTO from "@/interfaces/accountDTO";
+import _libBooking from "@/lib/booking";
+import _libKamar from "@/lib/kamar";
 
 export default function Home() {
     const router = useRouter();
     const cookies = new _libCookies();
     const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
     const libFasilitas = new _libFasilitas();
+    const libUsers = new _libUsers();
+    const libKamar = new _libKamar();
 
     const [isLogin, setIsLogin] = useState(false);
     const [namaAccount, setNama] = useState<string>("");
@@ -55,6 +61,23 @@ export default function Home() {
                 setDataFasilitas(splitData);
 
                 const dataCookies: CookiesDTO = await cookies.getCookies();
+
+                const user = await libUsers.getAccountById(
+                    Number((await cookies.parseJwt(dataCookies)).id_account)
+                );
+
+                if (user.Mahasiswa.length > 0) {
+                    const checkExpiredMahasiswa =
+                        await libUsers.checkExpiredMahasiswa(
+                            user.Mahasiswa[0].id_account
+                        );
+
+                    if (checkExpiredMahasiswa === false) {
+                        await libKamar.deleteExpiredMahasiswa(
+                            user.Mahasiswa[0].id_account
+                        );
+                    }
+                }
 
                 if (dataCookies.CERT !== undefined) {
                     setIsLogin(true);
