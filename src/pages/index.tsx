@@ -86,7 +86,7 @@ export default function Home() {
     };
 
     return (
-        <div className="bg-[#D2D7DF] h-screen md:h-full font-montserrat relative">
+        <div className="bg-[#D2D7DF] h-screen md:h-full font-montserrat relative overflow-hidden">
             <Navbar
                 isLogin={isLogin}
                 nama={namaAccount}

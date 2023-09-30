@@ -250,7 +250,11 @@ export default function Pembayaran() {
                             Status
                         </h2>
                         <h2 className="text-[16px] lg:text-[18px] font-semibold text-red-500">
-                            {role !== "umum" ? "Belum upload SIK" : status}
+                            {role !== "umum"
+                                ? namaFasilitas === "Asrama"
+                                    ? "Belum Melakukan Pembayaran"
+                                    : "Belum Upload SIK"
+                                : "Belum Upload SIK"}
                         </h2>
                     </div>
                 </div>
@@ -259,12 +263,18 @@ export default function Pembayaran() {
                 <div className="flex-col flex gap-5 mt-5 p-5 border rounded-xl shadow-lg bg-[#FFFFFF] xl:p-10 xl:items-center">
                     <h1 className="font-semibold">
                         {role !== "umum"
-                            ? "Upload Surat Izin Kegiatan"
-                            : "Upload Bukti Pembayaran"}
+                            ? namaFasilitas === "Asrama"
+                                ? "Upload Bukti Pembayaran"
+                                : "Upload SIK"
+                            : "Upload SIK"}
                     </h1>
                     <form
                         className={`${
-                            role !== "umum" ? `hidden` : `flex`
+                            role !== "umum"
+                                ? namaFasilitas === "Asrama"
+                                    ? "flex"
+                                    : "hidden"
+                                : `flex`
                         } flex items-center`}
                     >
                         <input
@@ -274,7 +284,15 @@ export default function Pembayaran() {
                             onChange={handleInputFoto}
                         />
                     </form>
-                    <form className={` flex items-center`}>
+                    <form
+                        className={`${
+                            role !== "umum"
+                                ? namaFasilitas === "Asrama"
+                                    ? "hidden"
+                                    : "flex"
+                                : `hidden`
+                        } flex items-center`}
+                    >
                         <input
                             name="bukti_sik"
                             type="file"

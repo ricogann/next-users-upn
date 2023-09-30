@@ -15,6 +15,19 @@ class _libBooking {
         }
     }
 
+    async getPemesananByIdUser(idAccount: number) {
+        try {
+            const data = await this.serviceBooking.getPemesananByIdUser(
+                idAccount
+            );
+
+            return data;
+        } catch (error) {
+            console.error("getPemesananByIdUser error", error);
+            throw error;
+        }
+    }
+
     async getDetailPemesanan(id: number) {
         try {
             const data = await this.serviceBooking.getDetailPemesanan(id);
@@ -48,6 +61,38 @@ class _libBooking {
             }
         } catch (error) {
             console.error("uploadSIK error", error);
+            throw error;
+        }
+    }
+
+    async uploadBuktiPembayaran(data: FormData, id: number) {
+        try {
+            const response = await this.serviceBooking.uploadBuktiPembayaran(
+                data,
+                id
+            );
+
+            if (response.status === true) {
+                return response;
+            }
+        } catch (error) {
+            console.error("uploadBuktiPembayaran error", error);
+            throw error;
+        }
+    }
+
+    async addMahasiswaToKamar(id: number, idAccount: number) {
+        try {
+            const response = await this.serviceBooking.addMahasiswaTokamar(
+                id,
+                idAccount
+            );
+
+            if (response.status === true) {
+                return response;
+            }
+        } catch (error) {
+            console.error("addMahasiswaToKamar error", error);
             throw error;
         }
     }

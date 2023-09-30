@@ -22,6 +22,7 @@ import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
 import AccountDTO from "@/interfaces/accountDTO";
 import FasilitasDTO from "@/interfaces/fasilitasDTO";
+import { error } from "console";
 
 export default function Booking() {
     const router = useRouter();
@@ -63,6 +64,7 @@ export default function Booking() {
 
     const [statusBook, setStatusBook] = useState<boolean>(true);
     const [bookMessage, setBookMessage] = useState<string>("");
+    const [isAsrama, setIsAsrama] = useState<boolean>(false);
 
     const jamToNumber = (jam: string) => {
         const convertJam = jam.split(":").join("");
@@ -138,6 +140,10 @@ export default function Booking() {
             const dataFasilitas: FasilitasDTO =
                 await fasilitas.getFasilitasById(Number(id));
 
+            if (dataFasilitas.nama === "Asrama") {
+                setIsAsrama(true);
+            }
+
             const dataBooking = await libBooking.getPemesanan(Number(id));
             setPemesanan(dataBooking);
 
@@ -153,6 +159,7 @@ export default function Booking() {
             if (role === "umum") {
                 setHarga(dataHarga[0].harga);
             }
+            setHarga(dataHarga[0].harga);
 
             setDataFasilitas(dataFasilitas);
         }
@@ -184,18 +191,41 @@ export default function Booking() {
             tanggal_pemesanan: tanggal,
             jam_checkin: jam_checkin,
             jam_checkout: jam_checkout,
-            total_harga: harga * (setDurasiBooking() / 60),
+            total_harga: isAsrama
+                ? harga * 2 + 250000
+                : harga * (setDurasiBooking() / 60),
             durasi: setDurasiBooking(),
             keterangan: keterangan,
             status: "Menunggu Pembayaran",
         };
 
-        const createPemesanan = await libBooking.addPemesanan(data);
-        if (createPemesanan.status === true) {
-            alert("Berhasil Booking");
-            router.push(
-                `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
+        if (isAsrama) {
+            const addMahasiswaToKamar = await libBooking.addMahasiswaToKamar(
+                idHarga,
+                idAccount
             );
+
+            if (addMahasiswaToKamar !== undefined) {
+                const createPemesanan = await libBooking.addPemesanan(data);
+                if (createPemesanan.status === true) {
+                    alert("Berhasil Booking");
+                    router.push(
+                        `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
+                    );
+                } else {
+                    alert("Gagal Booking");
+                }
+            } else {
+                alert("Kamu sudah terdaftar di Asrama");
+            }
+        } else {
+            const createPemesanan = await libBooking.addPemesanan(data);
+            if (createPemesanan.status === true) {
+                alert("Berhasil Booking");
+                router.push(
+                    `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
+                );
+            }
         }
     };
 
@@ -208,7 +238,10 @@ export default function Booking() {
         let dataBooked: PemesananDTO[] = [];
 
         pemesanan.map((item) => {
-            if (item.tanggal_pemesanan.split("T")[0] === date) {
+            if (
+                item.tanggal_pemesanan.split("T")[0] === date &&
+                item.id_fasilitas === Number(id)
+            ) {
                 dataBooked.push(item);
             }
         });
@@ -221,6 +254,8 @@ export default function Booking() {
 
         setDataBooked(dataBooked);
     };
+
+    console.log(dataFasilitas);
 
     return (
         <div className="">
@@ -380,97 +415,152 @@ export default function Booking() {
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
+                                <h2
+                                    className={`${
+                                        isAsrama ? "hidden" : "block"
+                                    } text-[12px] lg:text-[18px] text-black font-semibold`}
+                                >
                                     Tanggal
                                 </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
+                                <div
+                                    className={`${
+                                        isAsrama ? "hidden" : "block"
+                                    } bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA] lg:flex-row`}
+                                >
                                     <BsFillCalendarFill className="text-black md:text-xl" />
                                     <input
                                         name={`tanggal`}
                                         type="date"
+                                        min={
+                                            new Date()
+                                                .toISOString()
+                                                .split("T")[0]
+                                        }
                                         className="text-[10px] lg:text-[14px] ml-4 rounded bg-[#fff] xl:bg-[#F7F8FA] text-black"
                                         value={tanggal}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
-                                    Jam Checkin
-                                </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <AiFillClockCircle className="text-black text-xl" />
-                                    <input
-                                        name="jam_checkin"
-                                        type="time"
-                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
-                                        value={jam_checkin}
-                                        onChange={handleInput}
-                                    />
-                                </div>
-                                <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
-                                    Jam Checkout
-                                </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <AiFillClockCircle className="text-black text-xl" />
-                                    <input
-                                        name="jam_checkout"
-                                        type="time"
-                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
-                                        value={jam_checkout}
-                                        onChange={handleInput}
-                                    />
-                                </div>
-                                <h2
-                                    className={`${
-                                        role !== "umum" ? "hidden" : "block"
-                                    } text-[12px] lg:text-[18px] text-black font-semibold`}
-                                >
-                                    Tipe Harga
-                                </h2>
                                 <div
                                     className={`${
-                                        role !== "umum" ? "hidden" : "block"
-                                    } bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA] lg:flex-row `}
+                                        isAsrama ? "hidden" : "block"
+                                    }`}
                                 >
-                                    <AiFillClockCircle className="text-black text-xl" />
-                                    <select
-                                        name={`harga`}
-                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
-                                        onChange={handleHarga}
+                                    <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
+                                        Jam Checkin
+                                    </h2>
+                                    <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                        <AiFillClockCircle className="text-black text-xl" />
+                                        <input
+                                            name="jam_checkin"
+                                            type="time"
+                                            className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
+                                            value={jam_checkin}
+                                            onChange={handleInput}
+                                        />
+                                    </div>
+                                </div>
+                                <div
+                                    className={`${
+                                        isAsrama ? "hidden" : "block"
+                                    }`}
+                                >
+                                    <h2 className="text-[12px] lg:text-[18px] text-black font-semibold ">
+                                        Jam Checkout
+                                    </h2>
+                                    <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
+                                        <AiFillClockCircle className="text-black text-xl" />
+                                        <input
+                                            name="jam_checkout"
+                                            type="time"
+                                            className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
+                                            value={jam_checkout}
+                                            onChange={handleInput}
+                                        />
+                                    </div>
+                                </div>
+                                <div
+                                    className={`${
+                                        isAsrama && role !== "umum"
+                                            ? "block"
+                                            : "hidden"
+                                    }`}
+                                >
+                                    <h2
+                                        className={`text-[12px] lg:text-[18px] text-black font-semibold`}
                                     >
-                                        {dataHarga &&
-                                            dataHarga.map(
-                                                (harga: any, index: number) => {
-                                                    return (
-                                                        <option
-                                                            value={[
-                                                                harga.id,
-                                                                harga.harga,
-                                                            ]}
-                                                            key={index}
-                                                        >
-                                                            {harga.nama}
-                                                        </option>
-                                                    );
-                                                }
-                                            )}
-                                    </select>
+                                        {isAsrama ? "Lantai" : "Tipe Harga"}
+                                    </h2>
+                                    <div
+                                        className={`bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA] lg:flex-row `}
+                                    >
+                                        <AiFillClockCircle className="text-black text-xl" />
+                                        <select
+                                            name={`harga`}
+                                            className=" text-[10px] lg:text-[14px] ml-4 rounded text-black font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
+                                            onChange={handleHarga}
+                                        >
+                                            {dataHarga &&
+                                                dataHarga.map(
+                                                    (
+                                                        harga: any,
+                                                        index: number
+                                                    ) => {
+                                                        return (
+                                                            <option
+                                                                value={[
+                                                                    harga.id,
+                                                                    harga.harga,
+                                                                ]}
+                                                                key={index}
+                                                            >
+                                                                {harga.nama}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
+                                        </select>
+                                    </div>
                                 </div>
                                 <h2
                                     className={`${
-                                        role !== "umum" ? "hidden" : "block"
+                                        role !== "umum"
+                                            ? isAsrama
+                                                ? "block"
+                                                : "hidden"
+                                            : "hidden"
                                     } text-[12px] lg:text-[18px] text-black font-semibold `}
                                 >
                                     Biaya
                                 </h2>
                                 <div
                                     className={`${
-                                        role !== "umum" ? "hidden" : "block"
+                                        role !== "umum"
+                                            ? isAsrama
+                                                ? "block"
+                                                : "hidden"
+                                            : "hidden"
                                     } bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row`}
                                 >
                                     <FaDollarSign className="text-black text-xl" />
                                     <input
                                         type="text"
-                                        className=" text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]"
+                                        className={`${
+                                            isAsrama ? "block" : "hidden"
+                                        } text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]`}
+                                        readOnly
+                                        value={`Rp${(harga * 2 + 250000)
+                                            .toString()
+                                            .replace(
+                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                "."
+                                            )}`}
+                                    />
+                                    <input
+                                        type="text"
+                                        className={`${
+                                            isAsrama ? "hidden" : "block"
+                                        } text-[10px] lg:text-[14px] ml-4 rounded text-black bg-[#fff] xl:bg-[#f7f8fa]`}
                                         readOnly
                                         value={`Rp${(
                                             harga *
@@ -530,6 +620,8 @@ export default function Booking() {
                                 <h1
                                     className={`${
                                         statusBook === true ? "hidden" : "block"
+                                    } ${
+                                        isAsrama ? "hidden" : "block"
                                     } text-red-500`}
                                 >
                                     {bookMessage}
@@ -539,10 +631,18 @@ export default function Booking() {
                                     className={`${
                                         statusBook === true
                                             ? "block"
-                                            : " bg-gray-600"
-                                    } bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-4 rounded-lg mt-7`}
+                                            : isAsrama
+                                            ? "block"
+                                            : "bg-gray-600"
+                                    }  bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-4 rounded-lg mt-7`}
                                     onClick={handleBooking}
-                                    disabled={statusBook === false}
+                                    disabled={
+                                        statusBook === false
+                                            ? isAsrama
+                                                ? false
+                                                : true
+                                            : false
+                                    }
                                 >
                                     Continue
                                 </button>
