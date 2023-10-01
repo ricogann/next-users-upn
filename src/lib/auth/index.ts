@@ -17,18 +17,7 @@ class _libAuth {
                 password,
             });
 
-            if (
-                token === undefined ||
-                (await this.cookies.parseJwt({ CERT: token })).status === false
-            ) {
-                alert("Akun anda belum di verifikasi");
-            } else {
-                const result = await this.cookies.setCookie("CERT", token, 1);
-
-                if (result) {
-                    this.router.reload();
-                }
-            }
+            return token;
         } catch (error) {
             console.error("loginMahasiswa error", error);
             throw error;
@@ -39,19 +28,11 @@ class _libAuth {
         try {
             const token = await this.serviceAuth.login(role, email, password);
 
-            if (
-                token === undefined ||
-                (await this.cookies.parseJwt({ CERT: token })).status === false
-            ) {
-                alert("Akun anda belum di verifikasi");
-            } else {
-                const result = await this.cookies.setCookie("CERT", token, 1);
-
-                if (result) {
-                    this.router.reload();
-                }
-            }
-        } catch (error) {}
+            return token;
+        } catch (error) {
+            console.error("login error", error);
+            throw error;
+        }
     }
 
     async sendRegisterMahasiswa(data: FormData) {

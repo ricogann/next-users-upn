@@ -6,6 +6,7 @@ import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { useRouter } from "next/router";
 import { Login } from "@/components/login-form";
 import { Regis } from "@/components/registration-form";
+import Loading from "@/components/loading";
 
 // Services
 import _serviceFasilitas from "@/services/fasilitas.service";
@@ -38,6 +39,7 @@ export default function Home() {
 
     const [openModal, setOpenModal] = useState(false);
     const [openRegisModal, setOpenRegisModal] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleModal = () => {
         setOpenModal(!openModal);
@@ -102,14 +104,21 @@ export default function Home() {
             setOpenModal(true);
             return;
         } else if (dataInfo === undefined) {
+            setLoading(true);
             router.push(`/booking/${dataFasilitas[0][0].id_fasilitas}`);
         } else {
+            setLoading(true);
             router.push(`/booking/${dataInfo?.id_fasilitas}`);
         }
     };
 
     return (
         <div className="bg-[#D2D7DF] h-screen md:h-full font-montserrat relative overflow-hidden">
+            {loading && (
+                <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
+                    <Loading />
+                </div>
+            )}
             <Navbar
                 isLogin={isLogin}
                 nama={namaAccount}
@@ -130,7 +139,7 @@ export default function Home() {
                     openRegisModal ? "flex" : "hidden"
                 } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
             >
-                <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
+                <div className="bg-white rounded-lg shadow-xl border-black border-2">
                     <Regis
                         setRegisModal={handleRegisModal}
                         changeModal={changeModal}

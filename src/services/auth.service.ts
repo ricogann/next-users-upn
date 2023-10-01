@@ -16,11 +16,13 @@ class _serviceAuth {
 
             const resData = await res.json();
             if (resData.status === false && resData.error) {
-                throw new Error(resData.error);
+                return resData;
+            } else {
+                return resData.data.token;
             }
-            return resData.data.token;
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -41,9 +43,10 @@ class _serviceAuth {
 
             const resData = await res.json();
             if (resData.status === false && resData.error) {
-                throw new Error(resData.error);
+                return resData;
+            } else {
+                return resData.data.token;
             }
-            return resData.data.token;
         } catch (error) {
             console.log(error);
         }

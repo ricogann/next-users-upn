@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent } from "react";
 
 import { AiOutlineClose } from "react-icons/ai";
 import { AuthButton } from "./auth-button";
+import Loading from "./loading";
 
 import _libCampus from "@/lib/campus";
 import _libAuth from "@/lib/auth";
@@ -32,9 +33,8 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
     const libCampus = new _libCampus();
     const libAuth = new _libAuth();
 
-    const [hasError, setHasError] = useState(false);
-    const [passwordError, setPasswordError] = useState(false);
-    const [allError, setAllError] = useState(false);
+    const [error, setError] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [fakultas, setFakultas] = useState<Fakultas[]>([]);
     const [prodi, setProdi] = useState<Prodi[]>([]);
@@ -108,13 +108,21 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
     const handleRegis = async () => {
         if (role === "mahasiswa") {
-            if (npmRegis === "") {
-                setHasError(true);
-                setAllError(true);
-            } else if (passwordRegis === "") {
-                setPasswordError(true);
-                setAllError(true);
+            if (
+                npmRegis === "" ||
+                namaRegis === "" ||
+                emailRegis === "" ||
+                passwordRegis === "" ||
+                noTelpRegis === "" ||
+                fakultasRegis === "" ||
+                jurusanRegis === "" ||
+                tahunRegis === "" ||
+                noTelpRegis === "" ||
+                buktiRegis === null
+            ) {
+                setError(true);
             } else {
+                setIsLoading(true);
                 const data = new FormData();
                 data.append("nama", namaRegis);
                 data.append("npm", npmRegis);
@@ -131,19 +139,23 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
                 if (send) {
                     changeModal();
+                    setIsLoading(false);
                 } else {
                     alert("gagal regis");
                 }
             }
         } else if (role === "dosen") {
-            console.log("halo");
-            if (nipRegis === "") {
-                setHasError(true);
-                setAllError(true);
-            } else if (passwordRegis === "") {
-                setPasswordError(true);
-                setAllError(true);
+            if (
+                nipRegis === "" ||
+                namaRegis === "" ||
+                emailRegis === "" ||
+                passwordRegis === "" ||
+                noTelpRegis === "" ||
+                buktiRegis === null
+            ) {
+                setError(true);
             } else {
+                setIsLoading(true);
                 const data = new FormData();
                 data.append("nama", namaRegis);
                 data.append("NIP", nipRegis);
@@ -157,18 +169,23 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
                 if (send) {
                     changeModal();
+                    setIsLoading(false);
                 } else {
                     alert("gagal regis");
                 }
             }
         } else {
-            if (nikRegis === "") {
-                setHasError(true);
-                setAllError(true);
-            } else if (passwordRegis === "") {
-                setPasswordError(true);
-                setAllError(true);
+            if (
+                nikRegis === "" ||
+                namaRegis === "" ||
+                emailRegis === "" ||
+                passwordRegis === "" ||
+                noTelpRegis === "" ||
+                buktiRegis === null
+            ) {
+                setError(true);
             } else {
+                setIsLoading(true);
                 const data = new FormData();
                 data.append("nama", namaRegis);
                 data.append("NIK", nikRegis);
@@ -182,6 +199,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
                 if (send) {
                     changeModal();
+                    setIsLoading(false);
                 } else {
                     alert("gagal regis");
                 }
@@ -190,182 +208,243 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
     };
 
     return (
-        <div className="p-5 h-[500px] overflow-auto text-black">
-            <div className="flex justify-end" onClick={setRegisModal}>
-                <AiOutlineClose className="text-2xl cursor-pointer" />
-            </div>
-            <h1 className="text-[30px] font-semibold mb-5 md:mb-2 md:text-[40px] lg:text-[35px] mt-3">
-                Registrasi
-            </h1>
-            <div className="mt-5">
-                <h1 className="text-[17px] mb-1">Daftar Sebagai</h1>
-                <div className="flex flex-col gap-3">
-                    <select
-                        className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                        onChange={(e) => setRole(e.target.value)}
-                    >
-                        <option value="mahasiswa">Mahasiswa</option>
-                        <option value="dosen">Dosen</option>
-                        <option value="umum">Umum</option>
-                    </select>
+        <div className="relative">
+            {isLoading && (
+                <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
+                    <Loading />
+                </div>
+            )}
+            <div className="p-9 h-[500px] overflow-auto text-black relative">
+                <div className="flex justify-end" onClick={setRegisModal}>
+                    <AiOutlineClose className="text-2xl cursor-pointer" />
+                </div>
+                <h1 className="text-[30px] font-semibold mb-5 md:mb-2 md:text-[40px] lg:text-[35px] mt-3">
+                    Registrasi
+                </h1>
+                <div className="mt-5">
+                    <h1 className="text-[17px] mb-1">Daftar Sebagai</h1>
+                    <div className="flex flex-col gap-3">
+                        <select
+                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
+                            onChange={(e) => setRole(e.target.value)}
+                        >
+                            <option value="mahasiswa">Mahasiswa</option>
+                            <option value="dosen">Dosen</option>
+                            <option value="umum">Umum</option>
+                        </select>
 
-                    <div className="">
-                        <h1 className="text-[17px] mb-1">
-                            {role === "mahasiswa"
-                                ? "npm"
-                                : role === "dosen"
-                                ? "nip"
-                                : "nik"}
-                        </h1>
-                        <input
-                            name={`${
-                                role === "mahasiswa"
+                        <div className="">
+                            <h1 className="text-[17px] mb-1">
+                                {role === "mahasiswa"
                                     ? "npm"
                                     : role === "dosen"
                                     ? "nip"
-                                    : "nik"
-                            }`}
-                            type="text"
-                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="">
-                        <h1 className="text-[20px] mb-1">nama</h1>
-                        <input
-                            name={`nama`}
-                            type="text"
-                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="">
-                        <h1 className="text-[20px] mb-1">email</h1>
-                        <input
-                            name={`email`}
-                            type="email"
-                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="">
-                        <h1 className="text-[20px] mb-1">password</h1>
-                        <input
-                            name={`password`}
-                            type="password"
-                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div
-                        className={`${
-                            role === "mahasiswa" ? "flex" : "hidden"
-                        } flex-col gap-3`}
-                    >
-                        <div className="">
-                            <h1 className="text-[20px] mb-1">fakultas</h1>
-                            <select
-                                name="fakultas"
-                                className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                                onChange={handleCampusChange}
-                            >
-                                {fakultas.map((fakultas, index) => (
-                                    <option
-                                        key={index}
-                                        value={fakultas.id_fakultas}
-                                    >
-                                        {fakultas.nama_fakultas}
-                                    </option>
-                                ))}
-                            </select>
+                                    : "nik"}
+                            </h1>
+                            <input
+                                name={`${
+                                    role === "mahasiswa"
+                                        ? "npm"
+                                        : role === "dosen"
+                                        ? "nip"
+                                        : "nik"
+                                }`}
+                                type="text"
+                                className={` ${
+                                    error === true && role === "mahasiswa"
+                                        ? npmRegis === ""
+                                            ? "border-red-500"
+                                            : ""
+                                        : role === "dosen"
+                                        ? nipRegis === ""
+                                            ? "border-red-500"
+                                            : ""
+                                        : role === "umum"
+                                        ? nikRegis === ""
+                                            ? "border-red-500"
+                                            : ""
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]`}
+                                onChange={handleInputChange}
+                            />
                         </div>
 
                         <div className="">
-                            <h1 className="text-[20px] mb-1">jurusan</h1>
-                            <select
-                                name="prodi"
-                                className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                                onChange={handleCampusChange}
-                            >
-                                {prodi.map((prodi, index) => (
-                                    <option key={index} value={prodi.id_prodi}>
-                                        {prodi.nama_prodi}
-                                    </option>
-                                ))}
-                            </select>
+                            <h1 className="text-[20px] mb-1">nama</h1>
+                            <input
+                                name={`nama`}
+                                type="text"
+                                className={`${
+                                    error === true && namaRegis === ""
+                                        ? "border-red-500"
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]`}
+                                onChange={handleInputChange}
+                            />
                         </div>
 
                         <div className="">
-                            <h1 className="text-[20px] mb-1">tahun ajaran</h1>
-                            {
+                            <h1 className="text-[20px] mb-1">email</h1>
+                            <input
+                                name={`email`}
+                                type="email"
+                                className={`${
+                                    error === true && emailRegis === ""
+                                        ? "border-red-500"
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]`}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        <div className="">
+                            <h1 className="text-[20px] mb-1">password</h1>
+                            <input
+                                name={`password`}
+                                type="password"
+                                className={`${
+                                    error === true && passwordRegis === ""
+                                        ? "border-red-500"
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]`}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        <div
+                            className={`${
+                                role === "mahasiswa" ? "flex" : "hidden"
+                            } flex-col gap-3`}
+                        >
+                            <div className="">
+                                <h1 className="text-[20px] mb-1">fakultas</h1>
                                 <select
-                                    name="tahun_ajaran"
+                                    name="fakultas"
                                     className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
                                     onChange={handleCampusChange}
                                 >
-                                    {tahunAjaran.map((tahunAjaran, index) => (
+                                    {fakultas.map((fakultas, index) => (
                                         <option
                                             key={index}
-                                            value={tahunAjaran.id_tahun_ajaran}
+                                            value={fakultas.id_fakultas}
                                         >
-                                            {tahunAjaran.tahun_ajaran}
+                                            {fakultas.nama_fakultas}
                                         </option>
                                     ))}
                                 </select>
-                            }
+                            </div>
+
+                            <div className="">
+                                <h1 className="text-[20px] mb-1">jurusan</h1>
+                                <select
+                                    name="prodi"
+                                    className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
+                                    onChange={handleCampusChange}
+                                >
+                                    {prodi.map((prodi, index) => (
+                                        <option
+                                            key={index}
+                                            value={prodi.id_prodi}
+                                        >
+                                            {prodi.nama_prodi}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="">
+                                <h1 className="text-[20px] mb-1">
+                                    tahun ajaran
+                                </h1>
+                                {
+                                    <select
+                                        name="tahun_ajaran"
+                                        className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
+                                        onChange={handleCampusChange}
+                                    >
+                                        {tahunAjaran.map(
+                                            (tahunAjaran, index) => (
+                                                <option
+                                                    key={index}
+                                                    value={
+                                                        tahunAjaran.id_tahun_ajaran
+                                                    }
+                                                >
+                                                    {tahunAjaran.tahun_ajaran}
+                                                </option>
+                                            )
+                                        )}
+                                    </select>
+                                }
+                            </div>
+                        </div>
+
+                        <div className="">
+                            <h1 className="text-[20px] mb-1">no. telp</h1>
+                            <input
+                                name={`no_telp`}
+                                type="text"
+                                className={`${
+                                    error === true && noTelpRegis === ""
+                                        ? "border-red-500"
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]`}
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        <div className="">
+                            <h1 className="text-[20px] mb-1">
+                                upload kartu{" "}
+                                {role === "mahasiswa"
+                                    ? "mahasiswa"
+                                    : role === "dosen"
+                                    ? "dosen"
+                                    : "identitas"}
+                            </h1>
+                            <input
+                                name={`bukti`}
+                                type="file"
+                                className={`${
+                                    error === true && buktiRegis === null
+                                        ? "border-red-500"
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]`}
+                                onChange={handleInputChange}
+                            />
                         </div>
                     </div>
-
-                    <div className="">
-                        <h1 className="text-[20px] mb-1">no. telp</h1>
-                        <input
-                            name={`no_telp`}
-                            type="text"
-                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-
-                    <div className="">
-                        <h1 className="text-[20px] mb-1">
-                            upload kartu{" "}
-                            {role === "mahasiswa"
-                                ? "mahasiswa"
-                                : role === "dosen"
-                                ? "dosen"
-                                : "identitas"}
-                        </h1>
-                        <input
-                            name={`bukti`}
-                            type="file"
-                            className="bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px]"
-                            onChange={handleInputChange}
-                        />
-                    </div>
                 </div>
-            </div>
-            <div className="mt-10">
-                <AuthButton message="Registrasi" handleLogin={handleRegis} />
-            </div>
-            <div className="flex items-center justify-center mt-8">
-                <div className="w-[120px] h-[1px] bg-black"></div>
-                <div className="text-center mx-5">OR</div>
-                <div className="w-[120px] h-[1px] bg-black"></div>
-            </div>
-            <div className="text-center">
-                <h1 className="text-[20px] font-bold mt-10">
-                    Sudah punya akun?{" "}
-                    <span
-                        className="text-[#322A7D] cursor-pointer"
-                        onClick={changeModal}
-                    >
-                        Login
-                    </span>
+
+                <h1
+                    className={`${
+                        error === true ? "block" : "hidden"
+                    } mt-5 font-bold text-red-500`}
+                >
+                    Data tidak boleh kosong
                 </h1>
+                <div className="mt-5">
+                    <AuthButton
+                        message="Registrasi"
+                        handleLogin={handleRegis}
+                    />
+                </div>
+                <div className="flex items-center justify-center mt-8">
+                    <div className="w-[120px] h-[1px] bg-black"></div>
+                    <div className="text-center mx-5">OR</div>
+                    <div className="w-[120px] h-[1px] bg-black"></div>
+                </div>
+                <div className="text-center">
+                    <h1 className="text-[20px] font-bold mt-10">
+                        Sudah punya akun?{" "}
+                        <span
+                            className="text-[#322A7D] cursor-pointer"
+                            onClick={changeModal}
+                        >
+                            Login
+                        </span>
+                    </h1>
+                </div>
             </div>
         </div>
     );
