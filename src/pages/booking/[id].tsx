@@ -83,6 +83,9 @@ export default function Booking() {
         if (tanggalFiltered.length > 0 || jam_checkout <= jam_checkin) {
             setStatusBook(false);
             setBookMessage("Pemilihan jam tidak tersedia");
+        } else if (keterangan === "") {
+            setStatusBook(false);
+            setBookMessage("Keterangan harus diisi");
         } else {
             setStatusBook(true);
         }
@@ -118,6 +121,7 @@ export default function Booking() {
     const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         if (e.target.name === "keterangan") {
             setKeterangan(e.target.value);
+            setStatusBook(true);
         }
     };
 

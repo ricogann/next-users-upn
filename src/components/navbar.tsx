@@ -38,7 +38,11 @@ const Navbar: React.FC<Props> = ({
 
     const handleLogout = () => {
         deleteCookie("CERT");
-        router.push("/");
+        if (router.pathname === "/") {
+            router.reload();
+        } else {
+            router.push("/");
+        }
     };
 
     const deleteCookie = (name: string) => {

@@ -6,6 +6,7 @@ import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { BiCalendar, BiBookmark } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
 import { useRouter } from "next/router";
+import Loading from "@/components/loading";
 
 import { Login } from "@/components/login-form";
 import { Regis } from "@/components/registration-form";
@@ -39,6 +40,7 @@ export default function DetailFasilitas() {
 
     const [openModal, setOpenModal] = useState(false);
     const [openRegisModal, setOpenRegisModal] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleModal = () => {
         setOpenModal(!openModal);
@@ -123,12 +125,18 @@ export default function DetailFasilitas() {
             setOpenModal(true);
             return;
         } else {
+            setLoading(true);
             router.push(`/booking/${id}`);
         }
     };
 
     return (
-        <div className="bg-[#D2D7DF] font-montserrat">
+        <div className="bg-[#D2D7DF] font-montserrat relative">
+            {loading && (
+                <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
+                    <Loading />
+                </div>
+            )}
             <Navbar
                 isLogin={isLogin}
                 nama={nama}

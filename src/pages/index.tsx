@@ -283,7 +283,8 @@ export default function Home() {
                                 <div className="flex flex-col md:flex-row items-end gap-1">
                                     <button
                                         className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold p-1 lg:p-2 text-[10px] text-black border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
-                                        onClick={() =>
+                                        onClick={() => {
+                                            setLoading(true);
                                             router.push(
                                                 `/detail/${
                                                     dataInfo?.id_fasilitas ===
@@ -295,8 +296,8 @@ export default function Home() {
                                                             : ""
                                                         : dataInfo.id_fasilitas
                                                 }`
-                                            )
-                                        }
+                                            );
+                                        }}
                                     >
                                         More Info
                                     </button>

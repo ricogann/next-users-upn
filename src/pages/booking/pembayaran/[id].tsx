@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 
 import { Navbar } from "@/components/navbar";
+import Loading from "@/components/loading";
 
 import _libCookies from "@/lib/cookies";
 import _libBooking from "@/lib/booking";
@@ -10,10 +11,13 @@ import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
 
 export default function Pembayaran() {
+    const router = useRouter();
     const libCookies = new _libCookies();
     const libBooking = new _libBooking();
+
     const [isLogin, setIsLogin] = useState(true);
-    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+
     useEffect(() => {
         if (router.isReady) {
             setId(router.query.id as string);
@@ -36,8 +40,6 @@ export default function Pembayaran() {
     const [buktiSik, setBuktiSik] = useState<File | null>(null);
 
     const setData = (data: PemesananDTO) => {
-        console.log(data);
-        // if (data.Account.Dosen.length === 0)
         if (data.Account.Mahasiswa.length > 0) {
             setNamaPemesan(data.Account.Mahasiswa[0].nama);
         }
@@ -141,10 +143,12 @@ export default function Pembayaran() {
 
     const handleUpload = async () => {
         if (!buktiSik) {
+            setIsLoading(true);
             const data = new FormData();
             data.append("bukti_pembayaran", buktiPembayaran as File);
-            uploadBuktiPembayaran(id as string, data);
+            const res = await uploadBuktiPembayaran(id as string, data);
         } else if (!buktiPembayaran) {
+            setIsLoading(true);
             const data = new FormData();
             data.append("SIK", buktiSik as File);
             const res = await libBooking.uploadSIK(data, Number(id));
@@ -155,7 +159,12 @@ export default function Pembayaran() {
     };
 
     return (
-        <div className="flex flex-col bg-[#F7F8FA]">
+        <div className="flex flex-col bg-[#F7F8FA] relative">
+            {isLoading && (
+                <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
+                    <Loading />
+                </div>
+            )}
             <Navbar isLogin={isLogin} nama={nama} />
 
             <div className="p-10 md:px-28">

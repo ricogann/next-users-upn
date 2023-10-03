@@ -1,11 +1,10 @@
 import { Navbar } from "@/components/navbar";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 
-import { FaLocationDot } from "react-icons/fa6";
-import { GiCancel } from "react-icons/gi";
-
-import Image from "next/image";
+import Loading from "@/components/loading";
+import PDFDocument from "@/components/pdf";
 
 import _libBooking from "@/lib/booking";
 import _libAuth from "@/lib/auth";
@@ -38,10 +37,23 @@ interface RemainingTime {
 export default function Profile() {
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [pdfActive, setPdfActive] = useState(false);
+    const PDFViewer = dynamic(
+        () => import("@react-pdf/renderer").then((m) => m.PDFViewer),
+        {
+            ssr: false, // Disable server-side rendering for this component
+        }
+    );
+
+    const PDFDownloadLink = dynamic(
+        () => import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
+        {
+            ssr: false, // Disable server-side rendering for this component
+        }
+    );
 
     const libBooking = new _libBooking();
-    const libAuth = new _libAuth();
-    const libFasilitas = new _libFasilitas();
     const libCookies = new _libCookies();
 
     const [activeTab, setActiveTab] = useState("OnProcces");
@@ -94,7 +106,6 @@ export default function Profile() {
         []
     );
 
-    console.log(dataBookingFinished);
     const [remainingTime, setRemainingTime] = useState<RemainingTime[]>([]);
 
     const [buktiPembayaran, setBuktiPembayaran] = useState<File | null>(null);
@@ -147,7 +158,7 @@ export default function Profile() {
                 const updatedRemaining = countdown(remainingTime);
                 setRemainingTime(updatedRemaining);
             }
-        }, 1000);
+        }, 100000);
 
         return () => {
             clearInterval(interval); // Clear the interval on unmount
@@ -200,6 +211,7 @@ export default function Profile() {
 
     const handleUpload = async (id: string) => {
         if (!buktiSik) {
+            setLoading(true);
             const data = new FormData();
             data.append("bukti_pembayaran", buktiPembayaran as File);
             const res = await libBooking.uploadBuktiPembayaran(
@@ -210,6 +222,7 @@ export default function Profile() {
                 router.reload();
             }
         } else if (!buktiPembayaran) {
+            setLoading(true);
             const data = new FormData();
             data.append("SIK", buktiSik as File);
             const res = await libBooking.uploadSIK(data, Number(id));
@@ -221,8 +234,25 @@ export default function Profile() {
     };
 
     return (
-        <div className="bg-[#F7F8FA] ">
-            <Navbar isLogin={isLogin} />
+        <div className="bg-[#F7F8FA] relative">
+            <div
+                className={`${
+                    pdfActive ? "block" : "hidden"
+                } absolute w-full h-full flex flex-col justify-center items-center z-50 backdrop-blur-sm`}
+            >
+                <div className="text-black" onClick={() => setPdfActive(false)}>
+                    Close
+                </div>
+                <PDFViewer width="60%" height="50%">
+                    <PDFDocument />
+                </PDFViewer>
+            </div>
+            {loading && (
+                <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
+                    <Loading />
+                </div>
+            )}
+            <Navbar isLogin={isLogin} nama={namaAccount} />
 
             <div className="xl:mx-24 text-black">
                 <h1 className="ml-8 mt-4 font-bold xl:block xl:text-[36px]">
@@ -470,9 +500,20 @@ export default function Profile() {
                                             </div>
                                         </div>
                                         <div className="border-t border-gray-500 xl:hidden"></div>
-                                        <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg">
-                                            Print Invoice
-                                        </button>
+                                        <PDFDownloadLink
+                                            document={<PDFDocument />}
+                                            fileName="somename.pdf"
+                                        >
+                                            {({ blob, url, loading, error }) =>
+                                                loading ? (
+                                                    "Loading document..."
+                                                ) : (
+                                                    <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg">
+                                                        Print Invoice
+                                                    </button>
+                                                )
+                                            }
+                                        </PDFDownloadLink>
                                     </div>
                                 )
                             )}
