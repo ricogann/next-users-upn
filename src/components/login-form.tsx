@@ -191,7 +191,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                     <span
                         className={`${
                             role === "mahasiswa" ? "hidden" : "block"
-                        } text-[#322A7D]`}
+                        } text-[#07393C]`}
                         onClick={() => setRole("mahasiswa")}
                     >
                         Mahasiswa
@@ -199,7 +199,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                     <span
                         className={`${
                             role === "dosen" ? "hidden" : "block"
-                        } text-[#322A7D]`}
+                        } text-[#07393C]`}
                         onClick={() => setRole("dosen")}
                     >
                         Dosen
@@ -207,7 +207,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                     <span
                         className={`${
                             role === "umum" ? "hidden" : "block"
-                        } text-[#322A7D]`}
+                        } text-[#07393C]`}
                         onClick={() => setRole("umum")}
                     >
                         Umum
@@ -215,7 +215,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                 </h1>
 
                 <h1 className="text-[16px] font-bold mt-3 md:text-[21px] xl:text-[18px]">
-                    Lupa password? <span className="text-[#322A7D]">Reset</span>
+                    Lupa password? <span className="text-[#07393C]">Reset</span>
                 </h1>
             </div>
             <div className="flex items-center justify-center mt-8">
@@ -229,7 +229,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                 <h1 className="text-[20px] font-bold mt-10 md:mt-5 xl:text-[18px]">
                     Belum punya akun?{" "}
                     <span
-                        className="text-[#322A7D] cursor-pointer"
+                        className="text-[#07393C] cursor-pointer"
                         onClick={changeModal}
                     >
                         Daftar

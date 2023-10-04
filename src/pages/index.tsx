@@ -113,7 +113,7 @@ export default function Home() {
     };
 
     return (
-        <div className="bg-[#D2D7DF] h-screen md:h-full font-montserrat relative overflow-hidden">
+        <div className="bg-[#2C666E] h-screen md:h-full font-montserrat relative overflow-hidden">
             {loading && (
                 <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                     <Loading />
@@ -205,8 +205,8 @@ export default function Home() {
                                                 width={500}
                                                 height={500}
                                             />
-                                            <div className="text-black bg-gray-500 text-center p-3 w-full rounded-b-lg">
-                                                <h1 className="font-medium text-[15px]">
+                                            <div className="text-black bg-[#07393C] text-center p-3 w-full rounded-b-lg">
+                                                <h1 className="font-medium text-[15px] text-[#ffffff]">
                                                     {data.nama}
                                                 </h1>
                                             </div>
@@ -217,8 +217,8 @@ export default function Home() {
                                             onClick={() => setInfo(data)}
                                             key={index}
                                         >
-                                            <div className="text-black bg-gray-500 text-center p-3 w-full">
-                                                <h1 className="font-medium text-[15px]">
+                                            <div className="text-black bg-[#07393C] text-center p-3 w-full">
+                                                <h1 className="font-medium text-[15px] text-[#F0EDEE]">
                                                     {data.nama}
                                                 </h1>
                                             </div>
@@ -259,13 +259,15 @@ export default function Home() {
                     })}
                 </div>
 
-                <div className={`mt-5 bg-[#FFFFFF] rounded-[13px] border`}>
+                <div
+                    className={`mt-5 bg-[#FFFFFF] rounded-[13px] border-[#07393C] border-2 shadow-xl`}
+                >
                     <div className="lg:flex-row">
                         {/* Content here */}
                         <div className="">
                             <div className="flex items-start justify-between p-5 md:p-8 xl:px-14 xl:py-10">
                                 <div className="w-[150px] md:w-full flex flex-col gap-2">
-                                    <h1 className="text-xl text-black font-bold md:text-[25px] xl:text-[35px]">
+                                    <h1 className="text-xl text-[#222222] font-bold md:text-[25px] xl:text-[35px]">
                                         {dataInfo?.nama === undefined
                                             ? dataFasilitas.length > 0
                                                 ? dataFasilitas[0][0].nama
@@ -282,7 +284,7 @@ export default function Home() {
                                 </div>
                                 <div className="flex flex-col md:flex-row items-end gap-1">
                                     <button
-                                        className="w-24 bg-[#F7F8FA] hover:bg-[#00FF66] text-semibold font-bold p-1 lg:p-2 text-[10px] text-black border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
+                                        className="w-24 bg-[#F7F8FA] hover:bg-[#07393C] hover:text-[#F7F8FA] text-semibold font-bold p-1 lg:p-2 text-[10px] text-black border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
                                         onClick={() => {
                                             setLoading(true);
                                             router.push(
@@ -302,7 +304,7 @@ export default function Home() {
                                         More Info
                                     </button>
                                     <button
-                                        className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-1 lg:p-2 text-[10px] border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
+                                        className="w-24 bg-[#07393C] hover:bg-[#F0EDEE] hover:text-[#0A090C] text-white font-bold p-1 lg:p-2 text-[10px] border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
                                         onClick={handleBook}
                                     >
                                         Book Now
@@ -310,7 +312,7 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col items-start gap-5 md:flex-row text-[8px] md:text-[12px] xl:text-[18px] border-[#D3D3D3] border-t-[2px] p-5 md:p-8 xl:px-14 xl:py-10">
+                            <div className="flex flex-col items-start gap-5 md:flex-row text-[8px] md:text-[12px] xl:text-[18px] border-[#07393C] border-t-[2px] p-5 md:p-8 xl:px-14 xl:py-10">
                                 <div className="flex gap-3 items-start">
                                     <BsFillPinMapFill className="text-black font-bold text-lg lg:text-xl" />
 

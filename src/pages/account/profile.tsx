@@ -158,7 +158,7 @@ export default function Profile() {
                 const updatedRemaining = countdown(remainingTime);
                 setRemainingTime(updatedRemaining);
             }
-        }, 10000000);
+        }, 1000);
 
         return () => {
             clearInterval(interval); // Clear the interval on unmount
@@ -234,7 +234,7 @@ export default function Profile() {
     };
 
     return (
-        <div className="bg-[#F7F8FA] relative">
+        <div className="bg-[#2C666E] h-full relative">
             {loading && (
                 <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                     <Loading />
@@ -242,11 +242,11 @@ export default function Profile() {
             )}
             <Navbar isLogin={isLogin} nama={namaAccount} />
 
-            <div className="xl:mx-24 text-black">
+            <div className="xl:mx-24 text-[#F0EDEE]">
                 <h1 className="ml-8 mt-4 font-bold xl:block xl:text-[36px]">
                     Profile Anda
                 </h1>
-                <div className=" bg-[#FFFFFF] flex m-8 mt-4 flex-col gap-3 p-8 rounded-[15px] shadow-lg xl:flex-row ">
+                <div className=" bg-[#FFFFFF] flex m-8 mt-4 flex-col gap-3 p-8 rounded-[15px] shadow-lg xl:flex-row text-[#0A090C]">
                     <div className="m-4 gap-2 flex flex-col xl:flex-grow">
                         <div className="">
                             <h2 className="text-[16px] lg:text-[18px] font-semibold">
@@ -267,7 +267,7 @@ export default function Profile() {
                     </div>
                 </div>
 
-                <div className="bg-white shadow-lg mx-8 p-6 rounded-xl">
+                <div className="bg-white shadow-lg mx-8 p-6 rounded-xl text-[#0A090C]">
                     <div className="flex flex-col">
                         <h1 className="text-[25px] font-semibold text-[#11141A]">
                             Riwayat Pemesanan
@@ -314,17 +314,17 @@ export default function Profile() {
                         <div className="flex flex-col gap-5 rounded-[15px] xl:grid xl:grid-cols-3 xl:w-full xl:justify-items-center xl:mt-4">
                             {dataBookingOnProcess.map((item: any, index) => (
                                 <div
-                                    className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#FFA101] xl:w-[300px]"
+                                    className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border-2 border-[#FFA101] xl:w-[300px]"
                                     key={index}
                                 >
                                     <div className="flex flex-col">
-                                        <h2 className="text-[16px] lg:text-[12px] font-bold my-3 ">
+                                        <h2 className="text-[16px] lg:text-[20px] font-bold my-3 ">
                                             {item.Fasilitas.nama}
                                         </h2>
-                                        <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                        <h2 className="text-[12px] lg:text-[15px] font-regulat ">
                                             {`Booking ref # : ${item.id_pemesanan}`}
                                         </h2>
-                                        <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                        <h2 className="text-[12px] lg:text-[15px] font-regulat ">
                                             {new Date(
                                                 item.tanggal_pemesanan
                                             ).toLocaleDateString("id-ID", {
@@ -338,21 +338,21 @@ export default function Profile() {
 
                                     <div className="border-t border-gray-500 xl:hidden"></div>
                                     <div className="text-center ">
-                                        <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                                        <h2 className="text-[16px] lg:text-[15px] font-semibold ">
                                             Selesaikan Pembayaran Dalam
                                         </h2>
-                                        <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#FFA101]">
+                                        <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101] xl:mt-2">
                                             {remainingTime[index].remainingTime}
                                         </h2>
-                                        <h2 className="text-[16px] lg:text-[12px] font-semibold mt-5">
+                                        <h2 className="text-[16px] lg:text-[15px] font-semibold mt-5 xl:mt-3">
                                             Batas akhir pembayaran <br />
                                             Sabtu, 02 September 2023 <br />
                                             12:59
                                         </h2>
-                                        <h2 className="text-[16px] lg:text-[12px] font-semibold mt-6">
+                                        <h2 className="text-[16px] lg:text-[15px] font-semibold mt-6">
                                             Kode BNI VA
                                         </h2>
-                                        <h2 className="text-[16px] lg:text-[12px] font-semibold text-[#FFA101]">
+                                        <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101]">
                                             1693547942887
                                         </h2>
                                     </div>
@@ -407,22 +407,22 @@ export default function Profile() {
                     )}
 
                     {activeTab === "On Going" && (
-                        <div className="flex flex-col gap-5 rounded-[15px] xl:m-4 xl:grid xl:grid-cols-4 ">
+                        <div className="flex flex-col gap-5 rounded-[15px] xl:m-4 xl:grid xl:grid-cols-3 xl:gap-10 xl:ml-10 ">
                             {
                                 dataBookingOnGoing.map(
                                     (item: Pemesanan, index) => (
                                         <div
-                                            className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#FFA101]  xl:w-[300px]"
+                                            className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border-2 border-[#FFA101] xl:w-[300px]"
                                             key={index}
                                         >
                                             <div className="flex flex-col">
-                                                <h2 className="text-[16px] lg:text-[12px] font-bold my-3 ">
+                                                <h2 className="text-[16px] lg:text-[20px] font-bold">
                                                     {item.Fasilitas.nama}
                                                 </h2>
-                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                <h2 className="text-[12px] lg:text-[15px] font-regular ">
                                                     {`Booking ref # : ${item.id_pemesanan}`}
                                                 </h2>
-                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                <h2 className="text-[12px] lg:text-[15px] font-regular ">
                                                     {new Date(
                                                         item.tanggal_pemesanan
                                                     ).toLocaleDateString(
@@ -439,10 +439,10 @@ export default function Profile() {
 
                                             <div className="border-t border-gray-500 xl:hidden"></div>
                                             <div className="text-black">
-                                                <h2 className="text-[16px] lg:text-[12px] font-semibold ">
+                                                <h2 className="text-[16px] lg:text-[15px] font-semibold ">
                                                     Status
                                                 </h2>
-                                                <h1 className="text-[#FFA101]">
+                                                <h1 className="text-[#FFA101] font-bold">
                                                     Menunggu Persetujuan
                                                 </h1>
                                             </div>
@@ -456,23 +456,23 @@ export default function Profile() {
 
                     {/* Start Of div Card On Going*/}
                     {activeTab === "Finished" && (
-                        <div className="flex flex-col gap-5 rounded-[15px] xl:grid xl:grid-cols-4 p-3">
+                        <div className="flex flex-col gap-5 rounded-[15px] xl:grid xl:grid-cols-3 p-3 xl:ml-10 xl:gap-10">
                             {dataBookingFinished.map(
                                 (item: Pemesanan, index) => (
                                     <div
-                                        className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border border-[#2EC114] xl:w-[300px]"
+                                        className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border-2 border-[#2EC114] xl:w-[300px]"
                                         key={index}
                                     >
                                         <div className="flex flex-col w-full gap-4">
                                             <div className="flex flex-col">
-                                                <h2 className="text-[16px] lg:text-[12px] font-bold ">
+                                                <h2 className="text-[16px] lg:text-[20px] font-bold ">
                                                     {item.Fasilitas.nama}
                                                 </h2>
-                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                <h2 className="text-[12px] lg:text-[15px] font-regular ">
                                                     Booking ref # :{" "}
                                                     {item.id_pemesanan}
                                                 </h2>
-                                                <h2 className="text-[12px] lg:text-[12px] font-regulat ">
+                                                <h2 className="text-[12px] lg:text-[15px] font-regular ">
                                                     {new Date(
                                                         item.tanggal_pemesanan
                                                     ).toLocaleDateString(
@@ -501,17 +501,18 @@ export default function Profile() {
                                                     )}
                                                 />
                                             }
-                                            fileName="invoice.pdf"
+                                            fileName={`invoice-${item.id_pemesanan}.pdf`}
                                         >
-                                            {({ blob, url, loading, error }) =>
-                                                loading ? (
-                                                    "Loading document..."
-                                                ) : (
-                                                    <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg w-full">
-                                                        Print Invoice
-                                                    </button>
-                                                )
-                                            }
+                                            {({
+                                                blob,
+                                                url,
+                                                loading,
+                                                error,
+                                            }) => (
+                                                <button className=" bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-3 rounded-lg w-full">
+                                                    Download Invoice
+                                                </button>
+                                            )}
                                         </PDFDownloadLink>
                                     </div>
                                 )

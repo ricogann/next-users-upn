@@ -51,7 +51,7 @@ const Navbar: React.FC<Props> = ({
     };
 
     return (
-        <nav className="bg-[#ffffff]">
+        <nav className="bg-[#F0EDEE] shadow-xl">
             <div className=" container mx-auto flex justify-between items-center">
                 <div className="flex items-center justify-between w-full px-6 py-3 md:px-8">
                     <a className="text-white font-semibold text-lg ">
@@ -119,7 +119,7 @@ const Navbar: React.FC<Props> = ({
                         </div>
                     </div>
 
-                    <div className="hidden md:flex md:gap-14 text-black font-semibold font-montserrat">
+                    <div className="hidden md:flex md:gap-14 text-[#0A090C] font-semibold font-montserrat">
                         <button className="" onClick={() => router.push("/")}>
                             Home
                         </button>
@@ -139,7 +139,7 @@ const Navbar: React.FC<Props> = ({
                         </button>
                         <div className={`${isLogin ? "relative" : "hidden"}`}>
                             <div
-                                className={`relative flex p-3 items-center gap-5 shadow-xl border border-black ${
+                                className={`relative flex p-3 items-center gap-5 text-[#0A090C] shadow-xl border border-black ${
                                     openProfile
                                         ? `rounded-t-xl border-0`
                                         : ` rounded-xl`

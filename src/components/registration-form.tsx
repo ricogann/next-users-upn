@@ -438,7 +438,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                     <h1 className="text-[20px] font-bold mt-10">
                         Sudah punya akun?{" "}
                         <span
-                            className="text-[#322A7D] cursor-pointer"
+                            className="text-[#07393C] cursor-pointer"
                             onClick={changeModal}
                         >
                             Login
