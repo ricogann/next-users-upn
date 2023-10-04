@@ -1,5 +1,11 @@
-class _serviceUsers {
-    constructor(private baseUrl: string) {}
+import _core from "./core.service";
+
+class _serviceUsers extends _core {
+    constructor() {
+        super();
+    }
+
+    private baseUrl = _core.getBaseUrl();
 
     async getAccountById(id: number) {
         try {

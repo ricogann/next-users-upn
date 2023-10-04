@@ -1,5 +1,11 @@
-class _serviceCampus {
-    constructor(private baseUrl: string) {}
+import _core from "./core.service";
+
+class _serviceCampus extends _core {
+    constructor() {
+        super();
+    }
+
+    private baseUrl = _core.getBaseUrl();
 
     async getFakultas() {
         try {

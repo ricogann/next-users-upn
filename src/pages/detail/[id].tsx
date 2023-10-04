@@ -60,8 +60,8 @@ export default function DetailFasilitas() {
     }, [router.isReady]);
 
     const libCookies = new _libCookies();
-    const booking = new _serviceBooking("https://api.ricogann.com");
-    const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
+    const booking = new _serviceBooking();
+    const fasilitas = new _serviceFasilitas();
 
     useEffect(() => {
         const init = async (id: number) => {
@@ -131,7 +131,7 @@ export default function DetailFasilitas() {
     };
 
     return (
-        <div className="bg-[#D2D7DF] font-montserrat relative">
+        <div className="bg-[#2C666E] font-montserrat relative">
             {loading && (
                 <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                     <Loading />
@@ -243,7 +243,7 @@ export default function DetailFasilitas() {
                                 </div>
                             </div>
                             <button
-                                className="w-24 bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg"
+                                className="w-24 bg-[#07393C] hover:bg-[#2C666E] text-white font-bold py-2 px-2 text-[12px] xl:text-[17px] xl:w-32 rounded-lg"
                                 onClick={handleBook}
                             >
                                 Book Now
@@ -326,7 +326,7 @@ export default function DetailFasilitas() {
                                                             }
                                                         />
                                                         <button
-                                                            className="bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-[4px] text-[12px] xl:text-[15px] xl:w-24 rounded-lg"
+                                                            className="bg-[#07393C] hover:bg-[#2C666E] text-white font-bold p-[4px] text-[12px] xl:text-[15px] xl:w-24 rounded-lg"
                                                             onClick={
                                                                 checkAvailability
                                                             }

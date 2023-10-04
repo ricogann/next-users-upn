@@ -1,7 +1,12 @@
 import BookingDTO from "@/interfaces/bookingDTO";
+import _core from "./core.service";
 
-class _serviceBooking {
-    constructor(private baseUrl: string) {}
+class _serviceBooking extends _core {
+    constructor() {
+        super();
+    }
+
+    private baseUrl = _core.getBaseUrl();
 
     async getPemesanan() {
         const response = await fetch(`${this.baseUrl}/api/booking`);
@@ -13,7 +18,7 @@ class _serviceBooking {
     async getPemesananByIdUser(idAccount: number) {
         try {
             const res = await fetch(
-                `https://api.ricogann.com/api/booking/user/${idAccount}`
+                `${this.baseUrl}/api/booking/user/${idAccount}`
             );
             const data = await res.json();
             console.log(data);
@@ -27,6 +32,7 @@ class _serviceBooking {
     async getDetailPemesanan(id: number) {
         const response = await fetch(`${this.baseUrl}/api/booking/${id}`);
         const data = await response.json();
+        console.log(data);
 
         return data.data;
     }

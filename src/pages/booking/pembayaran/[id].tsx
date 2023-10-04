@@ -4,16 +4,20 @@ import { useRouter } from "next/router";
 import { Navbar } from "@/components/navbar";
 import Loading from "@/components/loading";
 
+import _serviceBooking from "@/services/booking.service";
+
 import _libCookies from "@/lib/cookies";
-import _libBooking from "@/lib/booking";
 
 import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
+import _libBooking from "@/lib/booking";
 
 export default function Pembayaran() {
     const router = useRouter();
     const libCookies = new _libCookies();
     const libBooking = new _libBooking();
+
+    const booking = new _serviceBooking();
 
     const [isLogin, setIsLogin] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
@@ -22,6 +26,8 @@ export default function Pembayaran() {
         if (router.isReady) {
             setId(router.query.id as string);
         }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.isReady]);
 
     const [role, setRole] = useState<string>("");
@@ -62,7 +68,7 @@ export default function Pembayaran() {
 
     useEffect(() => {
         async function fetchData(id: string) {
-            const data = await libBooking.getDetailPemesanan(Number(id));
+            const data = await booking.getDetailPemesanan(Number(id));
             setData(data);
 
             const dataCookies: CookiesDTO = await libCookies.getCookies();
@@ -83,55 +89,16 @@ export default function Pembayaran() {
     }, [id]);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            countdown(createdAt);
+        const interval = setInterval(async () => {
+            const time = await libBooking.countdown([
+                { tanggal_pemesanan: createdAt, remainingTime },
+            ]);
         }, 1000);
 
         return () => clearInterval(interval);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [createdAt]);
-
-    async function countdown(tanggalPemesanan: string) {
-        const targetDateTime =
-            new Date(tanggalPemesanan).getTime() + 24 * 60 * 60 * 1000;
-
-        const currentTime = new Date().getTime();
-        const difference = targetDateTime - currentTime;
-
-        if (difference <= 0) {
-            console.log("waktu habis");
-        } else {
-            const hours = Math.floor(
-                (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-            );
-            const minutes = Math.floor(
-                (difference % (1000 * 60 * 60)) / (1000 * 60)
-            );
-            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-            setRemainingTime(
-                `${hours}:${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`
-            );
-        }
-    }
-
-    async function uploadBuktiPembayaran(id: string, body: FormData) {
-        try {
-            const res = await fetch(
-                `https://api.ricogann.com/api/booking/upload-bukti/${id}`,
-                {
-                    method: "PUT",
-                    body: body,
-                }
-            );
-            const result = await res.json();
-
-            if (result.status === true) {
-                router.push("/account/profile");
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
 
     const handleInputFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.name === "bukti_pembayaran") {
@@ -146,12 +113,15 @@ export default function Pembayaran() {
             setIsLoading(true);
             const data = new FormData();
             data.append("bukti_pembayaran", buktiPembayaran as File);
-            const res = await uploadBuktiPembayaran(id as string, data);
+            const res = await booking.uploadBuktiPembayaran(data, Number(id));
+            if (res.status === true) {
+                router.push("/account/profile");
+            }
         } else if (!buktiPembayaran) {
             setIsLoading(true);
             const data = new FormData();
             data.append("SIK", buktiSik as File);
-            const res = await libBooking.uploadSIK(data, Number(id));
+            const res = await booking.uploadSIK(data, Number(id));
             if (res.status === true) {
                 router.push("/account/profile");
             }

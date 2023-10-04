@@ -1,5 +1,11 @@
-class _serviceAuth {
-    constructor(private baseUrl: string) {}
+import _core from "./core.service";
+
+class _serviceAuth extends _core {
+    constructor() {
+        super();
+    }
+
+    private baseUrl = _core.getBaseUrl();
 
     async sendLoginMahasiswa(data: Object) {
         try {

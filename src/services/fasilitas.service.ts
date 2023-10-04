@@ -1,5 +1,11 @@
-class _serviceFasilitas {
-    constructor(private baseUrl: string) {}
+import _core from "./core.service";
+
+class _serviceFasilitas extends _core {
+    constructor() {
+        super();
+    }
+
+    private baseUrl = _core.getBaseUrl();
 
     async getFasilitas() {
         try {

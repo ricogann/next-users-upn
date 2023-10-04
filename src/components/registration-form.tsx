@@ -4,8 +4,8 @@ import { AiOutlineClose } from "react-icons/ai";
 import { AuthButton } from "./auth-button";
 import Loading from "./loading";
 
-import _libCampus from "@/lib/campus";
-import _libAuth from "@/lib/auth";
+import _serviceAuth from "@/services/auth.service";
+import _serviceCampus from "@/services/campus.service";
 
 interface Props {
     setRegisModal: () => void;
@@ -30,8 +30,8 @@ type TahunAjaran = {
 const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
     const [role, setRole] = useState("mahasiswa");
 
-    const libCampus = new _libCampus();
-    const libAuth = new _libAuth();
+    const auth = new _serviceAuth();
+    const campus = new _serviceCampus();
 
     const [error, setError] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -58,9 +58,9 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const fakultas = await libCampus.getFakultas();
-            const jurusan = await libCampus.getProdi();
-            const tahun = await libCampus.getTahunAjaran();
+            const fakultas = await campus.getFakultas();
+            const jurusan = await campus.getProdi();
+            const tahun = await campus.getTahunAjaran();
 
             setFakultas(fakultas);
             setProdi(jurusan);
@@ -135,7 +135,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                 data.append("bukti_identitas", buktiRegis as Blob);
                 data.append("status", "0");
 
-                const send = await libAuth.sendRegisterMahasiswa(data);
+                const send = await auth.sendRegisterMahasiswa(data);
 
                 if (send) {
                     changeModal();
@@ -165,7 +165,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                 data.append("bukti_identitas", buktiRegis as Blob);
                 data.append("status", "0");
 
-                const send = await libAuth.sendRegisterDosen(data);
+                const send = await auth.sendRegisterDosen(data);
 
                 if (send) {
                     changeModal();
@@ -195,7 +195,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                 data.append("bukti_identitas", buktiRegis as Blob);
                 data.append("status", "0");
 
-                const send = await libAuth.sendRegisterUmum(data);
+                const send = await auth.sendRegisterUmum(data);
 
                 if (send) {
                     changeModal();

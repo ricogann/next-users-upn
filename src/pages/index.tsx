@@ -10,26 +10,25 @@ import Loading from "@/components/loading";
 
 // Services
 import _serviceFasilitas from "@/services/fasilitas.service";
+import _serviceUsers from "@/services/users.service";
+import _serviceKamar from "@/services/kamar.service";
 
 // Lib
 import _libFasilitas from "@/lib/fasilitas";
 import _libCookies from "@/lib/cookies";
-import _libUsers from "@/lib/users";
 
 // Interfaces
 import FasilitasDTO from "@/interfaces/fasilitasDTO";
 import CookiesDTO from "@/interfaces/cookiesDTO";
-import AccountDTO from "@/interfaces/accountDTO";
-import _libBooking from "@/lib/booking";
-import _libKamar from "@/lib/kamar";
 
 export default function Home() {
     const router = useRouter();
+    const fasilitas = new _serviceFasilitas();
+    const users = new _serviceUsers();
+    const kamar = new _serviceKamar();
+
     const cookies = new _libCookies();
-    const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
     const libFasilitas = new _libFasilitas();
-    const libUsers = new _libUsers();
-    const libKamar = new _libKamar();
 
     const [isLogin, setIsLogin] = useState(false);
     const [namaAccount, setNama] = useState<string>("");
@@ -64,18 +63,18 @@ export default function Home() {
 
                 const dataCookies: CookiesDTO = await cookies.getCookies();
 
-                const user = await libUsers.getAccountById(
+                const user = await users.getAccountById(
                     Number((await cookies.parseJwt(dataCookies)).id_account)
                 );
 
                 if (user.Mahasiswa.length > 0) {
                     const checkExpiredMahasiswa =
-                        await libUsers.checkExpiredMahasiswa(
+                        await users.checkExpiredMahasiswa(
                             user.Mahasiswa[0].id_account
                         );
 
                     if (checkExpiredMahasiswa === false) {
-                        await libKamar.deleteExpiredMahasiswa(
+                        await kamar.deleteExpiredMahasiswa(
                             user.Mahasiswa[0].id_account
                         );
                     }

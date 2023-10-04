@@ -6,10 +6,11 @@ import dynamic from "next/dynamic";
 import Loading from "@/components/loading";
 import PDFDocument from "@/components/pdf";
 
-import _libBooking from "@/lib/booking";
-import _libAuth from "@/lib/auth";
+import _serviceBooking from "@/services/booking.service";
+
 import _libFasilitas from "@/lib/fasilitas";
 import _libCookies from "@/lib/cookies";
+import _libBooking from "@/lib/booking";
 
 import CookiesDTO from "@/interfaces/cookiesDTO";
 
@@ -39,12 +40,6 @@ export default function Profile() {
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [pdfActive, setPdfActive] = useState(false);
-    const PDFViewer = dynamic(
-        () => import("@react-pdf/renderer").then((m) => m.PDFViewer),
-        {
-            ssr: false, // Disable server-side rendering for this component
-        }
-    );
 
     const PDFDownloadLink = dynamic(
         () => import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
@@ -53,8 +48,10 @@ export default function Profile() {
         }
     );
 
-    const libBooking = new _libBooking();
     const libCookies = new _libCookies();
+    const libBooking = new _libBooking();
+
+    const booking = new _serviceBooking();
 
     const [activeTab, setActiveTab] = useState("OnProcces");
 
@@ -113,7 +110,7 @@ export default function Profile() {
 
     useEffect(() => {
         async function fetchData(idAccount: number) {
-            const data = await libBooking.getPemesananByIdUser(idAccount);
+            const data = await booking.getPemesananByIdUser(idAccount);
 
             if (data.data.length > 0) {
                 const dataOnProcess = data.data.filter(
@@ -153,9 +150,11 @@ export default function Profile() {
     }, [idAccount]);
 
     useEffect(() => {
-        const interval = setInterval(() => {
+        const interval = setInterval(async () => {
             if (remainingTime.length > 0) {
-                const updatedRemaining = countdown(remainingTime);
+                const updatedRemaining = await libBooking.countdown(
+                    remainingTime
+                );
                 setRemainingTime(updatedRemaining);
             }
         }, 1000);
@@ -164,42 +163,6 @@ export default function Profile() {
             clearInterval(interval); // Clear the interval on unmount
         };
     }, [remainingTime]);
-
-    function countdown(tanggalPemesanan: RemainingTime[]) {
-        const updatedRemainingTime = tanggalPemesanan.map((item) => {
-            const targetDateTime =
-                new Date(item.tanggal_pemesanan).getTime() +
-                24 * 60 * 60 * 1000;
-
-            const currentTime = new Date().getTime();
-
-            const difference = targetDateTime - currentTime;
-
-            if (difference <= 0) {
-                return {
-                    tanggal_pemesanan: item.tanggal_pemesanan,
-                    remainingTime: "Waktu Habis",
-                };
-            } else if (difference > 0) {
-                const hours = Math.floor(
-                    (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-                );
-                const minutes = Math.floor(
-                    (difference % (1000 * 60 * 60)) / (1000 * 60)
-                );
-                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-
-                return {
-                    tanggal_pemesanan: item.tanggal_pemesanan,
-                    remainingTime: `${hours}:${minutes}:${
-                        seconds < 10 ? `0${seconds}` : seconds
-                    }`,
-                };
-            }
-        });
-
-        return updatedRemainingTime as RemainingTime[];
-    }
 
     const handleInputFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.name === "bukti_pembayaran") {
@@ -214,10 +177,7 @@ export default function Profile() {
             setLoading(true);
             const data = new FormData();
             data.append("bukti_pembayaran", buktiPembayaran as File);
-            const res = await libBooking.uploadBuktiPembayaran(
-                data,
-                Number(id)
-            );
+            const res = await booking.uploadBuktiPembayaran(data, Number(id));
             if (res.status === true) {
                 router.reload();
             }
@@ -225,7 +185,7 @@ export default function Profile() {
             setLoading(true);
             const data = new FormData();
             data.append("SIK", buktiSik as File);
-            const res = await libBooking.uploadSIK(data, Number(id));
+            const res = await booking.uploadSIK(data, Number(id));
             console.log(res);
             if (res.status === true) {
                 router.reload();

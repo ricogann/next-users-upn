@@ -1,5 +1,11 @@
-class _serviceKamar {
-    constructor(private baseUrl: string) {}
+import _core from "./core.service";
+
+class _serviceKamar extends _core {
+    constructor() {
+        super();
+    }
+
+    private baseUrl = _core.getBaseUrl();
 
     async deleteExpiredMahasiswa(id: number) {
         try {

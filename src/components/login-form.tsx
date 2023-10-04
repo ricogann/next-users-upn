@@ -4,8 +4,9 @@ import Loading from "./loading";
 
 import { AiOutlineClose } from "react-icons/ai";
 
-import _libAuth from "@/lib/auth";
 import _libCookies from "@/lib/cookies";
+
+import _serviceAuth from "@/services/auth.service";
 
 interface Props {
     setModal: () => void;
@@ -13,7 +14,7 @@ interface Props {
 }
 
 const Login: React.FC<Props> = ({ setModal, changeModal }) => {
-    const libAuth = new _libAuth();
+    const auth = new _serviceAuth();
     const libCookies = new _libCookies();
 
     const [role, setRole] = useState("mahasiswa");
@@ -52,7 +53,10 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                 setMessageError("Data tidak boleh kosong");
             } else {
                 setLoading(true);
-                const mahasiswa = await libAuth.loginMahasiswa(npm, password);
+                const mahasiswa = await auth.sendLoginMahasiswa({
+                    npm,
+                    password,
+                });
 
                 if (mahasiswa.status === false) {
                     setLoading(false);
@@ -86,7 +90,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                 setMessageError("Data tidak boleh kosong");
             } else {
                 setLoading(true);
-                const login = await libAuth.login(role, email, password);
+                const login = await auth.login(role, email, password);
                 if (login.status === false) {
                     setLoading(false);
                     if (login.error.includes("Email")) {

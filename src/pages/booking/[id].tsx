@@ -14,10 +14,9 @@ import Loading from "@/components/loading";
 
 import _serviceBooking from "@/services/booking.service";
 import _serviceFasilitas from "@/services/fasilitas.service";
+import _serviceUsers from "@/services/users.service";
 
 import _libCookies from "@/lib/cookies";
-import _libBooking from "@/lib/booking";
-import _libUsers from "@/lib/users";
 
 import BookingDTO from "@/interfaces/bookingDTO";
 import CookiesDTO from "@/interfaces/cookiesDTO";
@@ -27,10 +26,11 @@ import FasilitasDTO from "@/interfaces/fasilitasDTO";
 
 export default function Booking() {
     const router = useRouter();
-    const fasilitas = new _serviceFasilitas("https://api.ricogann.com");
+    const fasilitas = new _serviceFasilitas();
+    const booking = new _serviceBooking();
+    const users = new _serviceUsers();
+
     const libCookies = new _libCookies();
-    const libBooking = new _libBooking();
-    const libUsers = new _libUsers();
 
     const [isLogin, setIsLogin] = useState(true);
     const [dataHarga, setDataHarga] = useState<any>([]);
@@ -151,7 +151,7 @@ export default function Booking() {
                 setIsAsrama(true);
             }
 
-            const dataBooking = await libBooking.getPemesanan(Number(id));
+            const dataBooking = await booking.getPemesanan();
             setPemesanan(dataBooking);
 
             const Account: AccountDTO = await libCookies.parseJwt(cookies);
@@ -209,13 +209,15 @@ export default function Booking() {
         };
 
         if (isAsrama) {
-            if (await libUsers.checkExpiredMahasiswa(idAccount)) {
+            if (await users.checkExpiredMahasiswa(idAccount)) {
                 setLoading(true);
-                const addMahasiswaToKamar =
-                    await libBooking.addMahasiswaToKamar(idHarga, idAccount);
+                const addMahasiswaToKamar = await booking.addMahasiswaTokamar(
+                    idHarga,
+                    idAccount
+                );
 
                 if (addMahasiswaToKamar !== undefined) {
-                    const createPemesanan = await libBooking.addPemesanan(data);
+                    const createPemesanan = await booking.addPemesanan(data);
                     if (createPemesanan.status === true) {
                         setLoading(false);
                         alert("Berhasil Booking");
@@ -234,7 +236,7 @@ export default function Booking() {
                 alert("Tidak bisa daftar, semester anda lebih dari semester 3");
             }
         } else {
-            const createPemesanan = await libBooking.addPemesanan(data);
+            const createPemesanan = await booking.addPemesanan(data);
             if (createPemesanan.status === true) {
                 setLoading(true);
                 alert("Berhasil Booking");
@@ -349,7 +351,7 @@ export default function Booking() {
                                                                 }
                                                             />
                                                             <button
-                                                                className="bg-[#322A7D] hover:bg-[#00FF66] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] xl:w-24 rounded-lg"
+                                                                className="bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] xl:w-24 rounded-lg"
                                                                 onClick={
                                                                     checkAvailability
                                                                 }
