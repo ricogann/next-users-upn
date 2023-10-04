@@ -198,6 +198,8 @@ export default function Booking() {
             jam_checkout: jam_checkout,
             total_harga: isAsrama
                 ? harga * 2 + 250000
+                : role !== "umum"
+                ? 0
                 : harga * (setDurasiBooking() / 60),
             durasi: setDurasiBooking(),
             keterangan: keterangan,
