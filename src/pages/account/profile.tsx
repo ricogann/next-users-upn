@@ -158,7 +158,7 @@ export default function Profile() {
                 const updatedRemaining = countdown(remainingTime);
                 setRemainingTime(updatedRemaining);
             }
-        }, 100000);
+        }, 10000000);
 
         return () => {
             clearInterval(interval); // Clear the interval on unmount
@@ -235,18 +235,6 @@ export default function Profile() {
 
     return (
         <div className="bg-[#F7F8FA] relative">
-            <div
-                className={`${
-                    pdfActive ? "block" : "hidden"
-                } absolute w-full h-full flex flex-col justify-center items-center z-50 backdrop-blur-sm`}
-            >
-                <div className="text-black" onClick={() => setPdfActive(false)}>
-                    Close
-                </div>
-                <PDFViewer width="60%" height="50%">
-                    <PDFDocument />
-                </PDFViewer>
-            </div>
             {loading && (
                 <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                     <Loading />
@@ -501,14 +489,25 @@ export default function Profile() {
                                         </div>
                                         <div className="border-t border-gray-500 xl:hidden"></div>
                                         <PDFDownloadLink
-                                            document={<PDFDocument />}
-                                            fileName="somename.pdf"
+                                            document={
+                                                <PDFDocument
+                                                    nama={namaAccount}
+                                                    no_invoice="12"
+                                                    nama_fasilitas={
+                                                        item.Fasilitas.nama
+                                                    }
+                                                    harga={String(
+                                                        item.total_harga
+                                                    )}
+                                                />
+                                            }
+                                            fileName="invoice.pdf"
                                         >
                                             {({ blob, url, loading, error }) =>
                                                 loading ? (
                                                     "Loading document..."
                                                 ) : (
-                                                    <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg">
+                                                    <button className=" bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg w-full">
                                                         Print Invoice
                                                     </button>
                                                 )
