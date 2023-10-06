@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import {
     Document,
     Page,
@@ -8,6 +9,20 @@ import {
     Image,
 } from "@react-pdf/renderer";
 import InvoiceTable from "./table-pdf";
+import _misc from "@/services/misc.service";
+
+interface misc {
+    id_misc: number;
+    nama_instansi: string;
+    logo_instansi: number;
+    no_hp: string;
+    email: number;
+    instagram: string;
+    laman_web: string;
+    nama_pic: string;
+    nip_pic: string;
+    tanda_tangan: string;
+}
 
 const styles = StyleSheet.create({
     page: {
@@ -104,8 +119,8 @@ const PDFDocument: React.FC<PDFDocumentProps> = ({
     nama_fasilitas,
     harga,
 }) => {
-    const logo_bpu = "https://api.ricogann.com/assets/logo-bpu.png";
-    const ttd_rico = "https://api.ricogann.com/assets/ttd-rico.png";
+    // const logo_bpu = "https://api.ricogann.com/assets/logo-bpu.png";
+    // const ttd_rico = "https://api.ricogann.com/assets/ttd-rico.png";
 
     const invoiceData = {
         invoiceNumber: "INV-2023-001",
@@ -120,25 +135,45 @@ const PDFDocument: React.FC<PDFDocumentProps> = ({
             { name: "Item 3", quantity: 3, price: 15 },
         ],
     };
+
+    const misc = new _misc();
+
+    const [dataMisc, setDataMisc] = useState<misc>();
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const dataMisc = await misc.getDataMisc();
+
+                setDataMisc(dataMisc.data);
+            } catch (error) {
+                console.error("error fetching data fasilitas ", error);
+            }
+        }
+        fetchData();
+    });
+
+    console.log(dataMisc);
+
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.header}>
-                    <Image src={logo_bpu} style={styles.image} />
+                    <Image src={"https://api.ricogann.com/assets/"+dataMisc?.logo_instansi} style={styles.image} />
 
                     <View style={styles.center}>
                         <Text style={styles.upn}>
                             Universitas Pembangunan Nasional
                         </Text>
                         <Text style={styles.jawatimur}>Veteran Jawa Timur</Text>
-                        <Text style={styles.bpu}>BADAN PENGELOLA USAHA</Text>
+                        <Text style={styles.bpu}>{dataMisc?.nama_instansi}</Text>
                     </View>
                 </View>
 
                 <View style={styles.info}>
-                    <Text>Email : bpu@upnjatim.ac.id</Text>
-                    <Text>Mobile : 089682285841</Text>
-                    <Text>Laman : bpu.upnjatim.ac.id</Text>
+                    <Text>Email : {dataMisc?.email}</Text>
+                    <Text>Mobile : {dataMisc?.no_hp}</Text>
+                    <Text>Laman : {dataMisc?.laman_web}</Text>
                 </View>
 
                 <Text style={styles.line}></Text>
@@ -161,14 +196,14 @@ const PDFDocument: React.FC<PDFDocumentProps> = ({
 
                 <View style={styles.signatureContainer}>
                     <Image
-                        src={ttd_rico} // Replace with the URL of your signature image
+                        src={"https://api.ricogann.com/assets/"+dataMisc?.tanda_tangan} // Replace with the URL of your signature image
                         style={styles.signature}
                     />
                     <Text style={styles.signatureText}>
-                        Rico Putra Anugerah
+                        {dataMisc?.nama_pic}
                     </Text>
                     <Text style={styles.signatureText}>
-                        NIP. 199909012021021001
+                        NIP. {dataMisc?.nip_pic}
                     </Text>
                 </View>
             </Page>
