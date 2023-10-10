@@ -13,16 +13,14 @@ interface misc {
     email: number;
     instagram: string;
     laman_web: string;
-
 }
 
-const Footer = ({
-}) => {
+const Footer = ({}) => {
     const router = useRouter();
     const misc = new _misc();
     const [dataMisc, setDataMisc] = useState<misc>();
 
-     useEffect(() => {
+    useEffect(() => {
         async function fetchData() {
             try {
                 const dataMisc = await misc.getDataMisc();
@@ -33,7 +31,7 @@ const Footer = ({
             }
         }
         fetchData();
-    });
+    }, []);
 
     return (
         <nav className="bg-[#F0EDEE] shadow-xl">
