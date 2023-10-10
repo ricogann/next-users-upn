@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import Footer from "@/components/footer";
 import { BsFillPinMapFill } from "react-icons/bs";
 import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { useRouter } from "next/router";

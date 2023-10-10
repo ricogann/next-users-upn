@@ -20,7 +20,7 @@ interface misc {
     laman_web: string;
 }
 
-const Footer = ({}) => {
+export default function Footer() {
     const router = useRouter();
     const misc = new _misc();
     const [dataMisc, setDataMisc] = useState<misc>();
@@ -87,6 +87,4 @@ const Footer = ({}) => {
             {/* Mobile Menu (Hidden on Large Screens) */}
         </nav>
     );
-};
-
-export { Footer };
+}
