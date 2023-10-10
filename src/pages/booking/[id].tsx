@@ -208,6 +208,8 @@ export default function Booking() {
             status: "Menunggu Pembayaran",
         };
 
+        console.log(data);
+
         if (isAsrama) {
             if (await users.checkExpiredMahasiswa(idAccount)) {
                 setLoading(true);

@@ -31,7 +31,9 @@ class _serviceFasilitas extends _core {
 
     async getHarga(id: number) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/harga/${id}`);
+            const response = await fetch(
+                `${this.baseUrl}/api/harga/fasilitas/${id}`
+            );
             const data = await response.json();
 
             return data.data;

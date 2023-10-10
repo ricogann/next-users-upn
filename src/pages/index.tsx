@@ -113,7 +113,7 @@ export default function Home() {
     };
 
     return (
-        <div className="bg-[#2C666E] h-screen md:h-full font-montserrat relative overflow-hidden">
+        <div className="bg-[#2C666E] h-full md:h-full font-montserrat relative overflow-hidden">
             {loading && (
                 <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                     <Loading />
@@ -373,9 +373,7 @@ export default function Home() {
                 </div>
                 {/* End Of content */}
             </div>
-            <Footer
-
-            />
+            <Footer />
         </div>
     );
 }
