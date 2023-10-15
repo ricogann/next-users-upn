@@ -5,8 +5,10 @@ import dynamic from "next/dynamic";
 
 import Loading from "@/components/loading";
 import PDFDocument from "@/components/pdf";
+import Footer from "@/components/footer";
 
 import _serviceBooking from "@/services/booking.service";
+import _misc from "@/services/misc.service";
 
 import _libFasilitas from "@/lib/fasilitas";
 import _libCookies from "@/lib/cookies";
@@ -35,11 +37,26 @@ interface RemainingTime {
     remainingTime: string;
 }
 
+interface misc {
+    id_misc: number;
+    nama_instansi: string;
+    logo_instansi: number;
+    no_hp: string;
+    email: number;
+    instagram: string;
+    laman_web: string;
+    nama_pic: string;
+    nip_pic: string;
+    tanda_tangan: string;
+}
+
 export default function Profile() {
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [pdfActive, setPdfActive] = useState(false);
+    const [cookies, setCookies] = useState<string>("");
+    const [miscData, setMiscData] = useState<misc>();
 
     const PDFDownloadLink = dynamic(
         () => import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
@@ -51,6 +68,7 @@ export default function Profile() {
     const libCookies = new _libCookies();
     const libBooking = new _libBooking();
 
+    const misc = new _misc();
     const booking = new _serviceBooking();
 
     const [activeTab, setActiveTab] = useState("OnProcces");
@@ -63,6 +81,10 @@ export default function Profile() {
     useEffect(() => {
         async function startAuth() {
             const cookies: CookiesDTO = await libCookies.getCookies();
+            const dataMisc: misc = await misc.getDataMisc();
+
+            setMiscData(dataMisc);
+            setCookies(cookies.CERT);
             const dataCookies = await libCookies.parseJwt(cookies);
 
             if (cookies.CERT !== undefined) {
@@ -109,8 +131,8 @@ export default function Profile() {
     const [buktiSik, setBuktiSik] = useState<File | null>(null);
 
     useEffect(() => {
-        async function fetchData(idAccount: number) {
-            const data = await booking.getPemesananByIdUser(idAccount);
+        async function fetchData(idAccount: number, cookies: string) {
+            const data = await booking.getPemesananByIdUser(idAccount, cookies);
 
             if (data.data.length > 0) {
                 const dataOnProcess = data.data.filter(
@@ -145,23 +167,27 @@ export default function Profile() {
             }
         }
 
-        fetchData(idAccount);
+        if (cookies) {
+            fetchData(idAccount, cookies);
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [idAccount]);
 
     useEffect(() => {
-        const interval = setInterval(async () => {
-            if (remainingTime.length > 0) {
-                const updatedRemaining = await libBooking.countdown(
-                    remainingTime
-                );
-                setRemainingTime(updatedRemaining);
-            }
-        }, 1000);
+        if (activeTab === "OnProcces") {
+            const interval = setInterval(async () => {
+                if (remainingTime.length > 0) {
+                    const updatedRemaining = await libBooking.countdown(
+                        remainingTime
+                    );
+                    setRemainingTime(updatedRemaining);
+                }
+            }, 1000);
 
-        return () => {
-            clearInterval(interval); // Clear the interval on unmount
-        };
+            return () => {
+                clearInterval(interval); // Clear the interval on unmount
+            };
+        }
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [remainingTime]);
@@ -179,7 +205,11 @@ export default function Profile() {
             setLoading(true);
             const data = new FormData();
             data.append("bukti_pembayaran", buktiPembayaran as File);
-            const res = await booking.uploadBuktiPembayaran(data, Number(id));
+            const res = await booking.uploadBuktiPembayaran(
+                data,
+                Number(id),
+                cookies
+            );
             if (res.status === true) {
                 router.reload();
             }
@@ -187,8 +217,7 @@ export default function Profile() {
             setLoading(true);
             const data = new FormData();
             data.append("SIK", buktiSik as File);
-            const res = await booking.uploadSIK(data, Number(id));
-            console.log(res);
+            const res = await booking.uploadSIK(data, Number(id), cookies);
             if (res.status === true) {
                 router.reload();
             }
@@ -196,7 +225,7 @@ export default function Profile() {
     };
 
     return (
-        <div className="bg-[#2C666E] h-full relative">
+        <div className={`bg-[#2C666E] min-h-screen relative`}>
             {loading && (
                 <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                     <Loading />
@@ -204,7 +233,7 @@ export default function Profile() {
             )}
             <Navbar isLogin={isLogin} nama={namaAccount} />
 
-            <div className="xl:mx-24 text-[#F0EDEE]">
+            <div className="xl:m-24 text-[#F0EDEE]">
                 <h1 className="ml-8 mt-4 font-bold xl:block xl:text-[36px]">
                     Profile Anda
                 </h1>
@@ -306,33 +335,48 @@ export default function Profile() {
                                         <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101] xl:mt-2">
                                             {remainingTime[index].remainingTime}
                                         </h2>
-<h2 className="text-[16px] lg:text-[15px] font-semibold mt-5 xl:mt-3">
-    Batas akhir pembayaran <br />
-    {(() => {
-        const createdAtDate = new Date(item.createdAt);
-        const tomorrow = new Date(createdAtDate);
-        tomorrow.setDate(createdAtDate.getDate() + 1);
+                                        <h2 className="text-[16px] lg:text-[15px] font-semibold mt-5 xl:mt-3">
+                                            Batas akhir pembayaran <br />
+                                            {(() => {
+                                                const createdAtDate = new Date(
+                                                    item.createdAt
+                                                );
+                                                const tomorrow = new Date(
+                                                    createdAtDate
+                                                );
+                                                tomorrow.setDate(
+                                                    createdAtDate.getDate() + 1
+                                                );
 
-        // Get the time from item.createdAt
-        const hours = createdAtDate.getHours();
-        const minutes = createdAtDate.getMinutes();
+                                                // Get the time from item.createdAt
+                                                const hours =
+                                                    createdAtDate.getHours();
+                                                const minutes =
+                                                    createdAtDate.getMinutes();
 
-        // Set the time to tomorrow's date
-        tomorrow.setHours(hours, minutes);
+                                                // Set the time to tomorrow's date
+                                                tomorrow.setHours(
+                                                    hours,
+                                                    minutes
+                                                );
 
-        return (
-            <div>
-                {tomorrow.toLocaleDateString("id-ID", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                })}<br />
-                {hours}:{minutes}
-            </div>
-        );
-    })()}
-</h2>
+                                                return (
+                                                    <div>
+                                                        {tomorrow.toLocaleDateString(
+                                                            "id-ID",
+                                                            {
+                                                                weekday: "long",
+                                                                year: "numeric",
+                                                                month: "long",
+                                                                day: "numeric",
+                                                            }
+                                                        )}
+                                                        <br />
+                                                        {hours}:{minutes}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </h2>
                                         <h2 className="text-[16px] lg:text-[15px] font-semibold mt-6">
                                             Kode BNI VA
                                         </h2>
@@ -476,13 +520,17 @@ export default function Profile() {
                                             document={
                                                 <PDFDocument
                                                     nama={namaAccount}
-                                                    no_invoice="12"
+                                                    no_invoice={
+                                                        item.id_pemesanan
+                                                    }
                                                     nama_fasilitas={
                                                         item.Fasilitas.nama
                                                     }
-                                                    harga={String(
-                                                        item.total_harga
-                                                    )}
+                                                    harga={item.total_harga}
+                                                    tanggal_pemesanan={
+                                                        item.tanggal_pemesanan
+                                                    }
+                                                    data={miscData as misc}
                                                 />
                                             }
                                             fileName={`invoice-${item.id_pemesanan}.pdf`}
@@ -506,6 +554,7 @@ export default function Profile() {
                     {/* End of The div Card On Going*/}
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

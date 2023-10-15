@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 
 import { Navbar } from "@/components/navbar";
 import Loading from "@/components/loading";
+import Footer from "@/components/footer";
 
 import _serviceBooking from "@/services/booking.service";
 
@@ -44,6 +45,7 @@ export default function Pembayaran() {
     const [remainingTime, setRemainingTime] = useState(`23:59:59`);
     const [buktiPembayaran, setBuktiPembayaran] = useState<File | null>(null);
     const [buktiSik, setBuktiSik] = useState<File | null>(null);
+    const [cookiesCert, setCookiesCert] = useState<string>("");
 
     const setData = (data: PemesananDTO) => {
         if (data.Account.Mahasiswa.length > 0) {
@@ -68,10 +70,13 @@ export default function Pembayaran() {
 
     useEffect(() => {
         async function fetchData(id: string) {
-            const data = await booking.getDetailPemesanan(Number(id));
-            setData(data);
-
             const dataCookies: CookiesDTO = await libCookies.getCookies();
+            setCookiesCert(dataCookies.CERT);
+            const data = await booking.getDetailPemesanan(
+                Number(id),
+                dataCookies.CERT
+            );
+            setData(data);
 
             if (dataCookies.CERT !== undefined) {
                 setIsLogin(true);
@@ -114,7 +119,11 @@ export default function Pembayaran() {
             setIsLoading(true);
             const data = new FormData();
             data.append("bukti_pembayaran", buktiPembayaran as File);
-            const res = await booking.uploadBuktiPembayaran(data, Number(id));
+            const res = await booking.uploadBuktiPembayaran(
+                data,
+                Number(id),
+                cookiesCert
+            );
             if (res.status === true) {
                 router.push("/account/profile");
             }
@@ -122,7 +131,7 @@ export default function Pembayaran() {
             setIsLoading(true);
             const data = new FormData();
             data.append("SIK", buktiSik as File);
-            const res = await booking.uploadSIK(data, Number(id));
+            const res = await booking.uploadSIK(data, Number(id), cookiesCert);
             if (res.status === true) {
                 router.push("/account/profile");
             }
@@ -288,6 +297,7 @@ export default function Pembayaran() {
                     </button>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

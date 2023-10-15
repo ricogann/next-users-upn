@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 import React from "react";
 import { useState, useEffect } from "react";
 import {
@@ -22,6 +23,15 @@ interface misc {
     nama_pic: string;
     nip_pic: string;
     tanda_tangan: string;
+}
+
+interface inputMisc {
+    nama: string;
+    no_invoice: number;
+    nama_fasilitas: string;
+    harga: number;
+    tanggal_pemesanan: string;
+    data: misc;
 }
 
 const styles = StyleSheet.create({
@@ -106,81 +116,46 @@ const styles = StyleSheet.create({
     },
 });
 
-interface PDFDocumentProps {
-    nama: string;
-    no_invoice: string;
-    nama_fasilitas: string;
-    harga: string;
-}
-
-const PDFDocument: React.FC<PDFDocumentProps> = ({
+const PDFDocument: React.FC<inputMisc> = ({
     nama,
     no_invoice,
     nama_fasilitas,
     harga,
+    tanggal_pemesanan,
+    data,
 }) => {
-    // const logo_bpu = "https://api.ricogann.com/assets/logo-bpu.png";
-    // const ttd_rico = "https://api.ricogann.com/assets/ttd-rico.png";
-
-    const invoiceData = {
-        invoiceNumber: "INV-2023-001",
-        date: "October 15, 2023",
-        customer: {
-            name: "John Doe",
-            address: "123 Main Street, City, Country",
-        },
-        items: [
-            { name: "Item 1", quantity: 2, price: 20 },
-            { name: "Item 2", quantity: 1, price: 30 },
-            { name: "Item 3", quantity: 3, price: 15 },
-        ],
-    };
-
-    const misc = new _misc();
-
-    const [dataMisc, setDataMisc] = useState<misc>();
-
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const dataMisc = await misc.getDataMisc();
-
-                setDataMisc(dataMisc.data);
-            } catch (error) {
-                console.error("error fetching data fasilitas ", error);
-            }
-        }
-        fetchData();
-    });
-
-    console.log(dataMisc);
-
     return (
         <Document>
             <Page size="A4" style={styles.page}>
                 <View style={styles.header}>
-                    <Image src={"https://api.ricogann.com/assets/"+dataMisc?.logo_instansi} style={styles.image} />
+                    <Image
+                        src={
+                            "https://api.ricogann.com/assets/" +
+                            data.logo_instansi
+                        }
+                        style={styles.image}
+                    />
 
                     <View style={styles.center}>
                         <Text style={styles.upn}>
                             Universitas Pembangunan Nasional
                         </Text>
                         <Text style={styles.jawatimur}>Veteran Jawa Timur</Text>
-                        <Text style={styles.bpu}>{dataMisc?.nama_instansi}</Text>
+                        <Text style={styles.bpu}>{data.nama_instansi}</Text>
                     </View>
                 </View>
 
                 <View style={styles.info}>
-                    <Text>Email : {dataMisc?.email}</Text>
-                    <Text>Mobile : {dataMisc?.no_hp}</Text>
-                    <Text>Laman : {dataMisc?.laman_web}</Text>
+                    <Text>Email : {data.email}</Text>
+                    <Text>Mobile : {data.no_hp}</Text>
+                    <Text>Laman : {data.laman_web}</Text>
                 </View>
 
                 <Text style={styles.line}></Text>
 
                 <View style={styles.invoiceInfo}>
                     <View style={styles.invoiceInfoRow}>
-                        <Text>Date: {invoiceData.date}</Text>
+                        <Text>Date: {tanggal_pemesanan.split("T")[0]}</Text>
                         <Text>Invoice #: {no_invoice}</Text>
                     </View>
                     <View style={styles.invoiceInfoRow}>
@@ -191,19 +166,23 @@ const PDFDocument: React.FC<PDFDocumentProps> = ({
                     </View>
                 </View>
 
-                <InvoiceTable nama_fasilitas={nama_fasilitas} harga={harga} />
+                <InvoiceTable
+                    nama_fasilitas={nama_fasilitas}
+                    harga={String(harga)}
+                />
                 <Text style={styles.status}>Status: Paid Off</Text>
 
                 <View style={styles.signatureContainer}>
                     <Image
-                        src={"https://api.ricogann.com/assets/"+dataMisc?.tanda_tangan} // Replace with the URL of your signature image
+                        src={
+                            "https://api.ricogann.com/assets/" +
+                            data.tanda_tangan
+                        } // Replace with the URL of your signature image
                         style={styles.signature}
                     />
+                    <Text style={styles.signatureText}>{data.nama_pic}</Text>
                     <Text style={styles.signatureText}>
-                        {dataMisc?.nama_pic}
-                    </Text>
-                    <Text style={styles.signatureText}>
-                        NIP. {dataMisc?.nip_pic}
+                        NIP. {data.nip_pic}
                     </Text>
                 </View>
             </Page>

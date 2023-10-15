@@ -7,6 +7,7 @@ import { BiCalendar, BiBookmark } from "react-icons/bi";
 import { FaDollarSign } from "react-icons/fa";
 import { useRouter } from "next/router";
 import Loading from "@/components/loading";
+import Footer from "@/components/footer";
 
 import { Login } from "@/components/login-form";
 import { Regis } from "@/components/registration-form";
@@ -67,14 +68,13 @@ export default function DetailFasilitas() {
         const init = async (id: number) => {
             const data = await fasilitas.getFasilitasById(Number(id));
             const harga = await fasilitas.getHarga(Number(id));
+            const cookies: CookiesDTO = await libCookies.getCookies();
 
             setData(data);
             setHarga(harga);
 
-            const dataBooking = await booking.getPemesanan();
+            const dataBooking = await booking.getPemesanan(cookies.CERT);
             setPemesanan(dataBooking);
-
-            const cookies: CookiesDTO = await libCookies.getCookies();
 
             if (cookies.CERT !== undefined) {
                 setIsLogin(true);
@@ -399,8 +399,8 @@ export default function DetailFasilitas() {
                         </div>
                     </div>
                 </div>
-                {/* End Of content */}
             </div>
+            <Footer />
         </div>
     );
 }

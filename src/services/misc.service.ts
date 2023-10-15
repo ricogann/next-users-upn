@@ -8,7 +8,7 @@ class _misc extends _core {
             const res = await fetch(`${this.baseUrl}/api/misc`);
             const data = await res.json();
 
-            return data;
+            return data.data;
         } catch (error) {
             console.log(error);
         }

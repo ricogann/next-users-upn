@@ -8,20 +8,32 @@ class _serviceBooking extends _core {
 
     private baseUrl = _core.getBaseUrl();
 
-    async getPemesanan() {
-        const response = await fetch(`${this.baseUrl}/api/booking`);
+    async getPemesanan(cookie: string) {
+        const response = await fetch(`${this.baseUrl}/api/booking`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${cookie}`,
+            },
+        });
         const data = await response.json();
 
         return data.data;
     }
 
-    async getPemesananByIdUser(idAccount: number) {
+    async getPemesananByIdUser(idAccount: number, cookie: string) {
         try {
             const res = await fetch(
-                `${this.baseUrl}/api/booking/user/${idAccount}`
+                `${this.baseUrl}/api/booking/user/${idAccount}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${cookie}`,
+                    },
+                }
             );
             const data = await res.json();
-            console.log(data);
             return data;
         } catch (error) {
             console.log(error);
@@ -29,19 +41,26 @@ class _serviceBooking extends _core {
         }
     }
 
-    async getDetailPemesanan(id: number) {
-        const response = await fetch(`${this.baseUrl}/api/booking/${id}`);
+    async getDetailPemesanan(id: number, cookie: string) {
+        const response = await fetch(`${this.baseUrl}/api/booking/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${cookie}`,
+            },
+        });
         const data = await response.json();
         console.log(data);
 
         return data.data;
     }
 
-    async addPemesanan(data: BookingDTO) {
+    async addPemesanan(data: BookingDTO, cookie: string) {
         const response = await fetch(`${this.baseUrl}/api/booking/add`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${cookie}`,
             },
             body: JSON.stringify(data),
         });
@@ -49,24 +68,30 @@ class _serviceBooking extends _core {
         return await response.json();
     }
 
-    async uploadSIK(data: FormData, id: number) {
+    async uploadSIK(data: FormData, id: number, cookie: string) {
         const response = await fetch(
             `${this.baseUrl}/api/booking/upload-sik/${id}`,
             {
                 method: "PUT",
                 body: data,
+                headers: {
+                    Authorization: `Bearer ${cookie}`,
+                },
             }
         );
 
         return await response.json();
     }
 
-    async uploadBuktiPembayaran(data: FormData, id: number) {
+    async uploadBuktiPembayaran(data: FormData, id: number, cookie: string) {
         const response = await fetch(
             `${this.baseUrl}/api/booking/upload-bukti/${id}`,
             {
                 method: "PUT",
                 body: data,
+                headers: {
+                    Authorization: `Bearer ${cookie}`,
+                },
             }
         );
 

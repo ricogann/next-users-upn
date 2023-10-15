@@ -11,6 +11,7 @@ import { AiFillClockCircle } from "react-icons/ai";
 import { MdPayment } from "react-icons/md";
 import { useRouter } from "next/router";
 import Loading from "@/components/loading";
+import Footer from "@/components/footer";
 
 import _serviceBooking from "@/services/booking.service";
 import _serviceFasilitas from "@/services/fasilitas.service";
@@ -68,6 +69,7 @@ export default function Booking() {
     const [statusBook, setStatusBook] = useState<boolean>(true);
     const [bookMessage, setBookMessage] = useState<string>("");
     const [isAsrama, setIsAsrama] = useState<boolean>(false);
+    const [cookiesCert, setCookiesCert] = useState<string>("");
 
     const jamToNumber = (jam: string) => {
         const convertJam = jam.split(":").join("");
@@ -135,7 +137,7 @@ export default function Booking() {
     useEffect(() => {
         async function init(id: string) {
             const cookies: CookiesDTO = await libCookies.getCookies();
-
+            setCookiesCert(cookies.CERT);
             if (cookies.CERT === undefined) {
                 setIsLogin(false);
                 router.push("/");
@@ -151,7 +153,7 @@ export default function Booking() {
                 setIsAsrama(true);
             }
 
-            const dataBooking = await booking.getPemesanan();
+            const dataBooking = await booking.getPemesanan(cookies.CERT);
             setPemesanan(dataBooking);
 
             const Account: AccountDTO = await libCookies.parseJwt(cookies);
@@ -217,7 +219,10 @@ export default function Booking() {
                 );
 
                 if (addMahasiswaToKamar !== undefined) {
-                    const createPemesanan = await booking.addPemesanan(data);
+                    const createPemesanan = await booking.addPemesanan(
+                        data,
+                        cookiesCert
+                    );
                     if (createPemesanan.status === true) {
                         setLoading(false);
                         alert("Berhasil Booking");
@@ -236,7 +241,10 @@ export default function Booking() {
                 alert("Tidak bisa daftar, semester anda lebih dari semester 3");
             }
         } else {
-            const createPemesanan = await booking.addPemesanan(data);
+            const createPemesanan = await booking.addPemesanan(
+                data,
+                cookiesCert
+            );
             if (createPemesanan.status === true) {
                 setLoading(true);
                 alert("Berhasil Booking");
@@ -351,7 +359,7 @@ export default function Booking() {
                                                                 }
                                                             />
                                                             <button
-                                                                className="bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] w-14 h-8 xl:h-0 xl:w-24 rounded-lg"
+                                                                className="bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] w-14 h-8 xl:h-8 xl:w-24 rounded-lg"
                                                                 onClick={
                                                                     checkAvailability
                                                                 }
@@ -653,6 +661,7 @@ export default function Booking() {
                             </div>
                         </div>
                     </div>
+                    <Footer />
                 </div>
             ) : (
                 <div className="w-full h-screen flex justify-center items-center">

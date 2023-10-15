@@ -47,13 +47,13 @@ export default function Footer() {
             try {
                 const dataMisc = await misc.getDataMisc();
 
-                setDataMisc(dataMisc.data);
+                setDataMisc(dataMisc);
             } catch (error) {
                 console.error("error fetching data fasilitas ", error);
             }
         }
         fetchData();
-    });
+    }, []);
 
     return (
         <nav className="bg-[rgb(240,237,238)] shadow-xl lg:p-3">
