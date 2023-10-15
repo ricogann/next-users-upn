@@ -7,19 +7,7 @@ class _serviceUsers extends _core {
 
     private baseUrl = _core.getBaseUrl();
 
-    async getAccountById(id: number) {
-        try {
-            const res = await fetch(`${this.baseUrl}/api/users/account/${id}`);
-
-            const data = await res.json();
-            return data.data;
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    }
-
-    async checkExpiredMahasiswa(id: number) {
+    async checkExpiredMahasiswa(id: number, cookie: string) {
         try {
             const res = await fetch(
                 `${this.baseUrl}/api/users/mahasiswa/check/${id}`,
@@ -27,6 +15,7 @@ class _serviceUsers extends _core {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        Authorization: `Bearer ${cookie}`,
                     },
                 }
             );

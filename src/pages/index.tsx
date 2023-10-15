@@ -12,7 +12,6 @@ import Loading from "@/components/loading";
 // Services
 import _serviceFasilitas from "@/services/fasilitas.service";
 import _serviceUsers from "@/services/users.service";
-import _serviceKamar from "@/services/kamar.service";
 
 // Lib
 import _libFasilitas from "@/lib/fasilitas";

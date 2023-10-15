@@ -50,8 +50,6 @@ class _serviceBooking extends _core {
             },
         });
         const data = await response.json();
-        console.log(data);
-
         return data.data;
     }
 
@@ -98,13 +96,14 @@ class _serviceBooking extends _core {
         return await response.json();
     }
 
-    async addMahasiswaTokamar(id: number, idAccount: number) {
+    async addMahasiswaTokamar(id: number, idAccount: number, cookie: string) {
         const res = await fetch(
             `${this.baseUrl}/api/booking/kamarAsrama/${id}`,
             {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${cookie}`,
                 },
                 body: JSON.stringify({ idAccount }),
             }

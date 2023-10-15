@@ -211,11 +211,12 @@ export default function Booking() {
         };
 
         if (isAsrama) {
-            if (await users.checkExpiredMahasiswa(idAccount)) {
+            if (await users.checkExpiredMahasiswa(idAccount, cookiesCert)) {
                 setLoading(true);
                 const addMahasiswaToKamar = await booking.addMahasiswaTokamar(
                     idHarga,
-                    idAccount
+                    idAccount,
+                    cookiesCert
                 );
 
                 if (addMahasiswaToKamar !== undefined) {
