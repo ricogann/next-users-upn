@@ -30,6 +30,7 @@ export default function Home() {
 
     const [isLogin, setIsLogin] = useState(false);
     const [namaAccount, setNama] = useState<string>("");
+    const [role, setRole] = useState<string>("");
 
     const [dataFasilitas, setDataFasilitas] = useState<FasilitasDTO[][]>([]);
     const [dataFasilitasMobile, setDataFasilitasMobile] = useState<
@@ -71,6 +72,9 @@ export default function Home() {
                     setIsLogin(true);
                     setNama(
                         JSON.parse(atob(dataCookies.CERT.split(".")[1])).nama
+                    );
+                    setRole(
+                        JSON.parse(atob(dataCookies.CERT.split(".")[1])).role
                     );
                 } else {
                     setIsLogin(false);
@@ -292,8 +296,20 @@ export default function Home() {
                                         More Info
                                     </button>
                                     <button
-                                        className="w-24 bg-[#07393C] hover:bg-[#F0EDEE] hover:text-[#0A090C] text-white font-bold p-1 lg:p-2 text-[10px] border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg"
+                                        className={`${
+                                            dataInfo?.nama === "Asrama" &&
+                                            role === "umum"
+                                                ? "bg-gray-500 text-black"
+                                                : ""
+                                        }
+                                         w-24 bg-[#07393C] hover:bg-[#F0EDEE] hover:text-[#0A090C] text-white font-bold p-1 lg:p-2 text-[10px] border-black border-[2px] xl:text-[17px] xl:w-32 rounded-lg`}
                                         onClick={handleBook}
+                                        disabled={
+                                            dataInfo?.nama === "Asrama" &&
+                                            role === "umum"
+                                                ? true
+                                                : false
+                                        }
                                     >
                                         Book Now
                                     </button>

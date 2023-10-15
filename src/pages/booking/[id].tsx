@@ -512,9 +512,11 @@ export default function Booking() {
                                 </div>
                                 <div
                                     className={`${
-                                        isAsrama && role !== "umum"
-                                            ? "block"
-                                            : "hidden"
+                                        role !== "umum"
+                                            ? isAsrama
+                                                ? "block"
+                                                : "hidden"
+                                            : "block"
                                     }`}
                                 >
                                     <h2
@@ -559,7 +561,7 @@ export default function Booking() {
                                             ? isAsrama
                                                 ? "block"
                                                 : "hidden"
-                                            : "hidden"
+                                            : "block"
                                     } text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold `}
                                 >
                                     Biaya
@@ -570,7 +572,7 @@ export default function Booking() {
                                             ? isAsrama
                                                 ? "block"
                                                 : "hidden"
-                                            : "hidden"
+                                            : "block"
                                     } bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row`}
                                 >
                                     <FaDollarSign className="text-[#0A090C] text-xl" />

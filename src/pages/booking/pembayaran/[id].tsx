@@ -255,7 +255,7 @@ export default function Pembayaran() {
                             ? namaFasilitas === "Asrama"
                                 ? "Upload Bukti Pembayaran"
                                 : "Upload SIK"
-                            : "Upload SIK"}
+                            : "Upload Bukti Pembayaran"}
                     </h1>
                     <form
                         className={`${
