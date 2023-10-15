@@ -306,11 +306,33 @@ export default function Profile() {
                                         <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101] xl:mt-2">
                                             {remainingTime[index].remainingTime}
                                         </h2>
-                                        <h2 className="text-[16px] lg:text-[15px] font-semibold mt-5 xl:mt-3">
-                                            Batas akhir pembayaran <br />
-                                            Sabtu, 02 September 2023 <br />
-                                            12:59
-                                        </h2>
+<h2 className="text-[16px] lg:text-[15px] font-semibold mt-5 xl:mt-3">
+    Batas akhir pembayaran <br />
+    {(() => {
+        const createdAtDate = new Date(item.createdAt);
+        const tomorrow = new Date(createdAtDate);
+        tomorrow.setDate(createdAtDate.getDate() + 1);
+
+        // Get the time from item.createdAt
+        const hours = createdAtDate.getHours();
+        const minutes = createdAtDate.getMinutes();
+
+        // Set the time to tomorrow's date
+        tomorrow.setHours(hours, minutes);
+
+        return (
+            <div>
+                {tomorrow.toLocaleDateString("id-ID", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                })}<br />
+                {hours}:{minutes}
+            </div>
+        );
+    })()}
+</h2>
                                         <h2 className="text-[16px] lg:text-[15px] font-semibold mt-6">
                                             Kode BNI VA
                                         </h2>
