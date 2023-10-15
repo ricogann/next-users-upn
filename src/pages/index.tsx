@@ -25,8 +25,6 @@ import CookiesDTO from "@/interfaces/cookiesDTO";
 export default function Home() {
     const router = useRouter();
     const fasilitas = new _serviceFasilitas();
-    const users = new _serviceUsers();
-    const kamar = new _serviceKamar();
 
     const cookies = new _libCookies();
     const libFasilitas = new _libFasilitas();
@@ -35,6 +33,9 @@ export default function Home() {
     const [namaAccount, setNama] = useState<string>("");
 
     const [dataFasilitas, setDataFasilitas] = useState<FasilitasDTO[][]>([]);
+    const [dataFasilitasMobile, setDataFasilitasMobile] = useState<
+        FasilitasDTO[][]
+    >([]);
     const [dataInfo, setInfo] = useState<FasilitasDTO>();
 
     const [openModal, setOpenModal] = useState(false);
@@ -55,31 +56,17 @@ export default function Home() {
     useEffect(() => {
         async function fetchData() {
             try {
+                const dataCookies: CookiesDTO = await cookies.getCookies();
                 const data: FasilitasDTO[] = await fasilitas.getFasilitas();
 
                 const splitData: FasilitasDTO[][] =
-                    await libFasilitas.splitData(data);
+                    await libFasilitas.splitData(data, 5);
+
+                const splitDataMobile: FasilitasDTO[][] =
+                    await libFasilitas.splitData(data, 4);
 
                 setDataFasilitas(splitData);
-
-                const dataCookies: CookiesDTO = await cookies.getCookies();
-
-                const user = await users.getAccountById(
-                    Number((await cookies.parseJwt(dataCookies)).id_account)
-                );
-
-                if (user.Mahasiswa.length > 0) {
-                    const checkExpiredMahasiswa =
-                        await users.checkExpiredMahasiswa(
-                            user.Mahasiswa[0].id_account
-                        );
-
-                    if (checkExpiredMahasiswa === false) {
-                        await kamar.deleteExpiredMahasiswa(
-                            user.Mahasiswa[0].id_account
-                        );
-                    }
-                }
+                setDataFasilitasMobile(splitDataMobile);
 
                 if (dataCookies.CERT !== undefined) {
                     setIsLogin(true);
@@ -95,6 +82,8 @@ export default function Home() {
         }
 
         fetchData();
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleBook = async () => {
@@ -148,7 +137,7 @@ export default function Home() {
             </div>
             <div className="p-10 xl:mx-24">
                 <div className="carousel carousel-center md:hidden">
-                    {dataFasilitas.map((data, index) => {
+                    {dataFasilitasMobile.map((data, index) => {
                         return (
                             <div
                                 className="carousel-item grid grid-cols-2 gap-3 mx-5"

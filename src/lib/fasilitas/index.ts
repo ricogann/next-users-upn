@@ -14,7 +14,10 @@ interface Fasilitas {
 }
 
 class _libFasilitas {
-    async splitData(data: Fasilitas[]): Promise<Fasilitas[][]> {
+    async splitData(
+        data: Fasilitas[],
+        dataPerPage: number
+    ): Promise<Fasilitas[][]> {
         try {
             const dataFasilitas: Fasilitas[][] = [];
             let groupFasilitas: Fasilitas[] = [];
@@ -22,7 +25,10 @@ class _libFasilitas {
             for (let i = 0; i < data.length; i++) {
                 groupFasilitas.push(data[i]);
 
-                if (groupFasilitas.length === 5 || i === data.length - 1) {
+                if (
+                    groupFasilitas.length === dataPerPage ||
+                    i === data.length - 1
+                ) {
                     dataFasilitas.push(groupFasilitas);
                     groupFasilitas = [];
                 }

@@ -208,8 +208,6 @@ export default function Booking() {
             status: "Menunggu Pembayaran",
         };
 
-        console.log(data);
-
         if (isAsrama) {
             if (await users.checkExpiredMahasiswa(idAccount)) {
                 setLoading(true);
@@ -279,7 +277,7 @@ export default function Booking() {
     return (
         <div className="">
             {isLogin ? (
-                <div className="h-screen md:h-full bg-[#2C666E] relative">
+                <div className="h-full bg-[#2C666E] relative">
                     {loading && (
                         <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
                             <Loading />
@@ -309,7 +307,7 @@ export default function Booking() {
                                             alt="foto"
                                             width={100}
                                             height={100}
-                                            className="xl:w-full xl:h-[300px] rounded-[15px]"
+                                            className="hidden lg:block xl:w-full xl:h-[300px] rounded-[15px]"
                                         />
                                     )}
                                     <div className="flex flex-col md:mt-6 gap-3">
@@ -319,7 +317,7 @@ export default function Booking() {
                                         </h2>
                                         <div className="flex items-start gap-2">
                                             <HiLocationMarker className="hidden md:block text-[#0A090C] xl:text-3xl" />
-                                            <h2 className="text-[10px] md:text-[18px] mt-2 md:mt-0 text-[#0A090C] xl:w-[380px]">
+                                            <h2 className="text-[12px] md:text-[18px] text-[#0A090C] xl:w-[380px]">
                                                 {dataFasilitas &&
                                                     dataFasilitas.alamat}
                                             </h2>
@@ -327,10 +325,10 @@ export default function Booking() {
                                         <div className="flex items-start gap-2">
                                             <MdPayment className="text-[#0A090C] font-bold text-3xl" />
                                             <div className="flex flex-col">
-                                                <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-[#0A090C]">
+                                                <h2 className="text-[12px] md:text-[12px] xl:text-[17px] text-[#0A090C]">
                                                     Mode Of Payment
                                                 </h2>
-                                                <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-[#0A090C]">
+                                                <h2 className="text-[12px] md:text-[12px] xl:text-[17px] text-[#0A090C]">
                                                     Virtual Account
                                                 </h2>
                                             </div>
@@ -339,7 +337,7 @@ export default function Booking() {
                                             <div className="flex gap-2">
                                                 <BiCalendar className="text-[#0A090C] font-bold text-3xl" />
                                                 <div className="flex flex-col gap-2">
-                                                    <h2 className="text-[10px] md:text-[12px] xl:text-[17px] text-[#0A090C]">
+                                                    <h2 className="text-[12px] md:text-[12px] xl:text-[17px] text-[#0A090C]">
                                                         Cek Ketersediaan
                                                         Fasilitas
                                                     </h2>
@@ -347,13 +345,13 @@ export default function Booking() {
                                                         <div className="flex items-center gap-3">
                                                             <input
                                                                 type="date"
-                                                                className="border rounded-md px-2 py-1 w-[100px] text-[10px] xl:text-[15px] h-[20px] xl:h-[30px] xl:w-[150px] focus:outline-none focus:border-blue-500"
+                                                                className="border rounded-md px-2 py-1 w-[100px] text-[12px] xl:text-[15px] xl:h-[30px] xl:w-[150px] h-8 focus:outline-none focus:border-blue-500"
                                                                 onChange={
                                                                     handleDate
                                                                 }
                                                             />
                                                             <button
-                                                                className="bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] xl:w-24 rounded-lg"
+                                                                className="bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] w-14 h-8 xl:h-0 xl:w-24 rounded-lg"
                                                                 onClick={
                                                                     checkAvailability
                                                                 }
@@ -426,7 +424,7 @@ export default function Booking() {
                             </div>
 
                             <div className="flex flex-col xl:gap-4 xl:p-7 lg:bg-[#FFFFFF] rounded-[15px] lg:flex-1 mt-5 xl:mt-0">
-                                <h2 className="text-[12px] lg:text-[18px] text-[#0A090C] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] mb-1 text-white md:text-[#0A090C] font-semibold ">
                                     Nama
                                 </h2>
                                 <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
@@ -434,7 +432,7 @@ export default function Booking() {
                                     <input
                                         name={`nama`}
                                         type="text"
-                                        className="text-[10px] lg:text-[14px] ml-2 w-full p-1 text-[#0A090C] font-regular bg-[#fff] xl:bg-[#F7F8FA]"
+                                        className="text-[12px] lg:text-[14px] ml-2 w-full p-1 text-[#0A090C] font-regular bg-[#fff] xl:bg-[#F7F8FA]"
                                         value={namaAccount}
                                         onChange={handleInput}
                                     />
@@ -442,7 +440,7 @@ export default function Booking() {
                                 <h2
                                     className={`${
                                         isAsrama ? "hidden" : "block"
-                                    } text-[12px] lg:text-[18px] text-[#0A090C] font-semibold`}
+                                    } text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold`}
                                 >
                                     Tanggal
                                 </h2>
@@ -460,7 +458,7 @@ export default function Booking() {
                                                 .toISOString()
                                                 .split("T")[0]
                                         }
-                                        className="text-[10px] lg:text-[14px] ml-4 rounded bg-[#fff] xl:bg-[#F7F8FA] text-[#0A090C]"
+                                        className="text-[12px] lg:text-[14px] ml-4 rounded bg-[#fff] xl:bg-[#F7F8FA] text-[#0A090C]"
                                         value={tanggal}
                                         onChange={handleInput}
                                     />
@@ -470,7 +468,7 @@ export default function Booking() {
                                         isAsrama ? "hidden" : "block"
                                     }`}
                                 >
-                                    <h2 className="text-[12px] lg:text-[18px] text-[#0A090C] font-semibold ">
+                                    <h2 className="text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold ">
                                         Jam Checkin
                                     </h2>
                                     <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
@@ -478,7 +476,7 @@ export default function Booking() {
                                         <input
                                             name="jam_checkin"
                                             type="time"
-                                            className=" text-[10px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]"
+                                            className=" text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]"
                                             value={jam_checkin}
                                             onChange={handleInput}
                                         />
@@ -489,7 +487,7 @@ export default function Booking() {
                                         isAsrama ? "hidden" : "block"
                                     }`}
                                 >
-                                    <h2 className="text-[12px] lg:text-[18px] text-[#0A090C] font-semibold ">
+                                    <h2 className="text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold ">
                                         Jam Checkout
                                     </h2>
                                     <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
@@ -497,7 +495,7 @@ export default function Booking() {
                                         <input
                                             name="jam_checkout"
                                             type="time"
-                                            className=" text-[10px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]"
+                                            className=" text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]"
                                             value={jam_checkout}
                                             onChange={handleInput}
                                         />
@@ -521,7 +519,7 @@ export default function Booking() {
                                         <AiFillClockCircle className="text-[#0A090C] text-xl" />
                                         <select
                                             name={`harga`}
-                                            className=" text-[10px] lg:text-[14px] ml-4 rounded text-[#0A090C] font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
+                                            className=" text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
                                             onChange={handleHarga}
                                         >
                                             {dataHarga &&
@@ -553,7 +551,7 @@ export default function Booking() {
                                                 ? "block"
                                                 : "hidden"
                                             : "hidden"
-                                    } text-[12px] lg:text-[18px] text-[#0A090C] font-semibold `}
+                                    } text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold `}
                                 >
                                     Biaya
                                 </h2>
@@ -571,7 +569,7 @@ export default function Booking() {
                                         type="text"
                                         className={`${
                                             isAsrama ? "block" : "hidden"
-                                        } text-[10px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]`}
+                                        } text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]`}
                                         readOnly
                                         value={`Rp${(harga * 2 + 250000)
                                             .toString()
@@ -584,7 +582,7 @@ export default function Booking() {
                                         type="text"
                                         className={`${
                                             isAsrama ? "hidden" : "block"
-                                        } text-[10px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]`}
+                                        } text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]`}
                                         readOnly
                                         value={`Rp${(
                                             harga *
@@ -597,56 +595,38 @@ export default function Booking() {
                                             )}`}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[18px] text-[#0A090C] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold ">
                                     No. Telp
                                 </h2>
                                 <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
                                     <BiSolidPhoneCall className="text-[#0A090C] text-xl" />
                                     <input
                                         type="number"
-                                        className="text-[10px] lg:text-[14px] ml-4 text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa] rounded"
+                                        className="text-[12px] lg:text-[14px] ml-4 text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa] rounded"
                                         value={noTelpAccount}
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2 className="text-[12px] lg:text-[18px] text-[#0A090C] font-semibold ">
+                                <h2 className="text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold ">
                                     Keterangan
                                 </h2>
                                 <div className="  bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
                                     <BiSolidPencil className="text-[#0A090C]" />
                                     <textarea
                                         name="keterangan"
-                                        className="text-[10px] lg:text-[12px] ml-2 text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa] rounded w-full h-full"
+                                        className="text-[12px] lg:text-[12px] ml-2 text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa] rounded w-full h-full"
                                         placeholder="Saya meminjam fasilitas ini untuk..."
                                         value={keterangan}
                                         onChange={handleTextarea}
                                     />
                                 </div>
 
-                                {/* <div className="mt-5 bg-[#FFFFFF] flex flex-wrap rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <div className="p-3 flex flex-row ">
-                                        <input
-                                            type="checkbox"
-                                            className="ml-2"
-                                        />
-                                        <h2 className="text-[10px] lg:text-[12px] ml-5">
-                                            Menyetujui Persyaratan Sewa Asrama.{" "}
-                                            <br />
-                                            <a
-                                                className="font-[#2400FF]"
-                                                href=""
-                                            >
-                                                Lembar Persyaratan.
-                                            </a>
-                                        </h2>
-                                    </div>
-                                </div> */}
                                 <h1
                                     className={`${
                                         statusBook === true ? "hidden" : "block"
                                     } ${
                                         isAsrama ? "hidden" : "block"
-                                    } text-red-500`}
+                                    } text-red-500 mt-4 md:mt-0`}
                                 >
                                     {bookMessage}
                                 </h1>

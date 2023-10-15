@@ -35,24 +35,16 @@ export default function Footer() {
 
     return (
         <nav className="bg-[#F0EDEE] shadow-xl">
-            <div className=" container mx-auto flex justify-between items-center">
-                <div className="flex h-[120px] items-center justify-between w-full px-6 py-3 md:px-8">
-                    <div className=" md:gap-14 text-[#0A090C] font-semibold font-montserrat">
-                        <div className="flex flex-row gap-5">
-                            <div className="flex flex-col gap-5">
-                                <h1 className="">{dataMisc?.laman_web} </h1>
-                                <h1 className="">{dataMisc?.instagram}</h1>
-                            </div>
-                            <div className="flex flex-col gap-5">
-                                <h1 className="">{dataMisc?.no_hp} </h1>
-                                <h1 className="">{dataMisc?.email}</h1>
-                            </div>
-                        </div>
-                    </div>
+            <div className="flex flex-col gap-5">
+                <div className="flex flex-col gap-5">
+                    <h1 className="">{dataMisc?.laman_web} </h1>
+                    <h1 className="">{dataMisc?.instagram}</h1>
+                </div>
+                <div className="flex flex-col gap-5">
+                    <h1 className="">{dataMisc?.no_hp} </h1>
+                    <h1 className="">{dataMisc?.email}</h1>
                 </div>
             </div>
-
-            {/* Mobile Menu (Hidden on Large Screens) */}
         </nav>
     );
 }

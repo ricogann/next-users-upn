@@ -53,14 +53,17 @@ const Navbar: React.FC<Props> = ({
     return (
         <nav className="bg-[#F0EDEE] shadow-xl">
             <div className=" container mx-auto flex justify-between items-center">
-                <div className="flex items-center justify-between w-full px-6 py-3 md:px-8">
-                    <a className="text-white font-semibold text-lg ">
+                <div className="flex items-center justify-between w-full px-12 py-3 md:px-8">
+                    <div
+                        className="text-white font-semibold text-lg"
+                        onClick={() => router.push("/")}
+                    >
                         <Image
                             src={logo_bpu}
                             alt="logo"
-                            className="w-[130px] h-[90px]"
+                            className="w-[110px] h-[70px]"
                         />
-                    </a>
+                    </div>
 
                     <div className="relative">
                         <RxHamburgerMenu
@@ -167,8 +170,6 @@ const Navbar: React.FC<Props> = ({
                     </div>
                 </div>
             </div>
-
-            {/* Mobile Menu (Hidden on Large Screens) */}
         </nav>
     );
 };

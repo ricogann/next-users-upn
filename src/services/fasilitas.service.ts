@@ -9,7 +9,13 @@ class _serviceFasilitas extends _core {
 
     async getFasilitas() {
         try {
-            const response = await fetch(`${this.baseUrl}/api/fasilitas`);
+            const response = await fetch(`${this.baseUrl}/api/fasilitas`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    // Authorization: `Bearer ${cookie}`,
+                },
+            });
             const data = await response.json();
 
             return data.data;

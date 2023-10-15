@@ -93,6 +93,7 @@ export default function Pembayaran() {
             const time = await libBooking.countdown([
                 { tanggal_pemesanan: createdAt, remainingTime },
             ]);
+            setRemainingTime(time[0].remainingTime);
         }, 1000);
 
         return () => clearInterval(interval);

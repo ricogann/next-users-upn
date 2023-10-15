@@ -162,6 +162,8 @@ export default function Profile() {
         return () => {
             clearInterval(interval); // Clear the interval on unmount
         };
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [remainingTime]);
 
     const handleInputFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
