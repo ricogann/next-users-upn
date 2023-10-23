@@ -105,6 +105,39 @@ class _serviceAuth extends _core {
             throw error;
         }
     }
+
+    async sendRegisterUKM(data: FormData) {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/auth/register/ukm`, {
+                method: "POST",
+                body: data,
+            });
+
+            const resData = await res.json();
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async sendRegisterOrganisasi(data: FormData) {
+        try {
+            const res = await fetch(
+                `${this.baseUrl}/api/auth/register/organisasi`,
+                {
+                    method: "POST",
+                    body: data,
+                }
+            );
+
+            const resData = await res.json();
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
 }
 
 export default _serviceAuth;
