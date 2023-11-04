@@ -147,36 +147,6 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                     alert("gagal regis");
                 }
             }
-        } else if (role === "dosen") {
-            if (
-                nipRegis === "" ||
-                namaRegis === "" ||
-                emailRegis === "" ||
-                passwordRegis === "" ||
-                noTelpRegis === "" ||
-                buktiRegis === null
-            ) {
-                setError(true);
-            } else {
-                setIsLoading(true);
-                const data = new FormData();
-                data.append("nama", namaRegis);
-                data.append("NIP", nipRegis);
-                data.append("email", emailRegis);
-                data.append("password", passwordRegis);
-                data.append("no_telp", noTelpRegis);
-                data.append("bukti_identitas", buktiRegis as Blob);
-                data.append("status", "0");
-
-                const send = await auth.sendRegisterDosen(data);
-
-                if (send) {
-                    changeModal();
-                    setIsLoading(false);
-                } else {
-                    alert("gagal regis");
-                }
-            }
         } else if (role === "umum") {
             if (
                 nikRegis === "" ||
@@ -290,7 +260,6 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                             onChange={(e) => setRole(e.target.value)}
                         >
                             <option value="mahasiswa">Mahasiswa</option>
-                            <option value="dosen">Dosen</option>
                             <option value="umum">Umum</option>
                             <option value="ukm">UKM</option>
                             <option value="organisasi">Organisasi</option>

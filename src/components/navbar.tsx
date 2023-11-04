@@ -11,6 +11,7 @@ interface Props {
     nama: string;
     setModal?: () => void;
     setRegisModal?: () => void;
+    setResetModal?: () => void;
 }
 
 interface Cookies {
@@ -22,6 +23,7 @@ const Navbar: React.FC<Props> = ({
     nama,
     setModal,
     setRegisModal,
+    setResetModal,
 }) => {
     const router = useRouter();
 

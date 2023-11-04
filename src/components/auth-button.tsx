@@ -1,6 +1,6 @@
 type AuthButtonProps = {
     message: string;
-    handleLogin: () => void;
+    handleLogin?: () => void;
 };
 
 const AuthButton: React.FC<AuthButtonProps> = ({ message, handleLogin }) => {

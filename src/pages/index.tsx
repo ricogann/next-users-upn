@@ -7,6 +7,7 @@ import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
 import { useRouter } from "next/router";
 import { Login } from "@/components/login-form";
 import { Regis } from "@/components/registration-form";
+import { ResetPassword } from "@/components/reset-form";
 import Loading from "@/components/loading";
 
 // Services
