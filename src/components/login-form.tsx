@@ -106,7 +106,7 @@ const Login: React.FC<Props> = ({ setModal, changeModal }) => {
                     }
                 }
             }
-        } else if (role === "umum") {
+        } else if (role === "umum" || role === "ukm" || role === "organisasi") {
             if (email === "" || password === "") {
                 setAllError(true);
                 setMessageError("Data tidak boleh kosong");

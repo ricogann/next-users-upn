@@ -36,7 +36,13 @@ class _serviceAuth extends _core {
         try {
             const res = await fetch(
                 `${this.baseUrl}/api/auth/login${
-                    role === "dosen" ? "/dosen" : "/umum"
+                    role === "ukm"
+                        ? "/ukm"
+                        : role === "organisasi"
+                        ? "/organisasi"
+                        : role === "umum"
+                        ? "/umum"
+                        : ""
                 }`,
                 {
                     method: "POST",

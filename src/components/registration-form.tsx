@@ -100,7 +100,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
             setNoTelpRegis(e.target.value);
         } else if (e.target.name === "email") {
             setEmailRegis(e.target.value);
-        } else if (e.target.name === "nama_pj") {
+        } else if (e.target.name === "nama-pj") {
             setNamaPjRegis(e.target.value);
         }
     };
@@ -108,7 +108,6 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
     const handleSelectChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setRegisRole(event.target.value);
     };
-
     const handleRegis = async () => {
         if (role === "mahasiswa") {
             if (
@@ -199,11 +198,12 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
                 const send = await auth.sendRegisterUKM(data);
 
-                if (send) {
+                if (send.status === true) {
                     changeModal();
                     setIsLoading(false);
                 } else {
-                    alert("gagal regis");
+                    alert("Registrasi Gagal, Silahkan Coba Lagi");
+                    setIsLoading(false);
                 }
             }
         } else if (role === "organisasi") {
@@ -228,11 +228,12 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
 
                 const send = await auth.sendRegisterOrganisasi(data);
 
-                if (send) {
+                if (send.status === true) {
                     changeModal();
                     setIsLoading(false);
                 } else {
-                    alert("gagal regis");
+                    alert("Registrasi Gagal, Silahkan Coba Lagi");
+                    setIsLoading(false);
                 }
             }
         }
@@ -446,7 +447,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                                 nama penanggung jawab
                             </h1>
                             <input
-                                name={`nama`}
+                                name={`nama-pj`}
                                 type="text"
                                 className={`${
                                     error === true && namaRegis === ""
