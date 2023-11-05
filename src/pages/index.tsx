@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar";
 import Footer from "@/components/footer";
 import { BsFillPinMapFill } from "react-icons/bs";
 import { MdOutlineWatchLater, MdPayment } from "react-icons/md";
+import { RiArrowDropDownFill, RiArrowDropUpFill } from "react-icons/ri"
 import { useRouter } from "next/router";
 import { Login } from "@/components/login-form";
 import { Regis } from "@/components/registration-form";
@@ -42,6 +43,11 @@ export default function Home() {
     const [openModal, setOpenModal] = useState(false);
     const [openRegisModal, setOpenRegisModal] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showContent, setShowContent] = useState(false);
+
+    const toggleContent = () => {
+        setShowContent(!showContent);
+    };
 
     const handleModal = () => {
         setOpenModal(!openModal);
@@ -376,6 +382,35 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+
+                <div className="mt-5 bg-[#FFFFFF] rounded-[13px] border-[#07393C] border-2 shadow-xl justify-center items-center flex flex-col" onClick={toggleContent}>
+                    <h1 className="text-xl text-[#222222] font-bold md:text-[25px] xl:text-[35px] mt-3 " >Tata Cara Booking Fasilitas UPN</h1>
+                    {showContent ? <RiArrowDropDownFill style={{ fontSize: '60px', color: '#FFA500' }} /> : <RiArrowDropUpFill style={{ fontSize: '60px', color: '#FFA500' }} /> }
+                    {showContent && (
+                    <div className="flex flex-col gap-3 lg:m-12 p-4">
+                    {/* Your content to display when the h1 is pressed */}
+          <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
+            <p><span className="text-[#FFA500]">1. </span>Login ke akun Anda di website ini</p>
+          </div>
+          <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
+            <p><span className="text-[#FFA500]">2. </span>Pilih tanggal yang tersedia untuk reservasi.</p>
+          </div>
+          <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
+            <p><span className="text-[#FFA500]">3. </span>Tunggu persetujuan dari admin untuk reservasi Anda.</p>
+          </div>
+          <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
+            <p><span className="text-[#FFA500]">4. </span>Setelah mendapat persetujuan, lakukan pembayaran dan kirim bukti transfer atau lengkapi berkas SIK (Surat Izin Kegiatan) paling lambat satu bulan sebelum tanggal reservasi.</p>
+          </div>
+          <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
+            <p><span className="text-[#FFA500]">5. </span>Admin akan melakukan pengecekan dan jika semuanya sesuai, reservasi Anda akan di-approve.</p>
+          </div>
+          <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
+            <p><span className="text-[#FFA500]">6. </span>Anda akan mendapatkan Invoice berupa PDF yang nantinya dapat Anda gunakan saat registrasi ulang di kantor BPU.</p>
+          </div>
+                    </div>
+                )}
+                </div>
+
                 {/* End Of content */}
             </div>
             <Footer />
