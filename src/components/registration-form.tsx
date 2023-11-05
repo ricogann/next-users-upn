@@ -84,8 +84,6 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.name === "nama") {
             setNamaRegis(e.target.value);
-        } else if (e.target.name === "npm") {
-            setNpmRegis(e.target.value);
         } else if (e.target.name === "password") {
             setPasswordRegis(e.target.value);
         } else if (e.target.name === "bukti") {
@@ -102,6 +100,8 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
             setEmailRegis(e.target.value);
         } else if (e.target.name === "nama-pj") {
             setNamaPjRegis(e.target.value);
+        } else if (e.target.name) {
+            setNpmRegis(e.target.value);
         }
     };
 
@@ -281,13 +281,7 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                                     : "nik"}
                             </h1>
                             <input
-                                name={`${
-                                    role === "mahasiswa"
-                                        ? "npm"
-                                        : role === "dosen"
-                                        ? "nip"
-                                        : "nik"
-                                } `}
+                                name={`npm`}
                                 type="text"
                                 className={` ${
                                     error === true && role === "mahasiswa"
@@ -304,7 +298,27 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                                             : ""
                                         : ""
                                 } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px] ${
-                                    role === "ukm" || role === "organisasi"
+                                    role === "ukm" ||
+                                    role === "organisasi" ||
+                                    role === "umum"
+                                        ? "hidden"
+                                        : "block"
+                                }`}
+                                onChange={handleInputChange}
+                            />
+                            <input
+                                name={`nik`}
+                                type="text"
+                                className={` ${
+                                    error === true && role === "umum"
+                                        ? npmRegis === ""
+                                            ? "border-red-500"
+                                            : ""
+                                        : ""
+                                } bg-[#ffffff] border-[2px] border-black p-2 drop-shadow-xl rounded-[13px] w-[300px] ${
+                                    role === "ukm" ||
+                                    role === "organisasi" ||
+                                    role === "mahasiswa"
                                         ? "hidden"
                                         : "block"
                                 }`}
@@ -442,7 +456,13 @@ const Regis: React.FC<Props> = ({ setRegisModal, changeModal }) => {
                             />
                         </div>
 
-                        <div className="">
+                        <div
+                            className={`${
+                                role === "ukm" || role === "organisasi"
+                                    ? "block"
+                                    : "hidden"
+                            }`}
+                        >
                             <h1 className="text-[20px] mb-1">
                                 nama penanggung jawab
                             </h1>

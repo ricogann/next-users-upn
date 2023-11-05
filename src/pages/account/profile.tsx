@@ -15,6 +15,7 @@ import _libCookies from "@/lib/cookies";
 import _libBooking from "@/lib/booking";
 
 import CookiesDTO from "@/interfaces/cookiesDTO";
+import PemesananDTO from "@/interfaces/pemesananDTO";
 
 interface Fasilitas {
     nama: string;
@@ -30,6 +31,7 @@ interface Pemesanan {
     status: string;
     createdAt: string;
     remainingTime: string;
+    keterangan_tolak: string;
 }
 
 interface RemainingTime {
@@ -118,6 +120,7 @@ export default function Profile() {
     const [dataBookingOnGoing, setDataBookingOnGoing] = useState<Pemesanan[]>(
         []
     );
+    const [dataBookingReview, setDataBookingReview] = useState<Pemesanan[]>([]);
     const [dataBookingFinished, setDataBookingFinished] = useState<Pemesanan[]>(
         []
     );
@@ -136,11 +139,15 @@ export default function Profile() {
 
             if (data.data.length > 0) {
                 const dataOnProcess = data.data.filter(
-                    (item: Pemesanan) => item.status === "Menunggu Pembayaran"
+                    (item: Pemesanan) => item.status === "Menunggu Konfirmasi"
                 );
 
                 const dataOnGoing = data.data.filter(
-                    (item: Pemesanan) => item.status === "Menunggu Konfirmasi"
+                    (item: Pemesanan) => item.status === "Menunggu Berkas"
+                );
+
+                const dataReview = data.data.filter(
+                    (item: Pemesanan) => item.status === "Review Berkas"
                 );
 
                 const dataFinished = data.data.filter(
@@ -163,7 +170,9 @@ export default function Profile() {
                 setRemainingTime(dataDate);
                 setDataBookingOnProcess(dataOnProcess);
                 setDataBookingOnGoing(dataOnGoing);
+                setDataBookingReview(dataReview);
                 setDataBookingFinished(dataFinished);
+                setDataBookingCanceled(dataCanceled);
             }
         }
 
@@ -200,7 +209,7 @@ export default function Profile() {
         }
     };
 
-    const handleUpload = async (id: string) => {
+    const handleUpload = async (id: number) => {
         if (!buktiSik) {
             setLoading(true);
             const data = new FormData();
@@ -283,7 +292,18 @@ export default function Profile() {
                                             : ""
                                     }`}
                                 >
-                                    On Going
+                                    Upload Data
+                                </h2>
+                            </a>
+                            <a href="#" onClick={() => toggleTab("Review")}>
+                                <h2
+                                    className={`text-[14px] font-regular mb-3 mr-5 ${
+                                        activeTab === "Review"
+                                            ? "border-b-2 border-[#FFA101] font-bold"
+                                            : ""
+                                    }`}
+                                >
+                                    Review Berkas
                                 </h2>
                             </a>
                             <a href="#" onClick={() => toggleTab("Finished")}>
@@ -295,6 +315,17 @@ export default function Profile() {
                                     }`}
                                 >
                                     Finished
+                                </h2>
+                            </a>
+                            <a href="#" onClick={() => toggleTab("Canceled")}>
+                                <h2
+                                    className={`text-[14px] font-regular mb-3 mr-5 ${
+                                        activeTab === "Canceled"
+                                            ? "border-b-2 border-[#FFA101] font-bold"
+                                            : ""
+                                    }`}
+                                >
+                                    Canceled
                                 </h2>
                             </a>
                         </div>
@@ -309,13 +340,13 @@ export default function Profile() {
                                     key={index}
                                 >
                                     <div className="flex flex-col">
-                                        <h2 className="text-[16px] lg:text-[20px] font-bold my-3 ">
+                                        <h2 className="text-[16px] lg:text-[20px] font-bold">
                                             {item.Fasilitas.nama}
                                         </h2>
-                                        <h2 className="text-[12px] lg:text-[15px] font-regulat ">
+                                        <h2 className="text-[12px] lg:text-[15px] font-regular ">
                                             {`Booking ref # : ${item.id_pemesanan}`}
                                         </h2>
-                                        <h2 className="text-[12px] lg:text-[15px] font-regulat ">
+                                        <h2 className="text-[12px] lg:text-[15px] font-regular ">
                                             {new Date(
                                                 item.tanggal_pemesanan
                                             ).toLocaleDateString("id-ID", {
@@ -328,106 +359,14 @@ export default function Profile() {
                                     </div>
 
                                     <div className="border-t border-gray-500 xl:hidden"></div>
-                                    <div className="text-center ">
+                                    <div className="text-black">
                                         <h2 className="text-[16px] lg:text-[15px] font-semibold ">
-                                            Selesaikan Pembayaran Dalam
+                                            Status
                                         </h2>
-                                        <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101] xl:mt-2">
-                                            {remainingTime[index].remainingTime}
-                                        </h2>
-                                        <h2 className="text-[16px] lg:text-[15px] font-semibold mt-5 xl:mt-3">
-                                            Batas akhir pembayaran <br />
-                                            {(() => {
-                                                const createdAtDate = new Date(
-                                                    item.createdAt
-                                                );
-                                                const tomorrow = new Date(
-                                                    createdAtDate
-                                                );
-                                                tomorrow.setDate(
-                                                    createdAtDate.getDate() + 1
-                                                );
-
-                                                // Get the time from item.createdAt
-                                                const hours =
-                                                    createdAtDate.getHours();
-                                                const minutes =
-                                                    createdAtDate.getMinutes();
-
-                                                // Set the time to tomorrow's date
-                                                tomorrow.setHours(
-                                                    hours,
-                                                    minutes
-                                                );
-
-                                                return (
-                                                    <div>
-                                                        {tomorrow.toLocaleDateString(
-                                                            "id-ID",
-                                                            {
-                                                                weekday: "long",
-                                                                year: "numeric",
-                                                                month: "long",
-                                                                day: "numeric",
-                                                            }
-                                                        )}
-                                                        <br />
-                                                        {hours}:{minutes}
-                                                    </div>
-                                                );
-                                            })()}
-                                        </h2>
-                                        <h2 className="text-[16px] lg:text-[15px] font-semibold mt-6">
-                                            Kode BNI VA
-                                        </h2>
-                                        <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101]">
-                                            1693547942887
-                                        </h2>
+                                        <h1 className="text-[#FFA101] font-bold">
+                                            Menunggu Persetujuan
+                                        </h1>
                                     </div>
-                                    <h2 className="text-[16px] lg:text-[12px] font-bold xl:hidden">
-                                        Upload Bukti Pembayaran
-                                    </h2>
-
-                                    <div
-                                        className={`${
-                                            roleAccount !== "umum"
-                                                ? "hidden"
-                                                : "flex"
-                                        } flex-col gap-2`}
-                                    >
-                                        <h1>Upload Bukti Pembayaran</h1>
-                                        <input
-                                            name="bukti_pembayaran"
-                                            type="file"
-                                            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                                            onChange={handleInputFoto}
-                                        />
-                                    </div>
-
-                                    <div
-                                        className={`${
-                                            roleAccount !== "umum"
-                                                ? "flex"
-                                                : "hidden"
-                                        } flex-col gap-2 text-center`}
-                                    >
-                                        <h1>Upload SIK</h1>
-                                        <input
-                                            name="bukti_sik"
-                                            type="file"
-                                            className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                                            onChange={handleInputFoto}
-                                        />
-                                    </div>
-
-                                    <button
-                                        className={` bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg`}
-                                        onClick={() =>
-                                            handleUpload(item.id_pemesanan)
-                                        }
-                                    >
-                                        Submit
-                                    </button>
                                 </div>
                             ))}
                             {/* Start The Card */}
@@ -444,13 +383,13 @@ export default function Profile() {
                                             key={index}
                                         >
                                             <div className="flex flex-col">
-                                                <h2 className="text-[16px] lg:text-[20px] font-bold">
+                                                <h2 className="text-[16px] lg:text-[20px] font-bold my-3 ">
                                                     {item.Fasilitas.nama}
                                                 </h2>
-                                                <h2 className="text-[12px] lg:text-[15px] font-regular ">
+                                                <h2 className="text-[12px] lg:text-[15px] font-regulat ">
                                                     {`Booking ref # : ${item.id_pemesanan}`}
                                                 </h2>
-                                                <h2 className="text-[12px] lg:text-[15px] font-regular ">
+                                                <h2 className="text-[12px] lg:text-[15px] font-regulat ">
                                                     {new Date(
                                                         item.tanggal_pemesanan
                                                     ).toLocaleDateString(
@@ -466,14 +405,66 @@ export default function Profile() {
                                             </div>
 
                                             <div className="border-t border-gray-500 xl:hidden"></div>
-                                            <div className="text-black">
-                                                <h2 className="text-[16px] lg:text-[15px] font-semibold ">
-                                                    Status
+                                            <div
+                                                className={`text-center ${
+                                                    roleAccount !== "umum"
+                                                        ? "hidden"
+                                                        : "flex flex-col gap-2"
+                                                }`}
+                                            >
+                                                <h2 className="text-[16px] lg:text-[15px] font-semibold">
+                                                    Kode BNI VA
                                                 </h2>
-                                                <h1 className="text-[#FFA101] font-bold">
-                                                    Menunggu Persetujuan
-                                                </h1>
+                                                <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101]">
+                                                    1693547942887
+                                                </h2>
                                             </div>
+                                            <h2 className="text-[16px] lg:text-[12px] font-bold xl:hidden">
+                                                Upload Bukti Pembayaran
+                                            </h2>
+
+                                            <div
+                                                className={`${
+                                                    roleAccount !== "umum"
+                                                        ? "hidden"
+                                                        : "flex"
+                                                } flex-col gap-2`}
+                                            >
+                                                <h1>Upload Bukti Pembayaran</h1>
+                                                <input
+                                                    name="bukti_pembayaran"
+                                                    type="file"
+                                                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                                                    onChange={handleInputFoto}
+                                                />
+                                            </div>
+
+                                            <div
+                                                className={`${
+                                                    roleAccount !== "umum"
+                                                        ? "flex"
+                                                        : "hidden"
+                                                } flex-col gap-2 text-center`}
+                                            >
+                                                <h1>Upload SIK</h1>
+                                                <input
+                                                    name="bukti_sik"
+                                                    type="file"
+                                                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                                                    onChange={handleInputFoto}
+                                                />
+                                            </div>
+
+                                            <button
+                                                className={` bg-[#322A7D] hover:bg-[#00FF66] text-white font-bold p-3 rounded-lg`}
+                                                onClick={() =>
+                                                    handleUpload(
+                                                        item.id_pemesanan
+                                                    )
+                                                }
+                                            >
+                                                Submit
+                                            </button>
                                         </div>
                                     )
                                 ) /* Start The Card */
@@ -481,6 +472,47 @@ export default function Profile() {
                         </div>
                     )}
                     {/* End of The div Card On Going*/}
+
+                    {activeTab === "Review" && (
+                        <div className="flex flex-col gap-5 rounded-[15px] xl:grid xl:grid-cols-3 xl:w-full xl:justify-items-center xl:mt-4">
+                            {dataBookingReview.map((item: any, index) => (
+                                <div
+                                    className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border-2 border-[#FFA101] xl:w-[300px]"
+                                    key={index}
+                                >
+                                    <div className="flex flex-col">
+                                        <h2 className="text-[16px] lg:text-[20px] font-bold">
+                                            {item.Fasilitas.nama}
+                                        </h2>
+                                        <h2 className="text-[12px] lg:text-[15px] font-regular ">
+                                            {`Booking ref # : ${item.id_pemesanan}`}
+                                        </h2>
+                                        <h2 className="text-[12px] lg:text-[15px] font-regular ">
+                                            {new Date(
+                                                item.tanggal_pemesanan
+                                            ).toLocaleDateString("id-ID", {
+                                                weekday: "long",
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}{" "}
+                                        </h2>
+                                    </div>
+
+                                    <div className="border-t border-gray-500 xl:hidden"></div>
+                                    <div className="text-black">
+                                        <h2 className="text-[16px] lg:text-[15px] font-semibold ">
+                                            Status
+                                        </h2>
+                                        <h1 className="text-[#FFA101] font-bold">
+                                            Menunggu Review Berkas
+                                        </h1>
+                                    </div>
+                                </div>
+                            ))}
+                            {/* Start The Card */}
+                        </div>
+                    )}
 
                     {/* Start Of div Card On Going*/}
                     {activeTab === "Finished" && (
@@ -549,6 +581,57 @@ export default function Profile() {
                                     </div>
                                 )
                             )}
+                        </div>
+                    )}
+
+                    {activeTab === "Canceled" && (
+                        <div className="flex flex-col gap-5 rounded-[15px] xl:grid xl:grid-cols-3 xl:w-full xl:justify-items-center xl:mt-4">
+                            {dataBookingCanceled.map(
+                                (item: Pemesanan, index) => (
+                                    <div
+                                        className=" bg-[#FFFFFF] flex flex-col w-full p-5 gap-4 rounded-[15px] shadow-lg border-2 border-red-500 xl:w-[300px]"
+                                        key={index}
+                                    >
+                                        <div className="flex flex-col">
+                                            <h2 className="text-[16px] lg:text-[20px] font-bold">
+                                                {item.Fasilitas.nama}
+                                            </h2>
+                                            <h2 className="text-[12px] lg:text-[15px] font-regular ">
+                                                {`Booking ref # : ${item.id_pemesanan}`}
+                                            </h2>
+                                            <h2 className="text-[12px] lg:text-[15px] font-regular ">
+                                                {new Date(
+                                                    item.tanggal_pemesanan
+                                                ).toLocaleDateString("id-ID", {
+                                                    weekday: "long",
+                                                    year: "numeric",
+                                                    month: "long",
+                                                    day: "numeric",
+                                                })}{" "}
+                                            </h2>
+                                        </div>
+
+                                        <div className="border-t border-gray-500 xl:hidden"></div>
+                                        <div className="text-black">
+                                            <h2 className="text-[16px] lg:text-[15px] font-semibold ">
+                                                Status
+                                            </h2>
+                                            <h1 className="text-red-500 font-bold">
+                                                Ditolak
+                                            </h1>
+                                        </div>
+                                        <div className="text-black">
+                                            <h2 className="text-[16px] lg:text-[15px] font-semibold ">
+                                                Keterangan
+                                            </h2>
+                                            <h1 className="text-red-500 font-bold">
+                                                {item.keterangan_tolak}
+                                            </h1>
+                                        </div>
+                                    </div>
+                                )
+                            )}
+                            {/* Start The Card */}
                         </div>
                     )}
                     {/* End of The div Card On Going*/}

@@ -5,7 +5,12 @@ import { Navbar } from "@/components/navbar";
 
 import { BsFillPersonFill, BsFillCalendarFill } from "react-icons/bs";
 import { FaDollarSign } from "react-icons/fa";
-import { BiSolidPhoneCall, BiSolidPencil, BiCalendar } from "react-icons/bi";
+import {
+    BiSolidPhoneCall,
+    BiSolidPencil,
+    BiCalendar,
+    BiSolidTimer,
+} from "react-icons/bi";
 import { HiLocationMarker } from "react-icons/hi";
 import { AiFillClockCircle } from "react-icons/ai";
 import { MdPayment } from "react-icons/md";
@@ -65,7 +70,7 @@ export default function Booking() {
     const [harga, setHarga] = useState<number>(0);
     const [noTelpAccount, setNoTelpAccount] = useState<string>("");
     const [keterangan, setKeterangan] = useState<string>("");
-
+    const [durasi, setDurasi] = useState<number>(1);
     const [statusBook, setStatusBook] = useState<boolean>(true);
     const [bookMessage, setBookMessage] = useState<string>("");
     const [isAsrama, setIsAsrama] = useState<boolean>(false);
@@ -76,28 +81,8 @@ export default function Booking() {
         return parseInt(convertJam);
     };
 
-    useEffect(() => {
-        const tanggalFiltered = pemesanan.filter(
-            (item) =>
-                item.tanggal_pemesanan.split("T")[0] === tanggal &&
-                jam_checkin >= item.jam_checkin &&
-                jam_checkin <= item.jam_checkout
-        );
-
-        if (tanggalFiltered.length > 0 || jam_checkout <= jam_checkin) {
-            setStatusBook(false);
-            setBookMessage("Pemilihan jam tidak tersedia");
-        } else if (keterangan === "") {
-            setStatusBook(false);
-            setBookMessage("Keterangan harus diisi");
-        } else {
-            setStatusBook(true);
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [jam_checkin, jam_checkout]);
-
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log(e.target.name);
         if (e.target.name === "nama") {
             setNamaAccount(e.target.value);
         } else if (e.target.name === "tanggal") {
@@ -119,13 +104,14 @@ export default function Booking() {
             setHarga(parseInt(e.target.value));
         } else if (e.target.name === "no_telp") {
             setNoTelpAccount(e.target.value);
+        } else if (e.target.name === "durasi") {
+            setDurasi(parseInt(e.target.value));
         }
     };
 
     const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         if (e.target.name === "keterangan") {
             setKeterangan(e.target.value);
-            setStatusBook(true);
         }
     };
 
@@ -192,6 +178,52 @@ export default function Booking() {
         return checkout - checkin;
     };
 
+    useEffect(() => {
+        let dataBooked: PemesananDTO[] = [];
+
+        pemesanan.map((item) => {
+            if (item.durasi > 1) {
+                const dbDate = new Date(item.tanggal_pemesanan.split("T")[0]);
+                for (let i = 0; i < item.durasi; i++) {
+                    const temp = dbDate.setDate(dbDate.getDate() + 1);
+                    const dayAfter = new Date(temp).toISOString().split("T")[0];
+
+                    if (dayAfter === tanggal) {
+                        setStatusBook(false);
+                        dataBooked.push(item);
+                    }
+                }
+            }
+            if (
+                item.tanggal_pemesanan.split("T")[0] === tanggal &&
+                item.id_fasilitas === Number(id)
+            ) {
+                setStatusBook(false);
+                dataBooked.push(item);
+            }
+        });
+        // const tanggalFiltered = pemesanan.filter(
+        //     (item) => item.tanggal_pemesanan.split("T")[0] === tanggal
+        // );
+        console.log(dataBooked);
+
+        if (keterangan === "") {
+            setStatusBook(false);
+            setBookMessage("Keterangan harus diisi");
+        } else {
+            if (
+                dataBooked.length > 0 &&
+                dataBooked[0].status !== "Dibatalkan"
+            ) {
+                setBookMessage("Tanggal sudah di booking");
+            } else {
+                setStatusBook(true);
+            }
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tanggal, keterangan]);
+
     const handleBooking = async () => {
         const data: BookingDTO = {
             id_fasilitas: Number(id),
@@ -205,9 +237,9 @@ export default function Booking() {
                 : role !== "umum"
                 ? 0
                 : harga * (setDurasiBooking() / 60),
-            durasi: setDurasiBooking(),
+            durasi: durasi,
             keterangan: keterangan,
-            status: "Menunggu Pembayaran",
+            status: "Menunggu Konfirmasi",
         };
 
         if (isAsrama) {
@@ -249,9 +281,7 @@ export default function Booking() {
             if (createPemesanan.status === true) {
                 setLoading(true);
                 alert("Berhasil Booking");
-                router.push(
-                    `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
-                );
+                router.push(`/account/profile`);
                 setLoading(false);
             }
         }
@@ -266,6 +296,17 @@ export default function Booking() {
         let dataBooked: PemesananDTO[] = [];
 
         pemesanan.map((item) => {
+            if (item.durasi > 1) {
+                const dbDate = new Date(item.tanggal_pemesanan.split("T")[0]);
+                for (let i = 0; i < item.durasi; i++) {
+                    const temp = dbDate.setDate(dbDate.getDate() + 1);
+                    const dayAfter = new Date(temp).toISOString().split("T")[0];
+
+                    if (dayAfter === date) {
+                        dataBooked.push(item);
+                    }
+                }
+            }
             if (
                 item.tanggal_pemesanan.split("T")[0] === date &&
                 item.id_fasilitas === Number(id)
@@ -274,7 +315,7 @@ export default function Booking() {
             }
         });
 
-        if (dataBooked.length > 0) {
+        if (dataBooked.length > 0 && dataBooked[0].status !== "Dibatalkan") {
             setIsAvailable(false);
         } else {
             setIsAvailable(true);
@@ -282,6 +323,8 @@ export default function Booking() {
 
         setDataBooked(dataBooked);
     };
+
+    console.log(dataBooked);
 
     return (
         <div className="">
@@ -350,7 +393,7 @@ export default function Booking() {
                                                         Cek Ketersediaan
                                                         Fasilitas
                                                     </h2>
-                                                    <div className="flex flex-col md:flex-row items-start gap-5">
+                                                    <div className="flex flex-col items-start gap-5">
                                                         <div className="flex items-center gap-3">
                                                             <input
                                                                 type="date"
@@ -379,7 +422,7 @@ export default function Booking() {
                                                                     </h1>
                                                                 </div>
                                                             ) : (
-                                                                <div className="">
+                                                                <div className="flex gap-3">
                                                                     <div className="text-[#0A090C] flex items-center gap-3">
                                                                         <div className="w-2 h-2 xl:w-3 xl:h-3 bg-red-500 rounded-full"></div>
                                                                         <h1 className="text-[15px] xl:text-[17px]">
@@ -398,24 +441,36 @@ export default function Booking() {
                                                                                     }
                                                                                     className="text-[#0A090C] flex gap-3"
                                                                                 >
-                                                                                    <h1 className="text-[15px] xl:text-[17px]">
-                                                                                        {index +
-                                                                                            1}
-
-                                                                                        .
+                                                                                    <h1>
+                                                                                        {" "}
+                                                                                        -{" "}
                                                                                     </h1>
                                                                                     <div className="text-[15px] xl:text-[17px]">
-                                                                                        {
-                                                                                            item.jam_checkin
-                                                                                        }
-                                                                                    </div>
-                                                                                    <div className="text-[15px] xl:text-[17px]">
-                                                                                        to
-                                                                                    </div>
-                                                                                    <div className="text-[15px] xl:text-[17px]">
-                                                                                        {
-                                                                                            item.jam_checkout
-                                                                                        }
+                                                                                        {item
+                                                                                            .Account
+                                                                                            .Mahasiswa[0]
+                                                                                            ? item
+                                                                                                  .Account
+                                                                                                  .Mahasiswa[0]
+                                                                                                  .nama
+                                                                                            : item
+                                                                                                  .Account
+                                                                                                  .Umum[0]
+                                                                                            ? item
+                                                                                                  .Account
+                                                                                                  .Umum[0]
+                                                                                                  .nama
+                                                                                            : item
+                                                                                                  .Account
+                                                                                                  .UKM[0]
+                                                                                            ? item
+                                                                                                  .Account
+                                                                                                  .UKM[0]
+                                                                                                  .nama_ukm
+                                                                                            : item
+                                                                                                  .Account
+                                                                                                  .Organisasi[0]
+                                                                                                  .nama_organisasi}
                                                                                     </div>
                                                                                 </div>
                                                                             )
@@ -469,6 +524,23 @@ export default function Booking() {
                                         }
                                         className="text-[12px] lg:text-[14px] ml-4 rounded bg-[#fff] xl:bg-[#F7F8FA] text-[#0A090C]"
                                         value={tanggal}
+                                        onChange={handleInput}
+                                    />
+                                </div>
+                                <h2
+                                    className={`${
+                                        isAsrama ? "hidden" : "block"
+                                    } text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold`}
+                                >
+                                    Lama Hari
+                                </h2>
+                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
+                                    <BiSolidTimer className="text-[#0A090C] md:text-2xl" />
+                                    <input
+                                        name={`durasi`}
+                                        type="number"
+                                        className="text-[12px] lg:text-[14px] ml-2 w-full p-1 text-[#0A090C] font-regular bg-[#fff] xl:bg-[#F7F8FA]"
+                                        value={durasi}
                                         onChange={handleInput}
                                     />
                                 </div>
