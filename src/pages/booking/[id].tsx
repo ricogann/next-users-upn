@@ -710,7 +710,19 @@ export default function Booking() {
                                         onChange={handleTextarea}
                                     />
                                 </div>
-                                <p className="">Dengan Melakukan Transaksi Maka Anda telah menyetujui semua kesepakatan. Untuk informasi lebih lanjut, silakan kunjungi <a className="text-[#FFA500]" href="" target="_blank">halaman kebijakan kami</a></p>
+                                <p className="">
+                                    Dengan Melakukan Transaksi Maka Anda telah menyetujui semua kesepakatan. Untuk informasi lebih lanjut, silakan kunjungi{" "}
+                                    {dataFasilitas && (
+                                        <a className="text-[#FFA500]" href={`http://localhost:5000/assets/${
+                                                    JSON.parse(
+                                                        dataFasilitas.termservice
+                                                    )
+                                                }`} target="_blank">
+                                        halaman kebijakan kami
+                                    </a>
+                                    )}
+                                    
+                                </p>
                                 <h1
                                     className={`${
                                         statusBook === true ? "hidden" : "block"
