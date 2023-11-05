@@ -108,7 +108,12 @@ class _serviceBooking extends _core {
                 body: JSON.stringify({ idAccount }),
             }
         );
-        return await res.json();
+        const resData = await res.json();
+        if (resData.status === false && resData.error) {
+            return resData;
+        } else {
+            return resData;
+        }
     }
 }
 

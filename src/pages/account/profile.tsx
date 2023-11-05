@@ -408,7 +408,10 @@ export default function Profile() {
                                             <div
                                                 className={`text-center ${
                                                     roleAccount !== "umum"
-                                                        ? "hidden"
+                                                        ? item.Fasilitas
+                                                              .nama === "Asrama"
+                                                            ? "block"
+                                                            : "hidden"
                                                         : "flex flex-col gap-2"
                                                 }`}
                                             >
@@ -419,32 +422,44 @@ export default function Profile() {
                                                     1693547942887
                                                 </h2>
                                             </div>
-                                            <h2 className="text-[16px] lg:text-[12px] font-bold xl:hidden">
-                                                Upload Bukti Pembayaran
-                                            </h2>
-
                                             <div
-                                                className={`${
+                                                className={`text-center ${
                                                     roleAccount !== "umum"
-                                                        ? "hidden"
+                                                        ? item.Fasilitas
+                                                              .nama === "Asrama"
+                                                            ? "block"
+                                                            : "hidden"
                                                         : "flex"
-                                                } flex-col gap-2`}
+                                                }`}
                                             >
-                                                <h1>Upload Bukti Pembayaran</h1>
-                                                <input
-                                                    name="bukti_pembayaran"
-                                                    type="file"
-                                                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                                                    onChange={handleInputFoto}
-                                                />
+                                                <h2 className="text-[16px] lg:text-[12px] font-bold xl:hidden">
+                                                    Upload Bukti Pembayaran
+                                                </h2>
+
+                                                <div>
+                                                    <h1>
+                                                        Upload Bukti Pembayaran
+                                                    </h1>
+                                                    <input
+                                                        name="bukti_pembayaran"
+                                                        type="file"
+                                                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                                                        onChange={
+                                                            handleInputFoto
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
 
                                             <div
-                                                className={`${
+                                                className={`text-center ${
                                                     roleAccount !== "umum"
-                                                        ? "flex"
+                                                        ? item.Fasilitas
+                                                              .nama === "Asrama"
+                                                            ? "hidden"
+                                                            : "block"
                                                         : "hidden"
-                                                } flex-col gap-2 text-center`}
+                                                }`}
                                             >
                                                 <h1>Upload SIK</h1>
                                                 <input

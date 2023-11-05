@@ -82,7 +82,6 @@ export default function Booking() {
     };
 
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(e.target.name);
         if (e.target.name === "nama") {
             setNamaAccount(e.target.value);
         } else if (e.target.name === "tanggal") {
@@ -202,9 +201,7 @@ export default function Booking() {
                 dataBooked.push(item);
             }
         });
-        // const tanggalFiltered = pemesanan.filter(
-        //     (item) => item.tanggal_pemesanan.split("T")[0] === tanggal
-        // );
+
         console.log(dataBooked);
 
         if (keterangan === "") {
@@ -213,7 +210,8 @@ export default function Booking() {
         } else {
             if (
                 dataBooked.length > 0 &&
-                dataBooked[0].status !== "Dibatalkan"
+                dataBooked.filter((item) => item.status !== "Dibatalkan")
+                    .length > 0
             ) {
                 setBookMessage("Tanggal sudah di booking");
             } else {
@@ -236,7 +234,7 @@ export default function Booking() {
                 ? harga * 2 + 250000
                 : role !== "umum"
                 ? 0
-                : harga * (setDurasiBooking() / 60),
+                : harga * durasi,
             durasi: durasi,
             keterangan: keterangan,
             status: "Menunggu Konfirmasi",
@@ -259,9 +257,7 @@ export default function Booking() {
                     if (createPemesanan.status === true) {
                         setLoading(false);
                         alert("Berhasil Booking");
-                        router.push(
-                            `/booking/pembayaran/${createPemesanan.data.id_pemesanan}`
-                        );
+                        router.push(`/account/profile`);
                     } else {
                         setLoading(false);
                         alert("Gagal Booking");
@@ -315,7 +311,10 @@ export default function Booking() {
             }
         });
 
-        if (dataBooked.length > 0 && dataBooked[0].status !== "Dibatalkan") {
+        if (
+            dataBooked.length > 0 &&
+            dataBooked.filter((item) => item.status !== "Dibatalkan").length > 0
+        ) {
             setIsAvailable(false);
         } else {
             setIsAvailable(true);
@@ -323,8 +322,6 @@ export default function Booking() {
 
         setDataBooked(dataBooked);
     };
-
-    console.log(dataBooked);
 
     return (
         <div className="">
@@ -441,11 +438,17 @@ export default function Booking() {
                                                                                     }
                                                                                     className="text-[#0A090C] flex gap-3"
                                                                                 >
-                                                                                    <h1>
-                                                                                        {" "}
-                                                                                        -{" "}
-                                                                                    </h1>
-                                                                                    <div className="text-[15px] xl:text-[17px]">
+                                                                                    <div
+                                                                                        className={`text-[15px] xl:text-[17px] ${
+                                                                                            item.status ===
+                                                                                            "Dibatalkan"
+                                                                                                ? "hidden"
+                                                                                                : "flex gap-2"
+                                                                                        }`}
+                                                                                    >
+                                                                                        <h1>
+                                                                                            Oleh
+                                                                                        </h1>
                                                                                         {item
                                                                                             .Account
                                                                                             .Mahasiswa[0]
@@ -527,22 +530,26 @@ export default function Booking() {
                                         onChange={handleInput}
                                     />
                                 </div>
-                                <h2
+                                <div
                                     className={`${
                                         isAsrama ? "hidden" : "block"
-                                    } text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold`}
+                                    }`}
                                 >
-                                    Lama Hari
-                                </h2>
-                                <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
-                                    <BiSolidTimer className="text-[#0A090C] md:text-2xl" />
-                                    <input
-                                        name={`durasi`}
-                                        type="number"
-                                        className="text-[12px] lg:text-[14px] ml-2 w-full p-1 text-[#0A090C] font-regular bg-[#fff] xl:bg-[#F7F8FA]"
-                                        value={durasi}
-                                        onChange={handleInput}
-                                    />
+                                    <h2
+                                        className={`text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold`}
+                                    >
+                                        Lama Hari
+                                    </h2>
+                                    <div className="  bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-lg lg:bg-[#F7F8FA]  lg:flex-row ">
+                                        <BiSolidTimer className="text-[#0A090C] md:text-2xl" />
+                                        <input
+                                            name={`durasi`}
+                                            type="number"
+                                            className="text-[12px] lg:text-[14px] ml-2 w-full p-1 text-[#0A090C] font-regular bg-[#fff] xl:bg-[#F7F8FA]"
+                                            value={durasi}
+                                            onChange={handleInput}
+                                        />
+                                    </div>
                                 </div>
                                 <div
                                     className={`${
@@ -592,7 +599,7 @@ export default function Booking() {
                                     }`}
                                 >
                                     <h2
-                                        className={`text-[12px] lg:text-[18px] text-[#0A090C] font-semibold`}
+                                        className={`text-[12px] lg:text-[18px] my-1 text-[#0A090C] font-semibold`}
                                     >
                                         {isAsrama ? "Lantai" : "Tipe Harga"}
                                     </h2>
