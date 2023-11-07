@@ -9,4 +9,5 @@ export default interface FasilitasDTO {
     buka_hari: string;
     durasi: number;
     no_va: string;
+    termservice: string;
 }
