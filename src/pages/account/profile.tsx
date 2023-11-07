@@ -233,6 +233,12 @@ export default function Profile() {
         }
     };
 
+    const checkWeekend = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const dayOfWeek = date.getDay();
+        return dayOfWeek === 0 || dayOfWeek === 6;
+    };
+
     return (
         <div className={`bg-[#2C666E] min-h-screen relative`}>
             {loading && (
@@ -413,6 +419,26 @@ export default function Profile() {
                                                             ? "block"
                                                             : "hidden"
                                                         : "flex flex-col gap-2"
+                                                }`}
+                                            >
+                                                <h2 className="text-[16px] lg:text-[15px] font-semibold">
+                                                    Kode BNI VA
+                                                </h2>
+                                                <h2 className="text-[16px] lg:text-[20px] font-semibold text-[#FFA101]">
+                                                    1693547942887
+                                                </h2>
+                                            </div>
+                                            <div
+                                                className={`text-center ${
+                                                    roleAccount ===
+                                                        "organisasi" &&
+                                                    checkWeekend(
+                                                        item.tanggal_pemesanan.split(
+                                                            "T"
+                                                        )[0]
+                                                    )
+                                                        ? "block"
+                                                        : "hidden"
                                                 }`}
                                             >
                                                 <h2 className="text-[16px] lg:text-[15px] font-semibold">

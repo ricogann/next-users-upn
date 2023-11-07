@@ -75,6 +75,7 @@ export default function Booking() {
     const [bookMessage, setBookMessage] = useState<string>("");
     const [isAsrama, setIsAsrama] = useState<boolean>(false);
     const [cookiesCert, setCookiesCert] = useState<string>("");
+    const [isWeekend, setIsWeekend] = useState<boolean>(false);
 
     const jamToNumber = (jam: string) => {
         const convertJam = jam.split(":").join("");
@@ -106,6 +107,12 @@ export default function Booking() {
         } else if (e.target.name === "durasi") {
             setDurasi(parseInt(e.target.value));
         }
+    };
+
+    const checkWeekend = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const dayOfWeek = date.getDay();
+        return dayOfWeek === 0 || dayOfWeek === 6;
     };
 
     const handleTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -180,6 +187,13 @@ export default function Booking() {
     useEffect(() => {
         let dataBooked: PemesananDTO[] = [];
 
+        const weekend = checkWeekend(tanggal);
+        if (weekend) {
+            setIsWeekend(true);
+        } else {
+            setIsWeekend(false);
+        }
+
         pemesanan.map((item) => {
             if (item.durasi > 1) {
                 const dbDate = new Date(item.tanggal_pemesanan.split("T")[0]);
@@ -201,8 +215,6 @@ export default function Booking() {
                 dataBooked.push(item);
             }
         });
-
-        console.log(dataBooked);
 
         if (keterangan === "") {
             setStatusBook(false);
@@ -232,6 +244,8 @@ export default function Booking() {
             jam_checkout: jam_checkout,
             total_harga: isAsrama
                 ? harga * 2 + 250000
+                : role === "organisasi" && isWeekend
+                ? harga * durasi
                 : role !== "umum"
                 ? 0
                 : harga * durasi,
@@ -599,7 +613,50 @@ export default function Booking() {
                                     }`}
                                 >
                                     <h2
-                                        className={`text-[12px] lg:text-[18px] my-1 text-[#0A090C] font-semibold`}
+                                        className={`text-[12px] lg:text-[18px] my-1 text-[#0A090C] font-semibold `}
+                                    >
+                                        {isAsrama ? "Lantai" : "Tipe Harga"}
+                                    </h2>
+                                    <div
+                                        className={`bg-[#FFFFFF] flex items-center p-2 md:p-3 rounded-[15px] lg:bg-[#F7F8FA] lg:flex-row `}
+                                    >
+                                        <AiFillClockCircle className="text-[#0A090C] text-xl" />
+                                        <select
+                                            name={`harga`}
+                                            className=" text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] font-semibold bg-[#fff] xl:bg-[#f7f8fa] w-full"
+                                            onChange={handleHarga}
+                                        >
+                                            {dataHarga &&
+                                                dataHarga.map(
+                                                    (
+                                                        harga: any,
+                                                        index: number
+                                                    ) => {
+                                                        return (
+                                                            <option
+                                                                value={[
+                                                                    harga.id,
+                                                                    harga.harga,
+                                                                ]}
+                                                                key={index}
+                                                            >
+                                                                {harga.nama}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div
+                                    className={`${
+                                        role === "organisasi" && isWeekend
+                                            ? "block"
+                                            : "hidden"
+                                    }`}
+                                >
+                                    <h2
+                                        className={`text-[12px] lg:text-[18px] my-1 text-[#0A090C] font-semibold `}
                                     >
                                         {isAsrama ? "Lantai" : "Tipe Harga"}
                                     </h2>
@@ -645,6 +702,15 @@ export default function Booking() {
                                 >
                                     Biaya
                                 </h2>
+                                <h2
+                                    className={`${
+                                        role === "organisasi" && isWeekend
+                                            ? "block"
+                                            : "hidden"
+                                    } text-[12px] lg:text-[18px] my-1 text-white md:text-[#0A090C] font-semibold `}
+                                >
+                                    Biaya
+                                </h2>
                                 <div
                                     className={`${
                                         role !== "umum"
@@ -652,6 +718,44 @@ export default function Booking() {
                                                 ? "block"
                                                 : "hidden"
                                             : "block"
+                                    } bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row`}
+                                >
+                                    <FaDollarSign className="text-[#0A090C] text-xl" />
+                                    <input
+                                        type="text"
+                                        className={`${
+                                            isAsrama ? "block" : "hidden"
+                                        } text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]`}
+                                        readOnly
+                                        value={`Rp${(harga * 2 + 250000)
+                                            .toString()
+                                            .replace(
+                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                "."
+                                            )}`}
+                                    />
+                                    <input
+                                        type="text"
+                                        className={`${
+                                            isAsrama ? "hidden" : "block"
+                                        } text-[12px] lg:text-[14px] ml-4 rounded text-[#0A090C] bg-[#fff] xl:bg-[#f7f8fa]`}
+                                        readOnly
+                                        value={`Rp${(
+                                            harga *
+                                            (setDurasiBooking() / 60)
+                                        )
+                                            .toString()
+                                            .replace(
+                                                /\B(?=(\d{3})+(?!\d))/g,
+                                                "."
+                                            )}`}
+                                    />
+                                </div>
+                                <div
+                                    className={`${
+                                        role === "organisasi" && isWeekend
+                                            ? "block"
+                                            : "hidden"
                                     } bg-[#FFFFFF] flex items-center p-2 rounded-[15px] lg:bg-[#F7F8FA]  lg:flex-row`}
                                 >
                                     <FaDollarSign className="text-[#0A090C] text-xl" />
