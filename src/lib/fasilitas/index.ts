@@ -1,4 +1,5 @@
 import _serviceFasilitas from "@/services/fasilitas.service";
+import FasilitasDTO from "@/interfaces/fasilitasDTO";
 
 interface Fasilitas {
     id_fasilitas: number;
@@ -15,12 +16,12 @@ interface Fasilitas {
 
 class _libFasilitas {
     async splitData(
-        data: Fasilitas[],
+        data: FasilitasDTO[],
         dataPerPage: number
-    ): Promise<Fasilitas[][]> {
+    ): Promise<FasilitasDTO[][]> {
         try {
-            const dataFasilitas: Fasilitas[][] = [];
-            let groupFasilitas: Fasilitas[] = [];
+            const dataFasilitas: FasilitasDTO[][] = [];
+            let groupFasilitas: FasilitasDTO[] = [];
 
             for (let i = 0; i < data.length; i++) {
                 groupFasilitas.push(data[i]);
