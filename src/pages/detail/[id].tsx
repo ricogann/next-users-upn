@@ -146,6 +146,10 @@ export default function DetailFasilitas() {
         }
     };
 
+    const isLoading = () => {
+        setLoading(!loading);
+    };
+
     return (
         <div className="bg-[#2C666E] font-montserrat relative">
             {loading && (
@@ -158,6 +162,7 @@ export default function DetailFasilitas() {
                 nama={nama}
                 setModal={handleModal}
                 setRegisModal={handleRegisModal}
+                isLoading={isLoading}
             />
             <div
                 className={`${

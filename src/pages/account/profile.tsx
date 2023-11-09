@@ -239,6 +239,10 @@ export default function Profile() {
         return dayOfWeek === 0 || dayOfWeek === 6;
     };
 
+    const isLoading = () => {
+        setLoading(!loading);
+    };
+
     return (
         <div className={`bg-[#2C666E] min-h-screen relative`}>
             {loading && (
@@ -246,7 +250,11 @@ export default function Profile() {
                     <Loading />
                 </div>
             )}
-            <Navbar isLogin={isLogin} nama={namaAccount} />
+            <Navbar
+                isLogin={isLogin}
+                nama={namaAccount}
+                isLoading={isLoading}
+            />
 
             <div className="xl:m-24 text-[#F0EDEE]">
                 <h1 className="ml-8 mt-4 font-bold xl:block xl:text-[36px]">
