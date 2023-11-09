@@ -101,6 +101,17 @@ export default function DetailFasilitas() {
         let dataBooked: PemesananDTO[] = [];
 
         pemesanan.map((item) => {
+            if (item.durasi > 1) {
+                const dbDate = new Date(item.tanggal_pemesanan.split("T")[0]);
+                for (let i = 0; i < item.durasi; i++) {
+                    const temp = dbDate.setDate(dbDate.getDate() + 1);
+                    const dayAfter = new Date(temp).toISOString().split("T")[0];
+
+                    if (dayAfter === date) {
+                        dataBooked.push(item);
+                    }
+                }
+            }
             if (
                 item.tanggal_pemesanan.split("T")[0] === date &&
                 item.id_fasilitas === Number(id)
@@ -109,7 +120,10 @@ export default function DetailFasilitas() {
             }
         });
 
-        if (dataBooked.length > 0) {
+        if (
+            dataBooked.length > 0 &&
+            dataBooked.filter((item) => item.status !== "Dibatalkan").length > 0
+        ) {
             setIsAvailable(false);
         } else {
             setIsAvailable(true);
@@ -362,26 +376,44 @@ export default function DetailFasilitas() {
                                                                                 key={
                                                                                     index
                                                                                 }
-                                                                                className="text-black flex gap-3"
+                                                                                className="text-[#0A090C] flex gap-3"
                                                                             >
-                                                                                <h1 className="text-[15px] xl:text-[17px]">
-                                                                                    {index +
-                                                                                        1}
-
-                                                                                    .
-                                                                                </h1>
-                                                                                <div className="text-[15px] xl:text-[17px]">
-                                                                                    {
-                                                                                        item.jam_checkin
-                                                                                    }
-                                                                                </div>
-                                                                                <div className="text-[15px] xl:text-[17px]">
-                                                                                    to
-                                                                                </div>
-                                                                                <div className="text-[15px] xl:text-[17px]">
-                                                                                    {
-                                                                                        item.jam_checkout
-                                                                                    }
+                                                                                <div
+                                                                                    className={`text-[15px] xl:text-[17px] ${
+                                                                                        item.status ===
+                                                                                        "Dibatalkan"
+                                                                                            ? "hidden"
+                                                                                            : "flex gap-2"
+                                                                                    }`}
+                                                                                >
+                                                                                    <h1>
+                                                                                        Oleh
+                                                                                    </h1>
+                                                                                    {item
+                                                                                        .Account
+                                                                                        .Mahasiswa[0]
+                                                                                        ? item
+                                                                                              .Account
+                                                                                              .Mahasiswa[0]
+                                                                                              .nama
+                                                                                        : item
+                                                                                              .Account
+                                                                                              .Umum[0]
+                                                                                        ? item
+                                                                                              .Account
+                                                                                              .Umum[0]
+                                                                                              .nama
+                                                                                        : item
+                                                                                              .Account
+                                                                                              .UKM[0]
+                                                                                        ? item
+                                                                                              .Account
+                                                                                              .UKM[0]
+                                                                                              .nama_ukm
+                                                                                        : item
+                                                                                              .Account
+                                                                                              .Organisasi[0]
+                                                                                              .nama_organisasi}
                                                                                 </div>
                                                                             </div>
                                                                         )

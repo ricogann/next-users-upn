@@ -742,7 +742,8 @@ export default function Booking() {
                                         readOnly
                                         value={`Rp${(
                                             harga *
-                                            (setDurasiBooking() / 60)
+                                            (setDurasiBooking() / 60) *
+                                            durasi
                                         )
                                             .toString()
                                             .replace(
@@ -780,7 +781,8 @@ export default function Booking() {
                                         readOnly
                                         value={`Rp${(
                                             harga *
-                                            (setDurasiBooking() / 60)
+                                            (setDurasiBooking() / 60) *
+                                            durasi
                                         )
                                             .toString()
                                             .replace(
@@ -815,17 +817,20 @@ export default function Booking() {
                                     />
                                 </div>
                                 <p className="">
-                                    Dengan Melakukan Transaksi Maka Anda telah menyetujui semua kesepakatan. Untuk informasi lebih lanjut, silakan kunjungi{" "}
+                                    Dengan Melakukan Transaksi Maka Anda telah
+                                    menyetujui semua kesepakatan. Untuk
+                                    informasi lebih lanjut, silakan kunjungi{" "}
                                     {dataFasilitas && (
-                                        <a className="text-[#FFA500]" href={`http://localhost:5000/assets/${
-                                                    JSON.parse(
-                                                        dataFasilitas.termservice
-                                                    )
-                                                }`} target="_blank">
-                                        halaman kebijakan kami
-                                    </a>
+                                        <a
+                                            className="text-[#FFA500]"
+                                            href={`https://api.ricogann.com/assets/${JSON.parse(
+                                                dataFasilitas.termservice
+                                            )}`}
+                                            target="_blank"
+                                        >
+                                            halaman kebijakan kami
+                                        </a>
                                     )}
-                                    
                                 </p>
                                 <h1
                                     className={`${
