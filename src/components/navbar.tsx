@@ -5,6 +5,9 @@ import { useRouter } from "next/router";
 
 import { RxHamburgerMenu } from "react-icons/rx";
 import { BsPersonCircle } from "react-icons/bs";
+import Loading from "@/components/loading";
+
+
 
 interface Props {
     isLogin: boolean;
@@ -27,6 +30,7 @@ const Navbar: React.FC<Props> = ({
 }) => {
     const router = useRouter();
 
+    const [loading, setLoading] = useState<boolean>(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [openProfile, setOpenProfile] = useState(false);
 
@@ -52,13 +56,28 @@ const Navbar: React.FC<Props> = ({
             name + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     };
 
+  const handleClick = (param: string) => () => {
+    setLoading(true);
+
+    setTimeout(() => {
+      router.push(param).then(() => {
+        setLoading(false);
+      });
+    }, 2000); // Delay for 500 milliseconds (0.5 seconds)
+  };
+
     return (
         <nav className="bg-[#F0EDEE] shadow-xl">
+            {loading && (
+                <div className="absolute w-full h-full flex justify-center items-center z-50 backdrop-blur-sm">
+                    <Loading />
+                </div>
+            )}
             <div className=" container mx-auto flex justify-between items-center">
                 <div className="flex items-center justify-between w-full px-12 py-3 md:px-8">
                     <div
                         className="text-white font-semibold text-lg"
-                        onClick={() => router.push("/")}
+                        onClick={handleClick("/")}
                     >
                         <Image
                             src={logo_bpu}
@@ -80,7 +99,7 @@ const Navbar: React.FC<Props> = ({
                             <div className="bg-[#cdcdcd] flex flex-col gap-2 p-3 rounded-md">
                                 <button
                                     className=" text-black font-semibold"
-                                    onClick={() => router.push("/")}
+                                    onClick={handleClick("/")}
                                 >
                                     Home
                                 </button>

@@ -99,7 +99,7 @@ export default function DetailFasilitas() {
 
     const checkAvailability = async () => {
         let dataBooked: PemesananDTO[] = [];
-
+        setLoading(true);
         pemesanan.map((item) => {
             if (item.durasi > 1) {
                 const dbDate = new Date(item.tanggal_pemesanan.split("T")[0]);
@@ -125,8 +125,10 @@ export default function DetailFasilitas() {
             dataBooked.filter((item) => item.status !== "Dibatalkan").length > 0
         ) {
             setIsAvailable(false);
+            setLoading(false);
         } else {
             setIsAvailable(true);
+            setLoading(false);
         }
 
         setDataBooked(dataBooked);
