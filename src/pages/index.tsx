@@ -111,6 +111,10 @@ export default function Home() {
         }
     };
 
+    const isLoading = () => {
+        setLoading(!loading);
+    };
+
     return (
         <div className="bg-[#2C666E] h-full md:h-full font-montserrat relative overflow-hidden">
             {loading && (
@@ -123,6 +127,7 @@ export default function Home() {
                 nama={namaAccount}
                 setModal={handleModal}
                 setRegisModal={handleRegisModal}
+                isLoading={isLoading}
             />
             <div
                 className={`${
@@ -384,10 +389,10 @@ export default function Home() {
                 </div>
 
                 <div
-                    className="mt-5 bg-[#FFFFFF] rounded-[13px] border-[#07393C] border-2 shadow-xl justify-center items-center flex flex-col"
+                    className="mt-5 p-5 bg-[#FFFFFF] rounded-[13px] border-[#07393C] border-2 shadow-xl justify-center items-center flex flex-col"
                     onClick={toggleContent}
                 >
-                    <h1 className="text-xl text-[#222222] font-bold md:text-[25px] xl:text-[35px] mt-3 ">
+                    <h1 className="text-xl text-[#222222] font-bold md:text-[25px] xl:text-[35px] mt-10 ">
                         Tata Cara Booking Fasilitas UPN
                     </h1>
                     {showContent ? (
@@ -400,7 +405,7 @@ export default function Home() {
                         />
                     )}
                     {showContent && (
-                        <div className="flex flex-col gap-3 lg:m-12 p-4">
+                        <div className="flex flex-col gap-3 lg:m-12 p-4 text-black">
                             {/* Your content to display when the h1 is pressed */}
                             <div className="bg-white p-4 rounded-[13px] border-[#07393C] border-2">
                                 <p>

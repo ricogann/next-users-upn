@@ -12,6 +12,7 @@ interface Props {
     setModal?: () => void;
     setRegisModal?: () => void;
     setResetModal?: () => void;
+    isLoading: () => void;
 }
 
 interface Cookies {
@@ -24,6 +25,7 @@ const Navbar: React.FC<Props> = ({
     setModal,
     setRegisModal,
     setResetModal,
+    isLoading,
 }) => {
     const router = useRouter();
 
@@ -80,7 +82,10 @@ const Navbar: React.FC<Props> = ({
                             <div className="bg-[#cdcdcd] flex flex-col gap-2 p-3 rounded-md">
                                 <button
                                     className=" text-black font-semibold"
-                                    onClick={() => router.push("/")}
+                                    onClick={() => {
+                                        isLoading();
+                                        router.push("/");
+                                    }}
                                 >
                                     Home
                                 </button>
@@ -107,7 +112,10 @@ const Navbar: React.FC<Props> = ({
                                     className={`text-black font-semibold ${
                                         isLogin ? "block" : "hidden"
                                     }`}
-                                    onClick={handleProfile}
+                                    onClick={() => {
+                                        isLoading();
+                                        handleProfile();
+                                    }}
                                 >
                                     Profile
                                 </button>
@@ -125,7 +133,13 @@ const Navbar: React.FC<Props> = ({
                     </div>
 
                     <div className="hidden md:flex md:gap-14 text-[#0A090C] font-semibold font-montserrat">
-                        <button className="" onClick={() => router.push("/")}>
+                        <button
+                            className=""
+                            onClick={() => {
+                                isLoading();
+                                router.push("/");
+                            }}
+                        >
                             Home
                         </button>
                         <button
@@ -161,7 +175,13 @@ const Navbar: React.FC<Props> = ({
                                         : `hidden`
                                 } absolute right-0 -bottom-[95px] border w-[200px] p-5 bg-[#ffffff] z-50`}
                             >
-                                <div className="" onClick={handleProfile}>
+                                <div
+                                    className=""
+                                    onClick={() => {
+                                        isLoading();
+                                        handleProfile();
+                                    }}
+                                >
                                     Profile
                                 </div>
                                 <div className="" onClick={handleLogout}>

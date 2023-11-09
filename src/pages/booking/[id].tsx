@@ -336,6 +336,9 @@ export default function Booking() {
 
         setDataBooked(dataBooked);
     };
+    const isLoading = () => {
+        setLoading(!loading);
+    };
 
     return (
         <div className="">
@@ -346,7 +349,11 @@ export default function Booking() {
                             <Loading />
                         </div>
                     )}
-                    <Navbar isLogin={isLogin} nama={namaAccount} />
+                    <Navbar
+                        isLogin={isLogin}
+                        nama={namaAccount}
+                        isLoading={isLoading}
+                    />
 
                     <div className="p-10 xl:px-28">
                         <div className=" flex flex-col rounded-[13px] xl:mb-5">
