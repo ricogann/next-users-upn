@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "build": "next build",
+        "build": "next build && next export",
         "start": "next start",
         "lint": "next lint"
     },
@@ -17,6 +17,7 @@
         "@types/react-dom": "18.2.7",
         "@types/react-icons": "^3.0.0",
         "@types/socket.io": "^3.0.2",
+        "animate.css": "^4.1.1",
         "autoprefixer": "10.4.15",
         "axios": "^1.5.0",
         "eslint": "8.48.0",

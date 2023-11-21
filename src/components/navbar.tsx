@@ -137,7 +137,11 @@ const Navbar: React.FC<Props> = ({
                             className=""
                             onClick={() => {
                                 isLoading();
-                                router.push("/");
+                                if (router.pathname === "/") {
+                                    router.reload();
+                                } else {
+                                    router.push("/");
+                                }
                             }}
                         >
                             Home
