@@ -278,6 +278,11 @@ export default function Profile() {
                                 {noTelpAccount}
                             </h2>
                         </div>
+                        <button
+                            className={` bg-[#322A7D] hover:bg-[#231d57] text-white font-bold p-2 rounded-lg mt-5`}
+                        >
+                            Edit
+                        </button>
                     </div>
                 </div>
 

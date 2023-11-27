@@ -145,7 +145,7 @@ const Navbar: React.FC<Props> = ({
                         <button
                             className=""
                             onClick={() => {
-                                isLoading();
+                                setLoading(true);
                                 if (router.pathname === "/") {
                                     router.reload();
                                 } else {

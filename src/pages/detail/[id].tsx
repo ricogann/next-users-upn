@@ -25,6 +25,8 @@ import HargaDTO from "@/interfaces/hargaDTO";
 import FasilitasDTO from "@/interfaces/fasilitasDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
 
+import "animate.css";
+
 export default function DetailFasilitas() {
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(false);
@@ -167,7 +169,7 @@ export default function DetailFasilitas() {
             <div
                 className={`${
                     openModal ? "flex" : "hidden"
-                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm animate__animated animate__zoomIn`}
             >
                 <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
                     <Login setModal={handleModal} changeModal={changeModal} />
@@ -176,7 +178,7 @@ export default function DetailFasilitas() {
             <div
                 className={`${
                     openRegisModal ? "flex" : "hidden"
-                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm animate__animated animate__zoomIn`}
             >
                 <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
                     <Regis

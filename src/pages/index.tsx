@@ -23,6 +23,8 @@ import _libCookies from "@/lib/cookies";
 import FasilitasDTO from "@/interfaces/fasilitasDTO";
 import CookiesDTO from "@/interfaces/cookiesDTO";
 
+import "animate.css";
+
 export default function Home() {
     const router = useRouter();
     const fasilitas = new _serviceFasilitas();
@@ -132,7 +134,7 @@ export default function Home() {
             <div
                 className={`${
                     openModal ? "flex" : "hidden"
-                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm animate__animated animate__zoomIn`}
             >
                 <div className="bg-white p-4 rounded-lg shadow-xl border-black border-2">
                     <Login setModal={handleModal} changeModal={changeModal} />
@@ -141,7 +143,7 @@ export default function Home() {
             <div
                 className={`${
                     openRegisModal ? "flex" : "hidden"
-                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm`}
+                } fixed top-0 left-0 w-full h-full items-center justify-center z-50 backdrop-blur-sm animate__animated animate__zoomIn`}
             >
                 <div className="bg-white rounded-lg shadow-xl border-black border-2">
                     <Regis

@@ -299,7 +299,7 @@ export default function Booking() {
 
     const handleDate = (e: React.ChangeEvent<HTMLInputElement>) => {
         const date = e.target.value;
-        setDate(date);
+        setTanggal(date);
     };
 
     const checkAvailability = async () => {
@@ -312,13 +312,13 @@ export default function Booking() {
                     const temp = dbDate.setDate(dbDate.getDate() + 1);
                     const dayAfter = new Date(temp).toISOString().split("T")[0];
 
-                    if (dayAfter === date) {
+                    if (dayAfter === tanggal) {
                         dataBooked.push(item);
                     }
                 }
             }
             if (
-                item.tanggal_pemesanan.split("T")[0] === date &&
+                item.tanggal_pemesanan.split("T")[0] === tanggal &&
                 item.id_fasilitas === Number(id)
             ) {
                 dataBooked.push(item);
@@ -419,6 +419,14 @@ export default function Booking() {
                                                                 onChange={
                                                                     handleDate
                                                                 }
+                                                                min={
+                                                                    new Date()
+                                                                        .toISOString()
+                                                                        .split(
+                                                                            "T"
+                                                                        )[0]
+                                                                }
+                                                                value={tanggal}
                                                             />
                                                             <button
                                                                 className="bg-[#07393C] hover:bg-[#2C666E] text-[#F0EDEE] font-bold p-[4px] text-[12px] xl:text-[15px] w-14 h-8 xl:h-8 xl:w-24 rounded-lg"
