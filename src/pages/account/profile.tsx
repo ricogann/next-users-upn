@@ -17,6 +17,8 @@ import _libBooking from "@/lib/booking";
 import CookiesDTO from "@/interfaces/cookiesDTO";
 import PemesananDTO from "@/interfaces/pemesananDTO";
 
+import _serviceUsers from "@/services/users.service";
+
 interface Fasilitas {
     nama: string;
 }
@@ -59,6 +61,7 @@ export default function Profile() {
     const [pdfActive, setPdfActive] = useState(false);
     const [cookies, setCookies] = useState<string>("");
     const [miscData, setMiscData] = useState<misc>();
+    const users = new _serviceUsers();
 
     const PDFDownloadLink = dynamic(
         () => import("@react-pdf/renderer").then((m) => m.PDFDownloadLink),
@@ -79,23 +82,47 @@ export default function Profile() {
         setActiveTab(tab);
     };
 
+    const [idAccount, setIdAccount] = useState<number>(0);
+    const [namaAccount, setNamaAccount] = useState<string>("");
+    const [noTelpAccount, setNoTelpAccount] = useState<string>("");
+    const [namaPenanggungJawab, setNamaPenanggungJawab] = useState<string>("");
+    const [roleAccount, setRoleAccount] = useState<string>("");
+
     //start auth check
     useEffect(() => {
         async function startAuth() {
-            const cookies: CookiesDTO = await libCookies.getCookies();
+            const Cookies: CookiesDTO = await libCookies.getCookies();
             const dataMisc: misc = await misc.getDataMisc();
 
             setMiscData(dataMisc);
-            setCookies(cookies.CERT);
-            const dataCookies = await libCookies.parseJwt(cookies);
+            setCookies(Cookies.CERT);
+            const dataCookies = await libCookies.parseJwt(Cookies);
+            
 
-            if (cookies.CERT !== undefined) {
+            if (Cookies.CERT !== undefined) {
                 setIsLogin(true);
-
                 setIdAccount(dataCookies.id_account);
-                setNamaAccount(dataCookies.nama);
-                setNoTelpAccount(dataCookies.no_telp);
                 setRoleAccount(dataCookies.role);
+                
+                if(dataCookies.role==="mahasiswa"){
+                    const dataMahasiswa = await users.getMahasiswa(dataCookies.id_account,Cookies.CERT);
+                    setNoTelpAccount(dataMahasiswa.data.no_telp);
+                    setNamaAccount(dataMahasiswa.data.nama);
+                } else if(dataCookies.role==="ukm"){
+                    const dataUkm = await users.getUkm(dataCookies.id_account,Cookies.CERT);
+                    setNoTelpAccount(dataUkm.data.no_telp);
+                    setNamaAccount(dataUkm.data.nama_ukm);
+                    setNamaPenanggungJawab(dataUkm.data.nama_pj)
+                } else if (dataCookies.role==="organisasi"){
+                    const dataOrganisasi = await users.getOrganisasi(dataCookies.id_account,Cookies.CERT);
+                    setNoTelpAccount(dataOrganisasi.data.no_telp);
+                    setNamaAccount(dataOrganisasi.data.nama_organisasi);
+                    setNamaPenanggungJawab(dataOrganisasi.data.nama_pj)
+                } else if (dataCookies.role==="umum"){
+                    const dataUmum = await users.getUmum(dataCookies.id_account,Cookies.CERT);
+                    setNoTelpAccount(dataUmum.data.no_telp);
+                    setNamaAccount(dataUmum.data.nama_organisasi);
+                }
             } else {
                 setIsLogin(false);
                 router.push("/");
@@ -105,11 +132,6 @@ export default function Profile() {
         startAuth();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    const [idAccount, setIdAccount] = useState<number>(0);
-    const [namaAccount, setNamaAccount] = useState<string>("");
-    const [noTelpAccount, setNoTelpAccount] = useState<string>("");
-    const [roleAccount, setRoleAccount] = useState<string>("");
 
     //end auth check
 
@@ -243,6 +265,16 @@ export default function Profile() {
         setLoading(!loading);
     };
 
+    const handleClick = (param: string) => () => {
+        setLoading(true);
+
+        setTimeout(() => {
+            router.push(param).then(() => {
+                setLoading(false);
+            });
+        }, 2000); // Delay for 500 milliseconds (0.5 seconds)
+    };
+
     return (
         <div className={`bg-[#2C666E] min-h-screen relative`}>
             {loading && (
@@ -263,23 +295,39 @@ export default function Profile() {
                 <div className=" bg-[#FFFFFF] flex m-8 mt-4 flex-col gap-3 p-8 rounded-[15px] shadow-lg xl:flex-row text-[#0A090C]">
                     <div className="m-4 gap-2 flex flex-col xl:flex-grow">
                         <div className="">
-                            <h2 className="text-[16px] lg:text-[18px] font-semibold">
+                            <h1 className="text-[16px] lg:text-[18px] font-semibold">
                                 Nama
-                            </h2>
-                            <h2 className="text-[16px] lg:text-[18px] font-semibold ">
+                            </h1>
+                            <h4 className="text-[16px] lg:text-[18px] font-regular ">
                                 {namaAccount}
-                            </h2>
+                            </h4>
                         </div>
                         <div className="">
                             <h2 className="text-[16px] lg:text-[18px] font-semibold">
                                 No. Telpon
                             </h2>
-                            <h2 className="text-[16px] lg:text-[18px] font-semibold ">
+                            <h2 className="text-[16px] lg:text-[18px] font-regular ">
                                 {noTelpAccount}
                             </h2>
                         </div>
+                        {roleAccount === 'ukm' || roleAccount === 'organisasi' ? (
+                        <div className="">
+                            <h2 className="text-[16px] lg:text-[18px] font-semibold">
+                                Nama Penanggung Jawab
+                            </h2>
+                            <h2 className="text-[16px] lg:text-[18px] font-regular ">
+                                {namaPenanggungJawab}
+                            </h2>
+                        </div>
+                        ) : null}
                         <button
                             className={` bg-[#322A7D] hover:bg-[#231d57] text-white font-bold p-2 rounded-lg mt-5`}
+                            onClick={() => {
+                                setLoading(true);
+                                    router.push(
+                                        `/account/${idAccount}`
+                                            );
+                                        }}
                         >
                             Edit
                         </button>

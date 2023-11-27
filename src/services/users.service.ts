@@ -63,6 +63,163 @@ class _serviceUsers extends _core {
             throw error;
         }
     }
+
+    async Mahasiswa(id_account: number, data: Object, cookie: string) {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/users/mahasiswa/${id_account}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${cookie}`,
+                },
+                body: JSON.stringify(data),
+            });
+
+            const resData = await res.json();
+
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async getMahasiswa(id_account: number,cookie: string) {
+        console.log(cookie);
+        try {
+             const res = await fetch(`${this.baseUrl}/api/users/mahasiswa/${id_account}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${cookie}`,
+                },
+            });
+
+            const resData = await res.json();
+            console.log(resData)
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async getUkm(id_account: number,cookie: string) {
+        console.log(cookie);
+        try {
+             const res = await fetch(`${this.baseUrl}/api/users/ukm/${id_account}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${cookie}`,
+                },
+            });
+
+            const resData = await res.json();
+            console.log(resData)
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async getOrganisasi(id_account: number,cookie: string) {
+        console.log(cookie);
+        try {
+             const res = await fetch(`${this.baseUrl}/api/users/organisasi/${id_account}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${cookie}`,
+                },
+            });
+
+            const resData = await res.json();
+            console.log(resData)
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async getUmum(id_account: number,cookie: string) {
+        console.log(cookie);
+        try {
+             const res = await fetch(`${this.baseUrl}/api/users/umum/${id_account}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${cookie}`,
+                },
+            });
+
+            const resData = await res.json();
+            console.log(resData)
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async Organisasi(id_account: number, data: Object, cookie: string) {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/users/organisasi/${id_account}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${cookie}`,
+                },
+                body: JSON.stringify(data),
+            });
+
+            const resData = await res.json();
+
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async Ukm(id_account: number, data: Object, cookie: string) {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/users/ukm/${id_account}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${cookie}`,
+                },
+                body: JSON.stringify(data),
+            });
+
+            const resData = await res.json();
+
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async Umum(id_account: number, data: Object, cookie: string) {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/users/umum/${id_account}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${cookie}`,
+                },
+                body: JSON.stringify(data),
+            });
+
+            const resData = await res.json();
+
+            return resData;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
 }
 
 export default _serviceUsers;
